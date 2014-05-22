@@ -101,7 +101,6 @@ require([
 				};
 
 				on(map, 'load', mapLoadedHandler);
-				on(map, 'click', executeQueryTask);
 				on(map, 'extent-change', extentChangeHandler);
 
 				columns = [
@@ -376,109 +375,6 @@ require([
 				};
 				return div;
 			}
-
-
-			function executeQueryTask(evt) {
-				var mp = evt.mapPoint;
-				var qt = new QueryTask("http://services.arcgis.com/YkVYBaX0zm7bsV3k/ArcGIS/rest/services/USGSTopoIndex/FeatureServer/0");
-				var q = new Query();
-				q.returnGeometry = true;
-				q.outFields = OUTFIELDS;
-				q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-				q.where = 'IsDefault = 1'
-				if (FOOTPRINTS_URL !== "") {
-					q.geometry = mp;
-				} else {
-					// crop the extent
-					var subExtent = currentMapExtent.expand(0.60);
-					var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
-							new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH,
-								new Color([255, 0, 0]), 1), new Color([155, 255, 0, 0]));
-					extentGraphic = new Graphic(subExtent, sfs);
-					map.graphics.add(extentGraphic);
-					q.geometry = subExtent;
-				}
-				var deferred = qt.execute(q).addCallback(function (response) {
-					return array.map(response.features, function (feature, i) {
-						return feature;
-					});
-				}).then(function (features) {
-					console.log("NUMBER OF FEATURES: " + features.length);
-					if (FOOTPRINTS_URL !== "") {
-						map.infoWindow.setFeatures(features);
-						footprintGraphic = map.graphics.graphics[0];
-						var sls = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2.5);
-						footprintGraphic.setSymbol(sls);
-						setTimeout(function () {
-							map.graphics.remove(footprintGraphic);
-						}, 2000);
-					}
-
-					timelineData = [];
-					array.forEach(features, function (feature) {
-						var ext = feature.geometry.getExtent();
-						var xmin = ext.xmin;
-						var xmax = ext.xmax;
-						var ymin = ext.ymin;
-						var ymax = ext.ymax;
-
-						var objID = feature.attributes.OBJECTID;
-						var mapName = feature.attributes["Map_Name"];
-						var scale = feature.attributes["Map_Scale"];
-						var dateCurrent = feature.attributes["DateCurren"];
-						var imprintYear = feature.attributes["Imprint_Ye"];
-						var downloadLink = feature.attributes["Download_G"];
-						var citation = feature.attributes["Citation"];
-
-						var className = '';
-						if (scale <= TOPO_MAP_SCALES[0]) {
-							className = 'one';
-						} else if (scale > TOPO_MAP_SCALES[0] && scale <= TOPO_MAP_SCALES[1]) {
-							className = 'two';
-						} else if (scale > TOPO_MAP_SCALES[1] && scale <= TOPO_MAP_SCALES[2]) {
-							className = 'three';
-						} else if (scale > TOPO_MAP_SCALES[2] && scale <= TOPO_MAP_SCALES[3]) {
-							className = 'four';
-						} else if (scale > TOPO_MAP_SCALES[3]) {
-							className = 'five';
-						}
-
-						/*if (dateCurrent === 'Null')
-							dateCurrent = Config.MSG_UNKNOWN;
-						if (imprintYear === 'Null')
-							imprintYear = Config.MSG_UNKNOWN;*/
-
-						var tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
-								"<div class='tooltipContainer'>" +
-								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
-								"<div class='tooltipContent'>" + citation + "</div></div>";
-						timelineData.push({
-							'start': new Date(dateCurrent, 0, 0),
-							'content': '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '"><span class="thumbnailLabel">' + mapName + '</span><br ><img data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '" style="width:20px; height:auto"></div>',
-							'objID':objID,
-							'downloadLink':downloadLink,
-							'className': className
-						});
-					}); // END QUERY EXECTUTE
-
-					if ($('.timelineContainer').css('display') === 'none') {
-						$('.timelineContainer').css('display', 'block');
-						$('.timelineLegendContainer').css('display', 'block');
-						repositionMapDiv(map);
-					}
-					drawTimeline(timelineData);
-
-					$('.timeline-event').mouseover(function (evt) {
-						var extent = new Extent(evt.target.dataset.xmin, evt.target.dataset.ymin, evt.target.dataset.xmax, evt.target.dataset.ymax, new SpatialReference({ wkid: 102100 }));
-						var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.35]));
-						mouseOverGraphic = new Graphic(extent, sfs);
-						map.graphics.add(mouseOverGraphic);
-					}).mouseout(function () {
-						map.graphics.remove(mouseOverGraphic);
-					});
-				});
-			}
-
 
 			function drawTimeline(data) {
 				var filteredData = filterData(data, filter);
