@@ -76,7 +76,7 @@ require([
 				footprintGraphic,
 				extentGraphic,
 
-				TIMELINE_VISIBLE = false;
+				TIMELINE_VISIBLE;
 
 			ready(function () {
 				var uri = window.location.href;
@@ -93,6 +93,7 @@ require([
 				TOKEN = Config.TOKEN;
 				IMAGE_SERVICE_URL = 'http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer?self?culture=en&f=json&token=' + TOKEN;
 				FOOTPRINTS_URL = "";
+				TIMELINE_VISIBLE = false;
 
 				initMap(sharedLat, sharedLng, zoomLevel);
 				setMapHeight();
@@ -182,7 +183,8 @@ require([
 					'stackEvents': true,
 					'zoomMax': Config.TIMELINE_ZOOM_MAX,
 					'zoomMin': Config.TIMELINE_ZOOM_MIN,
-					'cluster': Config.TIMELINE_CLUSTER
+					'cluster': Config.TIMELINE_CLUSTER,
+					'animate': Config.TIMELINE_ANIMATE
 				};
 
 				var buttons = $('.toggle-scale');
@@ -253,17 +255,7 @@ require([
 						return feature;
 					});
 				}).then(function (features) {
-					console.log("NUMBER OF FEATURES: " + features.length);
-					if (FOOTPRINTS_URL !== "") {
-						map.infoWindow.setFeatures(features);
-						footprintGraphic = map.graphics.graphics[0];
-						var sls = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2.5);
-						footprintGraphic.setSymbol(sls);
-						setTimeout(function () {
-							map.graphics.remove(footprintGraphic);
-						}, 2000);
-					}
-
+					$('.feature-count').empty().append('(' + features.length + ')');
 					timelineData = [];
 					array.forEach(features, function (feature) {
 						var ext = feature.geometry.getExtent();
@@ -311,11 +303,12 @@ require([
 						});
 					}); // END QUERY EXECTUTE
 
-					if (!TIMELINE_VISIBLE) {
-						$('.timelineContainer').css('display', 'block');
-						$('.timelineLegendContainer').css('display', 'block');
-						repositionMapDiv(map);
-					}
+					$('.timelineContainer').css('display', 'block');
+					$('.timelineLegendContainer').css('display', 'block');
+					$('.stepOne').css('display', 'none');
+					$('.stepTwo').css('display', 'block');
+
+					repositionMapDiv(map);
 					drawTimeline(timelineData);
 
 					$('.timeline-event').mouseover(function (evt) {
@@ -341,7 +334,7 @@ require([
 					var evtJson = {
 						"mapPoint": mp
 					};
-					executeQueryTask(evtJson);
+					//executeQueryTask(evtJson);
 				}
 			}
 
@@ -398,17 +391,8 @@ require([
 					}
 				});
 
-				// show timeline legend
-				$('#timeline-legend-container').css('display', 'block');
-				$('.stepOne').css('display', 'none');
-				$('.stepTwo').css('display', 'block');
-
 				// instantiate timeline object.
 				timeline = new links.Timeline(dom.byId('timeline'));
-
-				function onRangeChanged(properties) {
-					console.log(properties);
-				}
 
 				function onSelect() {
 					var sel = timeline.getSelection();
@@ -423,11 +407,9 @@ require([
 							q.returnGeometry = false;
 							q.outFields = OUTFIELDS;
 							q.where = whereClause;
-							//q.geometry = currentMapExtent;
 							qt.execute(q, function (rs) {
 								var extent  = rs.features[0].geometry.getExtent();
 								var mapName = rs.features[0].attributes.Map_Name;
-								var imprintYear = rs.features[0].attributes.Imprint_Year;
 								var dateCurrent = rs.features[0].attributes.DateCurrent;
 
 								if (dateCurrent === null)
@@ -474,6 +456,7 @@ require([
 				}
 
 				//links.events.addListener(timeline, 'rangechanged', onRangeChanged);
+				links.events.addListener(timeline, 'ready', onTimelineReady);
 				links.events.addListener(timeline, 'select', onSelect);
 				timeline.draw(filteredData, options);
 
@@ -484,6 +467,15 @@ require([
 					offsetY: 20
 				});
 			}
+
+			function onTimelineReady() {
+				console.log('TIMELINE READY');
+			}
+
+			function onRangeChanged(properties) {
+				console.log(properties);
+			}
+
 
 			function createOrderedStore(data, options) {
 				// Instantiate a Memory store modified to support ordering.
@@ -595,10 +587,14 @@ require([
 			}
 
 			function repositionMapDiv(map) {
-				domStyle.set('map', 'height', (map.height - 300) + 'px');
-				map.reposition();
-				map.resize();
-				TIMELINE_VISIBLE = true;
+				if (!TIMELINE_VISIBLE) {
+					TIMELINE_VISIBLE = true;
+					var vs = win.getBox();
+					var mapHeight = (vs.h - 60) - 300;
+					domStyle.set('map', 'height', mapHeight + 'px');
+					map.reposition();
+					map.resize();
+				}
 			}
 
 			function createMouseOverGraphic(borderColor, fillColor) {

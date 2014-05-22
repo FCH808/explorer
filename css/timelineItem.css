@@ -1,7 +1,6 @@
 div.timeline-event-content {
 	width: 65px !important;
-	/*padding-bottom: 3px !important;
-	margin: 5px;*/
+	height: 35px;
 	font-size: 0.8em;
 }
 
