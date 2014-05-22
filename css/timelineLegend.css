@@ -1,0 +1,54 @@
+#timeline-legend-container {
+	display: none;
+	position: absolute;
+	width: 260px;
+	height: 315px;
+	margin-right: 5px;
+	bottom: 0;
+	padding: 5px;
+	background-color: #F0FDED;
+}
+
+.timelineLegendHeader {
+	font-size: 1.0em;
+	color: #666;
+	padding-top: 15px;
+	padding-bottom: 5px;
+	margin-left: 55px;
+}
+
+/* Container for selecting thumbnails and slider controls */
+.toggle-scale {
+	height: 30px;
+	border-radius: 0;
+	margin: 5px;
+}
+
+.topo-legend {
+	margin-left: 55px;
+	width: 10px;
+}
+
+.topo-legend > label.btn.toggle-scale > span {
+	margin-left: 20px;
+}
+
+.one {
+	background-color: #00EB89;
+}
+
+.two {
+	background-color: #00C49D;
+}
+
+.three {
+	background-color: #009CB0;
+}
+
+.four {
+	background-color: #0075C4;
+}
+
+.five {
+	background-color: #004ED7;
+}
