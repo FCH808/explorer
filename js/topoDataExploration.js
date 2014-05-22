@@ -74,7 +74,9 @@ require([
 
 				/* footprints */
 				footprintGraphic,
-				extentGraphic;
+				extentGraphic,
+
+				TIMELINE_VISIBLE = false;
 
 			ready(function () {
 				var uri = window.location.href;
@@ -309,7 +311,7 @@ require([
 						});
 					}); // END QUERY EXECTUTE
 
-					if ($('.timelineContainer').css('display') === 'none') {
+					if (!TIMELINE_VISIBLE) {
 						$('.timelineContainer').css('display', 'block');
 						$('.timelineLegendContainer').css('display', 'block');
 						repositionMapDiv(map);
@@ -596,6 +598,7 @@ require([
 				domStyle.set('map', 'height', (map.height - 300) + 'px');
 				map.reposition();
 				map.resize();
+				TIMELINE_VISIBLE = true;
 			}
 
 			function createMouseOverGraphic(borderColor, fillColor) {
