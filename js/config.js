@@ -1,4 +1,26 @@
 var Config = {
+	"APP_HEADER": "USGS Archival Topographic Map Explorer",
+	"STEP_ONE_MESSAGE":"",
+	"STEP_TWO_MESSAGE":"",
+	"STEP_THREE_MESSAGE":"",
+	"TIMELINE_LEGEND_HEADER":"Historical Map Scales",
+	"TIMELINE_LEGEND_VALUES":[{
+		"value": "250,000",
+		"color": "#004ED7"
+	}, {
+		"value": "125,000",
+		"color": "#0075C4"
+	}, {
+		"value": "63,360",
+		"color": "#009CB0"
+	}, {
+		"value": "24,000",
+		"color": "#00C49D"
+	}, {
+		"value": "12,000",
+		"color": "#00EB89"
+	}],
+
 	"SCALES": [12000, 31680, 63360, 125000],
 
 	"TOKEN": "RV6esLk-q9nBWpbAXOuvsBdpQOP0OwS_pL6_0G8EBAf2IuB_KpRFNGU_74pQunz7jybjGwh1RFtHBY-ugETNuu5c-JvPx-okF4dRuN7lKRCJVrQIQe-3RrUi2SMliDjDFmhKDl32rDiV-RCd0KQ8mt3fNqVFz3YG85YoMk6iIF6n_QZkDv5wylPPYf7LZ45e",
