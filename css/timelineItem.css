@@ -58,3 +58,14 @@ div.timeline-event-box.five {
 	background-color: #004ED7;
 	color: #f9f9f9;
 }
+
+/* Timeline axis text/labels */
+div.timeline-axis-text {
+	color: #797979;
+	padding: 3px;
+	white-space: nowrap;
+	font-size: 0.80em;
+	margin-left: -15px;
+	margin-top: 10px;
+	font-weight: 600;
+}
