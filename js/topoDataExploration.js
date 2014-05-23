@@ -43,8 +43,9 @@ require([
 	"esri/symbols/SimpleLineSymbol",
 	"esri/Color",
 	"esri/tasks/query",
-	"esri/tasks/QueryTask"],
-		function (array, declare, lang, win, Deferred, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, number, on, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask) {
+	"esri/tasks/QueryTask",
+	"esri/urlUtils"],
+		function (array, declare, lang, win, Deferred, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, number, on, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
 					currentMapExtent,
@@ -67,7 +68,7 @@ require([
 					mouseOverGraphic,
 
 			/* Timeline data and Filter */
-					options,
+					timelineOptions,
 					timelineData = [],
 					filter = [],
 
@@ -80,19 +81,12 @@ require([
 					extentGraphic,
 
 					TIMELINE_VISIBLE,
-					// sharing URL
-					sharingUrl;
+			// sharing URL
+					sharingUrl,
+					urlObject,
+					urlQueryObject;
 
 			ready(function () {
-				var uri = window.location.href;
-				var uriQuery = uri.substring(uri.indexOf("?") + 1, uri.length);
-				var params = ioQuery.queryToObject(uriQuery);
-				var sharedLat = params.lat;
-				var sharedLng = params.lng;
-				var zoomLevel = params.zl;
-				fpx = params.fpx;
-				fpy = params.fpy;
-
 				OUTFIELDS = Config.OUTFIELDS;
 				TOPO_MAP_SCALES = Config.SCALES;
 				TOKEN = Config.TOKEN;
@@ -123,7 +117,8 @@ require([
 				 }, labelNode);
 				 });*/
 
-				initMap(sharedLat, sharedLng, zoomLevel);
+				checkUrlParams();
+				initMap(urlQueryObject);
 				setMapHeight();
 				initGeocoderDijit("search");
 
@@ -137,42 +132,42 @@ require([
 
 				columns = [
 					{
-						label: ' ',
-						field: 'objID',
-						hidden: true
+						label:' ',
+						field:'objID',
+						hidden:true
 					},
 					{
-						label: ' ',
-						field: 'name',
-						renderCell: thumbnailRenderCell
+						label:' ',
+						field:'name',
+						renderCell:thumbnailRenderCell
 					},
 					editor({
-						label: ' ',
-						field: 'transparency',
-						editorArgs: {
-							value: 1.0,
-							minimum: 0,
-							maximum: 1.0,
-							intermediateChanges: true
+						label:' ',
+						field:'transparency',
+						editorArgs:{
+							value:1.0,
+							minimum:0,
+							maximum:1.0,
+							intermediateChanges:true
 						}
 					}, HorizontalSlider)
 				];
 
 				store = new Observable(new Memory({
-					data: storeData
+					data:storeData
 				}));
 
 				grid = new (declare([Grid, Selection, DnD, Keyboard]))({
-					store: store = createOrderedStore(storeData, {
-						idProperty: 'objID'
+					store:store = createOrderedStore(storeData, {
+						idProperty:'objID'
 					}),
-					columns: columns,
-					showHeader: false,
-					selectionMode: 'single',
-					dndParams: {
-						singular: true
+					columns:columns,
+					showHeader:false,
+					selectionMode:'single',
+					dndParams:{
+						singular:true
 					},
-					getObjectDndType: function (item) {
+					getObjectDndType:function (item) {
 						return [item.type ? item.type : this.dndSourceType];
 					}
 				}, 'grid');
@@ -200,20 +195,20 @@ require([
 				});
 
 				// timeline options
-				options = {
-					'width': '100%',
-					'height': '310px',
-					'style': Config.TIMELINE_STYLE,
-					'showNavigation': Config.TIMELINE_SHOW_NAVIGATION,
-					'max': new Date(Config.TIMELINE_MAX_DATE, 0, 0),
-					'min': new Date(Config.TIMELINE_MIN_DATE, 0, 0),
-					'scale': links.Timeline.StepDate.SCALE.YEAR,
-					'step': Config.TIMELINE_STEP,
-					'stackEvents': true,
-					'zoomMax': Config.TIMELINE_ZOOM_MAX,
-					'zoomMin': Config.TIMELINE_ZOOM_MIN,
-					'cluster': Config.TIMELINE_CLUSTER,
-					'animate': Config.TIMELINE_ANIMATE
+				timelineOptions = {
+					'width':'100%',
+					'height':'310px',
+					'style':Config.TIMELINE_STYLE,
+					'showNavigation':Config.TIMELINE_SHOW_NAVIGATION,
+					'max':new Date(Config.TIMELINE_MAX_DATE, 0, 0),
+					'min':new Date(Config.TIMELINE_MIN_DATE, 0, 0),
+					'scale':links.Timeline.StepDate.SCALE.YEAR,
+					'step':Config.TIMELINE_STEP,
+					'stackEvents':true,
+					'zoomMax':Config.TIMELINE_ZOOM_MAX,
+					'zoomMin':Config.TIMELINE_ZOOM_MIN,
+					'cluster':Config.TIMELINE_CLUSTER,
+					'animate':Config.TIMELINE_ANIMATE
 				};
 
 				var buttons = $('.toggle-scale');
@@ -237,32 +232,97 @@ require([
 							$("." + selectedItem).css("opacity", "1.0");
 						}
 					});
-					//drawTimeline(timelineData);
+					drawTimeline(timelineData);
 				});
 				/*var buttons = query(".toggle-scale");
-				on (buttons, "click", function() {
-					domClass.toggle(this, "sel");
-					var selectedItem;
-					array.forEach(buttons, function (i, e) {
-						console.log(i + "\t" + e);
-						var $this = $(e);
-						selectedItem = $this.attr('class').split(' ')[2];
-						if ($this.hasClass('sel')) {
-							var j = filter.indexOf(selectedItem);
-							if (j === -1) {
-								filter.push(selectedItem);
-							}
-							$("." + selectedItem).css("opacity", "0.3");
-						} else {
-							var k = filter.indexOf(selectedItem);
-							if (k !== -1) {
-								filter.splice(k, 1);
-							}
-							$("." + selectedItem).css("opacity", "1.0");
-						}
-					});
-				});*/
+				 on (buttons, "click", function() {
+				 domClass.toggle(this, "sel");
+				 var selectedItem;
+				 array.forEach(buttons, function (i, e) {
+				 console.log(i + "\t" + e);
+				 var $this = $(e);
+				 selectedItem = $this.attr('class').split(' ')[2];
+				 if ($this.hasClass('sel')) {
+				 var j = filter.indexOf(selectedItem);
+				 if (j === -1) {
+				 filter.push(selectedItem);
+				 }
+				 $("." + selectedItem).css("opacity", "0.3");
+				 } else {
+				 var k = filter.indexOf(selectedItem);
+				 if (k !== -1) {
+				 filter.splice(k, 1);
+				 }
+				 $("." + selectedItem).css("opacity", "1.0");
+				 }
+				 });
+				 });*/
 			});
+
+			function checkUrlParams() {
+				urlObject = urlUtils.urlToObject(window.location.href);
+				if (urlObject.query) {
+					urlQueryObject = urlObject.query;
+					initStore(urlQueryObject);
+				}
+			}
+
+			function initStore() {
+				var qt = new QueryTask(IMAGE_SERVICE_URL);
+				var q = new Query();
+				q.returnGeometry = true;
+				q.outFields = OUTFIELDS;
+				array.forEach(urlQueryObject.oids.split("|"), function (oid) {
+					var whereStatement = "OBJECTID = " + oid;
+					q.where = whereStatement;
+					qt.execute(q, function (rs) {
+						var feature = rs.features[0];
+						var objID = feature.attributes.OBJECTID;
+						var extent = feature.geometry.getExtent();
+						var mapName = feature.attributes.Map_Name;
+						var dateCurrent = feature.attributes.DateCurrent;
+
+						if (dateCurrent === null)
+							dateCurrent = 'unknown';
+						var scale = feature.attributes.Map_Scale;
+						scale = number.format(scale, {
+							places:0
+						});
+
+						var mosaicRule = new MosaicRule({
+							"method":MosaicRule.METHOD_CENTER,
+							"ascending":true,
+							"operation":MosaicRule.OPERATION_FIRST,
+							"where":whereStatement
+						});
+						params = new ImageServiceParameters();
+						params.noData = 0;
+						params.mosaicRule = mosaicRule;
+						imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
+							imageServiceParameters:params,
+							opacity:1.0
+						});
+						map.addLayer(imageServiceLayer);
+
+						var firstRowObj = store.query({objID:lastObjAdded})
+						store.put({
+							id:"1",
+							objID:objID,
+							layer:imageServiceLayer,
+							name:mapName,
+							imprintYear:dateCurrent,
+							scale:scale,
+							downloadLink:"SHIT",
+							extent:extent
+						}, {
+							before:firstRowObj[0]
+						});
+						lastObjAdded = objID;
+					});
+				});
+				$('.stepTwo').css('display', 'none');
+				$('.gridContainer').css('display', 'block');
+			}
 
 			function setSharingUrl() {
 				var lat = map.extent.getCenter().getLatitude();
@@ -278,6 +338,8 @@ require([
 				var minDate = new Date(timelineDateRange.min);
 				var maxDate = new Date(timelineDateRange.max);
 				sharingUrl = window.location.href + "index.html?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
+				console.log(sharingUrl);
+				window.open(sharingUrl);
 			}
 
 			function filterData(dataToFilter, filter) {
@@ -354,13 +416,13 @@ require([
 								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
 								"<div class='tooltipContent'>" + citation + "</div></div>";
 						timelineData.push({
-							'start': new Date(dateCurrent, 0, 0),
-							'content': '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '"><span class="thumbnailLabel">' + mapName + '</span><br ><img data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '" style="width:20px; height:auto"></div>',
-							'objID': objID,
-							'downloadLink': downloadLink,
-							'className': className
+							'start':new Date(dateCurrent, 0, 0),
+							'content':'<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '"><span class="thumbnailLabel">' + mapName + '</span><br ><img data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '" style="width:20px; height:auto"></div>',
+							'objID':objID,
+							'downloadLink':downloadLink,
+							'className':className
 						});
-					}); // END QUERY
+					}); // END forEach
 
 					updateUI();
 					repositionMapDiv(map);
@@ -370,16 +432,16 @@ require([
 						// TODO cheap hack
 						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 						if (data.xmin) {
-							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
+							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
 							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.35]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
 						}
 					}).mouseout(function () {
-								if (mouseOverGraphic)
-									map.graphics.remove(mouseOverGraphic);
-							});
-				});
+						if (mouseOverGraphic)
+							map.graphics.remove(mouseOverGraphic);
+					});
+				}); // END QUERY
 			}
 
 			function updateUI() {
@@ -399,9 +461,9 @@ require([
 				}
 
 				if (fpx && fpy) {
-					var mp = new Point(fpx, fpy, new SpatialReference({ wkid: 102100 }));
+					var mp = new Point(fpx, fpy, new SpatialReference({ wkid:102100 }));
 					var evtJson = {
-						"mapPoint": mp
+						"mapPoint":mp
 					};
 					//executeQueryTask(evtJson);
 				}
@@ -426,7 +488,7 @@ require([
 				div.getElementsByTagName('button')[0].onclick = function (evt) {
 					var objID = evt.target.dataset.objectid;
 					var storeObj = store.query({
-						objID: objID
+						objID:objID
 					});
 
 					map.removeLayer(storeObj[0].layer);
@@ -462,8 +524,13 @@ require([
 
 				if (timeline === undefined) {
 					console.log("Creating TIMELINE");
+					if (urlQueryObject) {
+						timelineOptions.start = new Date(urlQueryObject.minDate, 0, 0);
+						timelineOptions.end = new Date(urlQueryObject.maxDate, 0, 0);
+					}
+
 					timeline = new links.Timeline(dom.byId('timeline'));
-					timeline.draw(filteredData, options);
+					timeline.draw(filteredData, timelineOptions);
 					links.events.addListener(timeline, 'ready', onTimelineReady);
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
@@ -473,10 +540,10 @@ require([
 				}
 
 				$('.timelineItemTooltip').tooltipster({
-					theme: 'tooltipster-shadow',
-					contentAsHTML: true,
-					position: 'right',
-					offsetY: 20
+					theme:'tooltipster-shadow',
+					contentAsHTML:true,
+					position:'right',
+					offsetY:20
 				});
 			}
 
@@ -502,36 +569,36 @@ require([
 								dateCurrent = 'unknown';
 							var scale = rs.features[0].attributes.Map_Scale;
 							scale = number.format(scale, {
-								places: 0
+								places:0
 							});
 
 							var mosaicRule = new MosaicRule({
-								"method": MosaicRule.METHOD_CENTER,
-								"ascending": true,
-								"operation": MosaicRule.OPERATION_FIRST,
-								"where": whereClause
+								"method":MosaicRule.METHOD_CENTER,
+								"ascending":true,
+								"operation":MosaicRule.OPERATION_FIRST,
+								"where":whereClause
 							});
 							params = new ImageServiceParameters();
 							params.noData = 0;
 							params.mosaicRule = mosaicRule;
 							imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-								imageServiceParameters: params,
-								opacity: 1.0
+								imageServiceParameters:params,
+								opacity:1.0
 							});
 							map.addLayer(imageServiceLayer);
 
-							var firstRowObj = store.query({objID: lastObjAdded})
+							var firstRowObj = store.query({objID:lastObjAdded})
 							store.put({
-								id: "1",
-								objID: objID,
-								layer: imageServiceLayer,
-								name: mapName,
-								imprintYear: dateCurrent,
-								scale: scale,
-								downloadLink: downloadLink,
-								extent: extent
+								id:"1",
+								objID:objID,
+								layer:imageServiceLayer,
+								name:mapName,
+								imprintYear:dateCurrent,
+								scale:scale,
+								downloadLink:downloadLink,
+								extent:extent
 							}, {
-								before: firstRowObj[0]
+								before:firstRowObj[0]
 							});
 							lastObjAdded = objID;
 						});
@@ -549,17 +616,16 @@ require([
 				console.log(properties);
 			}
 
-
 			function createOrderedStore(data, options) {
 				// Instantiate a Memory store modified to support ordering.
-				return Observable(new Memory(lang.mixin({data: data,
-					idProperty: "id",
-					put: function (object, options) {
+				return Observable(new Memory(lang.mixin({data:data,
+					idProperty:"id",
+					put:function (object, options) {
 						object.id = calculateOrder(this, object, options && options.before);
 						return Memory.prototype.put.call(this, object, options);
 					},
 					// Memory's add does not need to be augmented since it calls put
-					copy: function (object, options) {
+					copy:function (object, options) {
 						// summary:
 						//		Given an item already in the store, creates a copy of it.
 						//		(i.e., shallow-clones the item sans id, then calls add)
@@ -580,10 +646,10 @@ require([
 						}
 						this.add(obj, options);
 					},
-					query: function (query, options) {
+					query:function (query, options) {
 						options = options || {};
 						options.sort = [
-							{attribute: "id"}
+							{attribute:"id"}
 						];
 						return Memory.prototype.query.call(this, query, options);
 					}
@@ -592,7 +658,8 @@ require([
 
 			function calculateOrder(store, object, before, orderField) {
 				// Calculates proper value of order for an item to be placed before another
-				var afterOrder, beforeOrder = 0;
+				var afterOrder,
+						beforeOrder = 0;
 				if (!orderField) {
 					orderField = "id";
 				}
@@ -620,25 +687,21 @@ require([
 				}
 			}
 
-			function initMap(sharedLat, sharedLng, zoomLevel) {
-				var lat = sharedLat,
-						lng = sharedLng,
-						zl = zoomLevel;
-
-				if (sharedLat && sharedLng && zoomLevel) {
-					lat = sharedLat;
-					lng = sharedLng;
-					zl = zoomLevel;
+			function initMap(urlQueryObject) {
+				var lat, lng, zl;
+				if (urlQueryObject) {
+					lat = urlQueryObject.lat;
+					lng = urlQueryObject.lng;
+					zl = urlQueryObject.zl;
 				} else {
 					lat = Config.MAP_INIT_LAT;
 					lng = Config.MAP_INIT_LNG;
 					zl = Config.MAP_INIT_ZOOM;
 				}
-
 				map = new Map('map', {
-					basemap: 'topo',
-					center: [lng, lat],
-					zoom: zl
+					basemap:'topo',
+					center:[lng, lat],
+					zoom:zl
 				});
 			}
 
@@ -651,10 +714,10 @@ require([
 
 			function initGeocoderDijit(srcRef) {
 				geocoder = new Geocoder({
-					map: map,
-					autoComplete: true,
-					showResults: true,
-					placeholder: 'Find a Place'
+					map:map,
+					autoComplete:true,
+					showResults:true,
+					placeholder:'Find a Place'
 				}, srcRef);
 				geocoder.startup();
 			}
