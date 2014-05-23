@@ -79,7 +79,9 @@ require([
 					footprintGraphic,
 					extentGraphic,
 
-					TIMELINE_VISIBLE;
+					TIMELINE_VISIBLE,
+					// sharing URL
+					sharingUrl;
 
 			ready(function () {
 				var uri = window.location.href;
@@ -131,45 +133,46 @@ require([
 
 				on(map, 'load', mapLoadedHandler);
 				on(map, 'extent-change', extentChangeHandler);
+				on(query(".share")[0], 'click', setSharingUrl);
 
 				columns = [
 					{
-						label:' ',
-						field:'objID',
-						hidden:true
+						label: ' ',
+						field: 'objID',
+						hidden: true
 					},
 					{
-						label:' ',
-						field:'name',
-						renderCell:thumbnailRenderCell
+						label: ' ',
+						field: 'name',
+						renderCell: thumbnailRenderCell
 					},
 					editor({
-						label:' ',
-						field:'transparency',
-						editorArgs:{
-							value:1.0,
-							minimum:0,
-							maximum:1.0,
-							intermediateChanges:true
+						label: ' ',
+						field: 'transparency',
+						editorArgs: {
+							value: 1.0,
+							minimum: 0,
+							maximum: 1.0,
+							intermediateChanges: true
 						}
 					}, HorizontalSlider)
 				];
 
 				store = new Observable(new Memory({
-					data:storeData
+					data: storeData
 				}));
 
 				grid = new (declare([Grid, Selection, DnD, Keyboard]))({
-					store:store = createOrderedStore(storeData, {
-						idProperty:'objID'
+					store: store = createOrderedStore(storeData, {
+						idProperty: 'objID'
 					}),
-					columns:columns,
-					showHeader:false,
-					selectionMode:'single',
-					dndParams:{
-						singular:true
+					columns: columns,
+					showHeader: false,
+					selectionMode: 'single',
+					dndParams: {
+						singular: true
 					},
-					getObjectDndType:function (item) {
+					getObjectDndType: function (item) {
 						return [item.type ? item.type : this.dndSourceType];
 					}
 				}, 'grid');
@@ -198,19 +201,19 @@ require([
 
 				// timeline options
 				options = {
-					'width':'100%',
-					'height':'310px',
-					'style':Config.TIMELINE_STYLE,
-					'showNavigation':Config.TIMELINE_SHOW_NAVIGATION,
-					'max':new Date(Config.TIMELINE_MAX_DATE, 0, 0),
-					'min':new Date(Config.TIMELINE_MIN_DATE, 0, 0),
-					'scale':links.Timeline.StepDate.SCALE.YEAR,
-					'step':Config.TIMELINE_STEP,
-					'stackEvents':true,
-					'zoomMax':Config.TIMELINE_ZOOM_MAX,
-					'zoomMin':Config.TIMELINE_ZOOM_MIN,
-					'cluster':Config.TIMELINE_CLUSTER,
-					'animate':Config.TIMELINE_ANIMATE
+					'width': '100%',
+					'height': '310px',
+					'style': Config.TIMELINE_STYLE,
+					'showNavigation': Config.TIMELINE_SHOW_NAVIGATION,
+					'max': new Date(Config.TIMELINE_MAX_DATE, 0, 0),
+					'min': new Date(Config.TIMELINE_MIN_DATE, 0, 0),
+					'scale': links.Timeline.StepDate.SCALE.YEAR,
+					'step': Config.TIMELINE_STEP,
+					'stackEvents': true,
+					'zoomMax': Config.TIMELINE_ZOOM_MAX,
+					'zoomMin': Config.TIMELINE_ZOOM_MIN,
+					'cluster': Config.TIMELINE_CLUSTER,
+					'animate': Config.TIMELINE_ANIMATE
 				};
 
 				var buttons = $('.toggle-scale');
@@ -236,7 +239,52 @@ require([
 					});
 					drawTimeline(timelineData);
 				});
+				/*var buttons = query(".toggle-scale");
+				on (buttons, "click", function(evt) {
+					console.log(this);
+					//this.toggleClass('sel');
+					domClass.toggle(this, "sel");
+				});*/
+				/*on(buttons[0], "click", function (event) {
+					$(this).toggleClass('sel');
+					var selectedItem;
+					//buttons.each(function (i, e) {
+					query(".toggle-scale").each(function (i, e) {
+						var $this = $(e);
+						selectedItem = $this.attr('class').split(' ')[2];
+						if ($this.hasClass('sel')) {
+							var j = filter.indexOf(selectedItem);
+							if (j === -1) {
+								filter.push(selectedItem);
+							}
+							$("." + selectedItem).css("opacity", "0.3");
+						} else {
+							var k = filter.indexOf(selectedItem);
+							if (k !== -1) {
+								filter.splice(k, 1);
+							}
+							$("." + selectedItem).css("opacity", "1.0");
+						}
+					});
+					drawTimeline(timelineData);
+				});*/
 			});
+
+			function setSharingUrl() {
+				var lat = map.extent.getCenter().getLatitude();
+				var lng = map.extent.getCenter().getLongitude();
+				var zoomLevel = map.getLevel();
+				var timelineDateRange = timeline.getDataRange();
+				var selectedItems = store.data;
+				var objectIDs = '';
+				array.forEach(selectedItems, function (selectedItem) {
+					objectIDs += selectedItem.objID + "|";
+				});
+				objectIDs = objectIDs.substr(0, objectIDs.length - 1);
+				var minDate = new Date(timelineDateRange.min);
+				var maxDate = new Date(timelineDateRange.max);
+				sharingUrl = window.location.href + "index.html?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
+			}
 
 			function filterData(dataToFilter, filter) {
 				var filteredData = [];
@@ -259,7 +307,7 @@ require([
 
 			function extentChangeHandler(evt) {
 				currentMapExtent = evt.extent;
-				var qt = new QueryTask("http://services.arcgis.com/YkVYBaX0zm7bsV3k/ArcGIS/rest/services/USGSTopoIndex/FeatureServer/0");
+				var qt = new QueryTask(Config.TOPO_INDEX);
 				var q = new Query();
 				q.returnGeometry = true;
 				q.outFields = OUTFIELDS;
@@ -277,76 +325,67 @@ require([
 				q.geometry = subExtent;
 
 				var deferred = qt.execute(q).addCallback(function (response) {
-					return array.map(response.features, function (feature, i) {
-						return feature;
-					});
-				}).then(function (features) {
-							$('.feature-count').empty().append('(' + features.length + ')');
-							timelineData = [];
-							array.forEach(features, function (feature) {
-								var ext = feature.geometry.getExtent();
-								var xmin = ext.xmin;
-								var xmax = ext.xmax;
-								var ymin = ext.ymin;
-								var ymax = ext.ymax;
+					$('.feature-count').empty().append('(' + response.features.length + ')');
+					timelineData = [];
+					array.forEach(response.features, function (feature) {
+						var ext = feature.geometry.getExtent();
+						var xmin = ext.xmin;
+						var xmax = ext.xmax;
+						var ymin = ext.ymin;
+						var ymax = ext.ymax;
 
-								var objID = feature.attributes.OBJECTID;
-								var mapName = feature.attributes.Map_Name;
-								var scale = feature.attributes.Map_Scale;
-								var dateCurrent = feature.attributes.DateCurren;
-								var imprintYear = feature.attributes.Imprint_Ye;
-								var downloadLink = feature.attributes.Download_G;
-								var citation = feature.attributes.Citation;
+						var objID = feature.attributes.OBJECTID;
+						var mapName = feature.attributes.Map_Name;
+						var scale = feature.attributes.Map_Scale;
+						var dateCurrent = feature.attributes.DateCurren;
+						var imprintYear = feature.attributes.Imprint_Ye;
+						var downloadLink = feature.attributes.Download_G;
+						var citation = feature.attributes.Citation;
 
-								var className = '';
-								if (scale <= TOPO_MAP_SCALES[0]) {
-									className = 'one';
-								} else if (scale > TOPO_MAP_SCALES[0] && scale <= TOPO_MAP_SCALES[1]) {
-									className = 'two';
-								} else if (scale > TOPO_MAP_SCALES[1] && scale <= TOPO_MAP_SCALES[2]) {
-									className = 'three';
-								} else if (scale > TOPO_MAP_SCALES[2] && scale <= TOPO_MAP_SCALES[3]) {
-									className = 'four';
-								} else if (scale > TOPO_MAP_SCALES[3]) {
-									className = 'five';
-								}
+						var className = '';
+						if (scale <= TOPO_MAP_SCALES[0]) {
+							className = 'one';
+						} else if (scale > TOPO_MAP_SCALES[0] && scale <= TOPO_MAP_SCALES[1]) {
+							className = 'two';
+						} else if (scale > TOPO_MAP_SCALES[1] && scale <= TOPO_MAP_SCALES[2]) {
+							className = 'three';
+						} else if (scale > TOPO_MAP_SCALES[2] && scale <= TOPO_MAP_SCALES[3]) {
+							className = 'four';
+						} else if (scale > TOPO_MAP_SCALES[3]) {
+							className = 'five';
+						}
 
-								/*if (dateCurrent === 'Null')
-								 dateCurrent = Config.MSG_UNKNOWN;
-								 if (imprintYear === 'Null')
-								 imprintYear = Config.MSG_UNKNOWN;*/
-
-								var tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
-										"<div class='tooltipContainer'>" +
-										"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
-										"<div class='tooltipContent'>" + citation + "</div></div>";
-								timelineData.push({
-									'start':new Date(dateCurrent, 0, 0),
-									'content':'<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '"><span class="thumbnailLabel">' + mapName + '</span><br ><img data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '" style="width:20px; height:auto"></div>',
-									'objID':objID,
-									'downloadLink':downloadLink,
-									'className':className
-								});
-							}); // END QUERY EXECTUTE
-
-							updateUI();
-							repositionMapDiv(map);
-							drawTimeline(timelineData);
-
-							$('.timeline-event').mouseover(function (evt) {
-								// TODO cheap hack
-								var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
-								if (data.xmin) {
-									var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-									var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.35]));
-									mouseOverGraphic = new Graphic(extent, sfs);
-									map.graphics.add(mouseOverGraphic);
-								}
-							}).mouseout(function () {
-										if (mouseOverGraphic)
-											map.graphics.remove(mouseOverGraphic);
-									});
+						var tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
+								"<div class='tooltipContainer'>" +
+								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+								"<div class='tooltipContent'>" + citation + "</div></div>";
+						timelineData.push({
+							'start': new Date(dateCurrent, 0, 0),
+							'content': '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '"><span class="thumbnailLabel">' + mapName + '</span><br ><img data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '" style="width:20px; height:auto"></div>',
+							'objID': objID,
+							'downloadLink': downloadLink,
+							'className': className
 						});
+					}); // END QUERY
+
+					updateUI();
+					repositionMapDiv(map);
+					drawTimeline(timelineData);
+
+					$('.timeline-event').mouseover(function (evt) {
+						// TODO cheap hack
+						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+						if (data.xmin) {
+							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
+							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.35]));
+							mouseOverGraphic = new Graphic(extent, sfs);
+							map.graphics.add(mouseOverGraphic);
+						}
+					}).mouseout(function () {
+								if (mouseOverGraphic)
+									map.graphics.remove(mouseOverGraphic);
+							});
+				});
 			}
 
 			function updateUI() {
@@ -366,9 +405,9 @@ require([
 				}
 
 				if (fpx && fpy) {
-					var mp = new Point(fpx, fpy, new SpatialReference({ wkid:102100 }));
+					var mp = new Point(fpx, fpy, new SpatialReference({ wkid: 102100 }));
 					var evtJson = {
-						"mapPoint":mp
+						"mapPoint": mp
 					};
 					//executeQueryTask(evtJson);
 				}
@@ -393,7 +432,7 @@ require([
 				div.getElementsByTagName('button')[0].onclick = function (evt) {
 					var objID = evt.target.dataset.objectid;
 					var storeObj = store.query({
-						objID:objID
+						objID: objID
 					});
 
 					map.removeLayer(storeObj[0].layer);
@@ -439,16 +478,11 @@ require([
 					timeline.redraw();
 				}
 
-				//links.events.addListener(timeline, 'rangechanged', onRangeChanged);
-				//links.events.addListener(timeline, 'ready', onTimelineReady);
-				//links.events.addListener(timeline, 'select', onSelect);
-				//timeline.draw(filteredData, options);
-
 				$('.timelineItemTooltip').tooltipster({
-					theme:'tooltipster-shadow',
-					contentAsHTML:true,
-					position:'right',
-					offsetY:20
+					theme: 'tooltipster-shadow',
+					contentAsHTML: true,
+					position: 'right',
+					offsetY: 20
 				});
 			}
 
@@ -474,36 +508,36 @@ require([
 								dateCurrent = 'unknown';
 							var scale = rs.features[0].attributes.Map_Scale;
 							scale = number.format(scale, {
-								places:0
+								places: 0
 							});
 
 							var mosaicRule = new MosaicRule({
-								"method":MosaicRule.METHOD_CENTER,
-								"ascending":true,
-								"operation":MosaicRule.OPERATION_FIRST,
-								"where":whereClause
+								"method": MosaicRule.METHOD_CENTER,
+								"ascending": true,
+								"operation": MosaicRule.OPERATION_FIRST,
+								"where": whereClause
 							});
 							params = new ImageServiceParameters();
 							params.noData = 0;
 							params.mosaicRule = mosaicRule;
 							imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-								imageServiceParameters:params,
-								opacity:1.0
+								imageServiceParameters: params,
+								opacity: 1.0
 							});
 							map.addLayer(imageServiceLayer);
 
-							var firstRowObj = store.query({objID:lastObjAdded})
+							var firstRowObj = store.query({objID: lastObjAdded})
 							store.put({
-								id:"1",
-								objID:objID,
-								layer:imageServiceLayer,
-								name:mapName,
-								imprintYear:dateCurrent,
-								scale:scale,
-								downloadLink:downloadLink,
-								extent:extent
+								id: "1",
+								objID: objID,
+								layer: imageServiceLayer,
+								name: mapName,
+								imprintYear: dateCurrent,
+								scale: scale,
+								downloadLink: downloadLink,
+								extent: extent
 							}, {
-								before:firstRowObj[0]
+								before: firstRowObj[0]
 							});
 							lastObjAdded = objID;
 						});
@@ -524,14 +558,14 @@ require([
 
 			function createOrderedStore(data, options) {
 				// Instantiate a Memory store modified to support ordering.
-				return Observable(new Memory(lang.mixin({data:data,
-					idProperty:"id",
-					put:function (object, options) {
+				return Observable(new Memory(lang.mixin({data: data,
+					idProperty: "id",
+					put: function (object, options) {
 						object.id = calculateOrder(this, object, options && options.before);
 						return Memory.prototype.put.call(this, object, options);
 					},
 					// Memory's add does not need to be augmented since it calls put
-					copy:function (object, options) {
+					copy: function (object, options) {
 						// summary:
 						//		Given an item already in the store, creates a copy of it.
 						//		(i.e., shallow-clones the item sans id, then calls add)
@@ -552,10 +586,10 @@ require([
 						}
 						this.add(obj, options);
 					},
-					query:function (query, options) {
+					query: function (query, options) {
 						options = options || {};
 						options.sort = [
-							{attribute:"id"}
+							{attribute: "id"}
 						];
 						return Memory.prototype.query.call(this, query, options);
 					}
@@ -608,9 +642,9 @@ require([
 				}
 
 				map = new Map('map', {
-					basemap:'topo',
-					center:[lng, lat],
-					zoom:zl
+					basemap: 'topo',
+					center: [lng, lat],
+					zoom: zl
 				});
 			}
 
@@ -623,10 +657,10 @@ require([
 
 			function initGeocoderDijit(srcRef) {
 				geocoder = new Geocoder({
-					map:map,
-					autoComplete:true,
-					showResults:true,
-					placeholder:'Find a Place'
+					map: map,
+					autoComplete: true,
+					showResults: true,
+					placeholder: 'Find a Place'
 				}, srcRef);
 				geocoder.startup();
 			}

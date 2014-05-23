@@ -17,7 +17,8 @@ body {
 	margin: 0 auto;
 }
 
-.header {
+/* Header */
+.headerContainer {
 	float: left;
 	height: 60px;
 	width: 100%;
@@ -26,6 +27,22 @@ body {
 	background-color: rgb(8, 68, 0);
 	color: white;
 }
+
+.header {
+	float: left;
+}
+
+.share {
+	float: right;
+	font-size: 0.5em;
+	color: #a8a8a8;
+}
+
+.share:hover {
+	cursor: pointer;
+	color: #FFF;
+}
+
 
 .contentliquid {
 	float: left;
