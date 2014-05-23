@@ -12,7 +12,6 @@
 .timelineLegendHeader {
 	font-size: 1.0em;
 	color: #666;
-	padding-top: 15px;
 	padding-bottom: 5px;
 	margin-left: 55px;
 }
@@ -20,7 +19,7 @@
 /* Container for selecting thumbnails and slider controls */
 .toggle-scale {
 	height: 30px;
-	border-radius: 0;
+	border-radius: 0 !important;
 	margin: 5px;
 }
 

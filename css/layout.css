@@ -63,19 +63,19 @@ body {
 
 .timelineContainer {
 	display: none;
-	height: 300px;
+	height: 295px;
 	right: 0;
 	left: 500px;
-	bottom: 0;
+	bottom: 5px;
 	position: absolute;
 }
 
 .timelineLegendContainer {
 	display: none;
 	padding-top: 10px;
-	height: 300px;
+	height: 295px;
 	left: 275px;
-	bottom: 0;
+	bottom: 5px;
 }
 
 /* MAP */
