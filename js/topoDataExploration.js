@@ -237,19 +237,14 @@ require([
 							$("." + selectedItem).css("opacity", "1.0");
 						}
 					});
-					drawTimeline(timelineData);
+					//drawTimeline(timelineData);
 				});
 				/*var buttons = query(".toggle-scale");
-				on (buttons, "click", function(evt) {
-					console.log(this);
-					//this.toggleClass('sel');
+				on (buttons, "click", function() {
 					domClass.toggle(this, "sel");
-				});*/
-				/*on(buttons[0], "click", function (event) {
-					$(this).toggleClass('sel');
 					var selectedItem;
-					//buttons.each(function (i, e) {
-					query(".toggle-scale").each(function (i, e) {
+					array.forEach(buttons, function (i, e) {
+						console.log(i + "\t" + e);
 						var $this = $(e);
 						selectedItem = $this.attr('class').split(' ')[2];
 						if ($this.hasClass('sel')) {
@@ -266,7 +261,6 @@ require([
 							$("." + selectedItem).css("opacity", "1.0");
 						}
 					});
-					drawTimeline(timelineData);
 				});*/
 			});
 
