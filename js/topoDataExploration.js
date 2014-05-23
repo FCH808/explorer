@@ -421,7 +421,7 @@ require([
 						"<div class='thumbnailMapName'>" + mapName + "</div>" +
 						"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
 						"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
-						"<div class='downloadLink'><a href='" + downloadLink + "' target='_blank'>download</a></div>";
+						"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download</a></div>";
 
 				div.getElementsByTagName('button')[0].onclick = function (evt) {
 					var objID = evt.target.dataset.objectid;
