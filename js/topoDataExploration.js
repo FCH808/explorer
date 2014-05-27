@@ -95,7 +95,9 @@ require([
 					loading,
 
 			// timeline container dimensions
-					timelineContainerGeometry;
+					timelineContainerGeometry,
+
+					filteredArray;
 
 			ready(function () {
 				parser.parse();
@@ -172,18 +174,16 @@ require([
 				grid.on(mouseUtil.enterCell, function (event) {
 					if (mouseOverGraphic)
 						map.graphics.remove(mouseOverGraphic);
-
 					var row = grid.row(event);
 					var extent = row.data.extent;
-					var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
-							new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT,
-									new Color([8, 68, 0]), 1), new Color([255, 255, 0, 0.0]));
+					var sfs = createMouseOverGraphic(new Color([8, 68, 0, 1.0]), new Color([255, 255, 0, 0.0]));
 					mouseOverGraphic = new Graphic(extent, sfs);
 					map.graphics.add(mouseOverGraphic);
 				});
 
 				grid.on(mouseUtil.leaveCell, function (event) {
-					map.graphics.remove(mouseOverGraphic);
+					if (mouseOverGraphic)
+						map.graphics.remove(mouseOverGraphic);
 				});
 
 				// timeline options
@@ -203,55 +203,29 @@ require([
 					'animate':Config.TIMELINE_ANIMATE
 				};
 
-				var buttons = $('.toggle-scale');
-				buttons.on('click', function () {
-					$(this).toggleClass('sel');
+				var buttons = query(".toggle-scale");
+				on(buttons, "click", function () {
+					domClass.toggle(this, "sel");
 					var selectedItem;
-					buttons.each(function (i, e) {
-						var $this = $(e);
-						selectedItem = $this.attr('class').split(' ')[2];
-						if ($this.hasClass('sel')) {
+					array.forEach(buttons, function (e, i) {
+						selectedItem = domAttr.get(e, "class").split(' ')[2];
+						if (domClass.contains(e, "sel")) {
 							var j = filter.indexOf(selectedItem);
 							if (j === -1) {
 								filter.push(selectedItem);
 							}
-							$("." + selectedItem).css("opacity", "0.3");
+							domStyle.set(e, "opacity", "0.3");
 						} else {
 							var k = filter.indexOf(selectedItem);
 							if (k !== -1) {
 								filter.splice(k, 1);
 							}
-							$("." + selectedItem).css("opacity", "1.0");
+							domStyle.set(e, "opacity", "01.0");
 						}
 					});
 					drawTimeline(timelineData);
 				});
-				/*var buttons = query(".toggle-scale");
-				 on(buttons, "click", function () {
-				 domClass.toggle(this, "sel");
-				 var selectedItem;
-				 array.forEach(buttons, function (e, i) {
-				 //console.log(e);
-				 selectedItem = domAttr.get(e, "class");
-				 if (domClass.contains(e, "sel")) {
-				 console.log(selectedItem);
-				 var j = filter.indexOf(selectedItem);
-				 if (j === -1) {
-				 filter.push(selectedItem);
-				 }
-				 domStyle.set(e, "opacity", "0.3");
-				 //$("." + selectedItem).css("opacity", "0.3");
-				 } else {
-				 console.log(selectedItem);
-				 var k = filter.indexOf(selectedItem);
-				 if (k !== -1) {
-				 filter.splice(k, 1);
-				 }
-				 $("." + selectedItem).css("opacity", "1.0");
-				 }
-				 });
-				 drawTimeline(timelineData);
-				 });*/
+
 				watchSplitters(registry.byId("main-window"));
 			});
 
@@ -375,6 +349,8 @@ require([
 			}
 
 			function filterData(dataToFilter, filter) {
+				console.log("FILTER");
+				console.log(filter);
 				var filteredData = [];
 				var exclude = false;
 				array.forEach(dataToFilter, function (item) {
@@ -486,13 +462,14 @@ require([
 			}
 
 			function mapLoadedHandler() {
-				if (fpx && fpy) {
+				console.log("mapLoadedHandler");
+				/*if (fpx && fpy) {
 					var mp = new Point(fpx, fpy, new SpatialReference({ wkid:102100 }));
 					var evtJson = {
 						"mapPoint":mp
 					};
 					//executeQueryTask(evtJson);
-				}
+				}*/
 			}
 
 			function thumbnailRenderCell(object, data, td, options) {
