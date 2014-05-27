@@ -161,7 +161,7 @@ body {
 }
 
 .timeline-event-dot {
-	/*border-color: rgb(8, 68, 0) !important;*/
+	border-color: rgb(8, 68, 0) !important;
 }
 
 .timeline-event-selected {

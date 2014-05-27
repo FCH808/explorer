@@ -4,6 +4,7 @@ require([
 	"dojo/_base/lang",
 	"dojo/_base/window",
 	"dojo/Deferred",
+	"dojo/aspect",
 	"dojo/dom",
 	"dojo/dom-attr",
 	"dojo/dom-class",
@@ -11,8 +12,10 @@ require([
 	"dojo/dom-geometry",
 	"dojo/dom-style",
 	"dojo/io-query",
+	"dojo/json",
 	"dojo/number",
 	"dojo/on",
+	"dojo/parser",
 	"dojo/query",
 	"dojo/ready",
 	"dojo/topic",
@@ -27,6 +30,9 @@ require([
 	"dgrid/util/mouse",
 	"dijit/form/Button",
 	"dijit/form/HorizontalSlider",
+	"dijit/layout/BorderContainer",
+	"dijit/layout/ContentPane",
+	"dijit/registry",
 	"esri/arcgis/utils",
 	"esri/dijit/Geocoder",
 	"esri/geometry/Point",
@@ -44,8 +50,9 @@ require([
 	"esri/Color",
 	"esri/tasks/query",
 	"esri/tasks/QueryTask",
-	"esri/urlUtils"],
-		function (array, declare, lang, win, Deferred, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, number, on, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
+	"esri/urlUtils",
+	"dojo/domReady!"],
+		function (array, declare, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
 					currentMapExtent,
@@ -55,79 +62,64 @@ require([
 					PARAMS = '?self?culture=en&f=json&token=',
 					TOKEN,
 					IMAGE_SERVICE_URL,
-					FOOTPRINTS_URL,
 					imageServiceLayer,
-					timeline,
-					store,
 
+			// dgrid store
 					store,
 					storeData = [],
+			// dgrid
 					grid,
+			// dgrid columns
 					columns,
 					lastObjAdded,
 					mouseOverGraphic,
 
-			/* Timeline data and Filter */
+			// timeline data and filters
+					timeline,
 					timelineOptions,
 					timelineData = [],
 					filter = [],
 
-			/* URL params */
+			// URL params
 					fpx,
 					fpy,
 
-			/* footprints */
-					footprintGraphic,
 					extentGraphic,
 
 					TIMELINE_VISIBLE,
 			// sharing URL
 					sharingUrl,
 					urlObject,
-					urlQueryObject;
+					urlQueryObject,
+			// loading icon
+					loading,
+
+			// timeline container dimensions
+					timelineContainerGeometry;
 
 			ready(function () {
+				parser.parse();
 				OUTFIELDS = Config.OUTFIELDS;
 				TOPO_MAP_SCALES = Config.SCALES;
 				TOKEN = Config.TOKEN;
 				IMAGE_SERVICE_URL = 'http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer?self?culture=en&f=json&token=' + TOKEN;
-				FOOTPRINTS_URL = "";
+				//IMAGE_SERVICE_URL = Config.
 				TIMELINE_VISIBLE = false;
 
-				var appHeaderNode = query(".header");
-				appHeaderNode[0].innerHTML = Config.APP_HEADER;
-				var timelineLegendHeaderNode = query(".timelineLegendHeader");
-				timelineLegendHeaderNode[0].innerHTML = Config.TIMELINE_LEGEND_HEADER;
-				/*var timelineLegend = query('.topo-legend');
-				 var timelineLegendValues = Config.TIMELINE_LEGEND_VALUES;
-				 array.forEach(timelineLegendValues, function(data) {
-				 var labelNode = domConstruct.create('label', {
-				 dataPlacement: 'right',
-				 class: 'btn toggle-scale five'
-				 }, timelineLegend[0]);
-				 var inputNode = domConstruct.create('input', {
-				 type: 'checkbox',
-				 name: 'options'
-				 }, labelNode);
-				 domConstruct.create("span", {
-				 innerHTML: data.value,
-				 style: {
-				 marginLeft: "20"
-				 }
-				 }, labelNode);
-				 });*/
+				query(".header-title")[0].innerHTML = Config.APP_HEADER;
+				query(".subheader-title")[0].innerHTML = Config.APP_SUBHEADER;
+				query(".timeline-legend-header")[0].innerHTML = Config.TIMELINE_LEGEND_HEADER;
 
 				checkUrlParams();
 				initMap(urlQueryObject);
-				setMapHeight();
-				initGeocoderDijit("search");
+				initGeocoderDijit("geocoder");
 
-				window.onresize = function () {
-					setMapHeight();
-				};
+				loading = dom.byId("loadingImg");
 
-				on(map, 'load', mapLoadedHandler);
-				on(map, 'extent-change', extentChangeHandler);
+				on(map, "load", mapLoadedHandler);
+				on(map, "extent-change", extentChangeHandler);
+				on(map, "update-start", showLoading);
+				on(map, "update-end", hideLoading);
 				on(query(".share")[0], 'click', setSharingUrl);
 
 				columns = [
@@ -153,9 +145,9 @@ require([
 					}, HorizontalSlider)
 				];
 
-				store = new Observable(new Memory({
-					data:storeData
-				}));
+				/*store = new Observable(new Memory({
+				 data: storeData
+				 }));*/
 
 				grid = new (declare([Grid, Selection, DnD, Keyboard]))({
 					store:store = createOrderedStore(storeData, {
@@ -197,7 +189,7 @@ require([
 				// timeline options
 				timelineOptions = {
 					'width':'100%',
-					'height':'310px',
+					'height':Config.TIMELINE_HEIGHT,
 					'style':Config.TIMELINE_STYLE,
 					'showNavigation':Config.TIMELINE_SHOW_NAVIGATION,
 					'max':new Date(Config.TIMELINE_MAX_DATE, 0, 0),
@@ -235,20 +227,22 @@ require([
 					drawTimeline(timelineData);
 				});
 				/*var buttons = query(".toggle-scale");
-				 on (buttons, "click", function() {
+				 on(buttons, "click", function () {
 				 domClass.toggle(this, "sel");
 				 var selectedItem;
-				 array.forEach(buttons, function (i, e) {
-				 console.log(i + "\t" + e);
-				 var $this = $(e);
-				 selectedItem = $this.attr('class').split(' ')[2];
-				 if ($this.hasClass('sel')) {
+				 array.forEach(buttons, function (e, i) {
+				 //console.log(e);
+				 selectedItem = domAttr.get(e, "class");
+				 if (domClass.contains(e, "sel")) {
+				 console.log(selectedItem);
 				 var j = filter.indexOf(selectedItem);
 				 if (j === -1) {
 				 filter.push(selectedItem);
 				 }
-				 $("." + selectedItem).css("opacity", "0.3");
+				 domStyle.set(e, "opacity", "0.3");
+				 //$("." + selectedItem).css("opacity", "0.3");
 				 } else {
+				 console.log(selectedItem);
 				 var k = filter.indexOf(selectedItem);
 				 if (k !== -1) {
 				 filter.splice(k, 1);
@@ -256,8 +250,46 @@ require([
 				 $("." + selectedItem).css("opacity", "1.0");
 				 }
 				 });
+				 drawTimeline(timelineData);
 				 });*/
+				watchSplitters(registry.byId("main-window"));
 			});
+
+			function watchSplitters(bc) {
+				var moveConnects = {};
+				array.forEach(["bottom"], function (region) {
+					var spl = bc.getSplitter(region);
+					aspect.after(spl, "_startDrag", function () {
+						domStyle.set(spl.child.domNode, "opacity", "0.4");
+						/*moveConnects[spl.widgetId] = on(spl.domNode, "mousemove", function (evt) {
+						 console.log(evt.y);
+						 var vs = win.getBox();
+						 console.log(vs.h - evt.y);
+						 });*/
+					});
+					aspect.after(spl, "_stopDrag", function () {
+						domStyle.set(spl.child.domNode, "opacity", 1);
+						//var vs = win.getBox();
+						var node = dom.byId("timeline-container");
+						var computedStyle = domStyle.getComputedStyle(node);
+						timelineContainerGeometry = domGeom.getContentBox(node, computedStyle);
+						//moveConnects[spl.widgetId].remove();
+						//delete moveConnects[spl.widgetId];
+					});
+				});
+			}
+
+			function showLoading() {
+				esri.show(loading);
+				map.disableMapNavigation();
+				map.hideZoomSlider();
+			}
+
+			function hideLoading() {
+				esri.hide(loading);
+				map.enableMapNavigation();
+				map.showZoomSlider();
+			}
 
 			function checkUrlParams() {
 				urlObject = urlUtils.urlToObject(window.location.href);
@@ -304,7 +336,7 @@ require([
 						});
 						map.addLayer(imageServiceLayer);
 
-						var firstRowObj = store.query({objID:lastObjAdded})
+						var firstRowObj = store.query({objID:lastObjAdded});
 						store.put({
 							id:"1",
 							objID:objID,
@@ -312,7 +344,7 @@ require([
 							name:mapName,
 							imprintYear:dateCurrent,
 							scale:scale,
-							downloadLink:"SHIT",
+							downloadLink:"TODO",
 							extent:extent
 						}, {
 							before:firstRowObj[0]
@@ -370,14 +402,14 @@ require([
 				q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 				q.where = 'IsDefault = 1';
 
-				if (extentGraphic)
-					map.graphics.remove(extentGraphic);
+				/*if (extentGraphic)
+				 map.graphics.remove(extentGraphic);*/
 				var subExtent = currentMapExtent.expand(0.60);
-				var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
-						new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH,
-								new Color([255, 0, 0]), 1), new Color([155, 255, 0, 0]));
-				extentGraphic = new Graphic(subExtent, sfs);
-				map.graphics.add(extentGraphic);
+				/*var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+				 new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH,
+				 new Color([255, 0, 0]), 1), new Color([155, 255, 0, 0]));
+				 extentGraphic = new Graphic(subExtent, sfs);
+				 map.graphics.add(extentGraphic);*/
 				q.geometry = subExtent;
 
 				var deferred = qt.execute(q).addCallback(function (response) {
@@ -425,7 +457,7 @@ require([
 					}); // END forEach
 
 					updateUI();
-					repositionMapDiv(map);
+					//repositionMapDiv(map);
 					drawTimeline(timelineData);
 
 					$('.timeline-event').mouseover(function (evt) {
@@ -438,9 +470,9 @@ require([
 							map.graphics.add(mouseOverGraphic);
 						}
 					}).mouseout(function () {
-						if (mouseOverGraphic)
-							map.graphics.remove(mouseOverGraphic);
-					});
+								if (mouseOverGraphic)
+									map.graphics.remove(mouseOverGraphic);
+							});
 				}); // END QUERY
 			}
 
@@ -454,12 +486,6 @@ require([
 			}
 
 			function mapLoadedHandler() {
-				if (FOOTPRINTS_URL !== "") {
-					var footprints = new ArcGISDynamicMapServiceLayer(FOOTPRINTS_URL);
-					footprints.opacity = 0.65;
-					map.addLayer(footprints);
-				}
-
 				if (fpx && fpy) {
 					var mp = new Point(fpx, fpy, new SpatialReference({ wkid:102100 }));
 					var evtJson = {
@@ -479,12 +505,12 @@ require([
 
 				var div = document.createElement("div");
 				div.className = "renderedCell";
-				div.innerHTML = "<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button><img style='width:90px; float: left; padding: 4px' src='" + imgSrc + "'>" +
+				div.innerHTML = "<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
+						"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
 						"<div class='thumbnailMapName'>" + mapName + "</div>" +
 						"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
 						"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
 						"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download</a></div>";
-
 				div.getElementsByTagName('button')[0].onclick = function (evt) {
 					var objID = evt.target.dataset.objectid;
 					var storeObj = store.query({
@@ -535,8 +561,16 @@ require([
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
 					console.log("Redrawing TIMELINE");
-					timeline.setData(filteredData);
-					timeline.redraw();
+					/*if (timelineContainerGeometry.h < 200) {
+						var timelineFrame = dom.byId("timeline-frame");
+						domStyle.set(timelineFrame, "height", "120");
+						timelineOptions.style = "dot";
+						timeline.draw(filteredData, timelineOptions);
+					} else {
+						timelineOptions.style = "box";
+					*/	timeline.setData(filteredData);
+						timeline.redraw();
+					//}
 				}
 
 				$('.timelineItemTooltip').tooltipster({
@@ -602,7 +636,7 @@ require([
 							});
 							lastObjAdded = objID;
 						});
-						$('.stepTwo').css('display', 'none');
+						$('.stepOne').css('display', 'none');
 						$('.gridContainer').css('display', 'block');
 					}
 				}
@@ -705,13 +739,6 @@ require([
 				});
 			}
 
-			function setMapHeight() {
-				var vs = win.getBox();
-				domStyle.set('map', 'height', (vs.h - 60) + 'px');
-				map.reposition();
-				map.resize();
-			}
-
 			function initGeocoderDijit(srcRef) {
 				geocoder = new Geocoder({
 					map:map,
@@ -722,23 +749,10 @@ require([
 				geocoder.startup();
 			}
 
-			function repositionMapDiv(map) {
-				if (!TIMELINE_VISIBLE) {
-					TIMELINE_VISIBLE = true;
-					var vs = win.getBox();
-					var mapHeight = (vs.h - 60) - 300;
-					domStyle.set('map', 'height', mapHeight + 'px');
-					map.reposition();
-					map.resize();
-				}
-			}
 
 			function createMouseOverGraphic(borderColor, fillColor) {
 				var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
 						new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, 2), fillColor);
 				return sfs;
 			}
-		}
-
-)
-;
+		});

@@ -1,102 +1,276 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<title>USGS Topo Data Exploration</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<!--The viewport meta tag is used to improve the presentation and behavior of the samples
+  on iOS devices-->
+<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+<title></title>
 
-	<meta charset="UTF-8">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+<link rel="stylesheet" type="text/css" href="css/tooltip.css"/>
+<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css"/>
+<link rel="stylesheet" type="text/css" href="css/slider.css"/>
+<!--<link rel="stylesheet" type="text/css" href="css/layout.css"/>-->
+<link rel="stylesheet" type="text/css" href="css/timeline.css"/>
+<link rel="stylesheet" type="text/css" href="css/timelineItem.css"/>
+<link rel="stylesheet" type="text/css" href="css/grid.css"/>
+<link rel="stylesheet" type="text/css" href="css/timelineLegend.css"/>
+<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/dojo/dijit/themes/nihilo/nihilo.css"/>
+<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css"/>
 
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-	<link rel="stylesheet" type="text/css" href="css/tooltip.css"/>
-	<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css"/>
-	<link rel="stylesheet" type="text/css" href="css/slider.css"/>
-	<link rel="stylesheet" type="text/css" href="css/layout.css"/>
-	<link rel="stylesheet" type="text/css" href="css/timeline.css"/>
-	<link rel="stylesheet" type="text/css" href="css/timelineItem.css"/>
-	<link rel="stylesheet" type="text/css" href="css/grid.css"/>
-	<link rel="stylesheet" type="text/css" href="css/timelineLegend.css"/>
-	<!--<link rel="stylesheet" type="text/css" href="css/topo-data-exploration.css"/>-->
-	<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/dojo/dijit/themes/nihilo/nihilo.css"/>
-	<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css"/>
+<link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
 
-	<link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+<script src="js/tooltip-min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/tmin.js"></script>
+<script src="http://js.arcgis.com/3.9/"></script>
+<script src="js/topoDataExploration.js"></script>
 
-	<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-	<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-	<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
-	<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-	<script src="js/tooltip-min.js"></script>
-	<script src="js/config.js"></script>
-	<script src="js/tmin.js"></script>
-	<script src="http://js.arcgis.com/3.9/"></script>
-	<script src="js/topoDataExploration.js"></script>
+<style>
+	html, body {
+		height: 100%;
+		width: 100%;
+		margin: 0;
+		padding: 0;
+		font-family: 'Open Sans', sans-serif;
+		color: #666666;
+		font-size: 0.85em;
+	}
+
+	body {
+		overflow: hidden;
+	}
+
+	/* ------ main window ------ */
+	#main-window {
+		height: 100%;
+		width: 100%;
+	}
+
+	/* ------ header ------ */
+	.header {
+		height: 70px;
+		margin: 0;
+		background-color: rgb(8, 68, 0);
+		color: white;
+	}
+
+	.header-title {
+		font-size: 2.0em;
+		padding-top: 10px;
+		padding-left: 10px;
+	}
+
+	.subheader-title {
+		font-size: 1.3em;
+		padding-left: 20px;
+	}
+
+	.share {
+		float: right;
+		color: #a8a8a8;
+		font-size: 1.3em;
+		margin-top: -50px;
+		margin-right: 10px;
+	}
+
+	.share:hover {
+		cursor: pointer;
+		color: #FFF;
+	}
+
+
+	/* ------ side bar ------*/
+	.sidebar {
+		height: 100% !important;
+		width: 270px;
+		margin: 0;
+		overflow: hidden;
+	}
+
+
+	/* ------ map container ------ */
+	#map {
+		margin: 0;
+	}
+
+	.map .logo-med {
+		opacity: 0.75 !important;
+	}
+
+
+	/* ------ timeline container ------*/
+	#timeline-container {
+		height: 310px;
+		/*margin: 0;*/
+		margin-left: 270px;
+		padding: 3px;
+	}
+
+
+	/* timeline legend */
+	.timeline-legend-container {
+		float: left;
+		color: #666;
+		/*display: none;*/
+		width: 200px;
+	}
+
+	.timeline-legend-header {
+		font-size: 1.3em;
+		padding-bottom: 5px;
+		margin-left: 5px;
+	}
+
+
+	/* timeline */
+	#timeline {
+		margin-left: 200px;
+	}
+
+	.timeline-frame {
+		border: none !important;
+	}
+
+	.timeline-event-dot {
+		/*border-color: rgb(8, 68, 0) !important;*/
+	}
+
+	.timeline-event-selected {
+		border-color: #ff000a !important;
+	}
+
+	.timeline-navigation {
+		position: absolute;
+		/* right: 10px; */
+		top: 10px;
+		left: 10px;
+		opacity: 0.85;
+		width: 150px;
+	}
+
+
+	/* ------ geocoder ------  */
+	.esriSimpleSliderTL {
+		top: 10px !important;
+		left: 10px !important;
+	}
+
+	.simpleGeocoder .esriGeocoder {
+		border: 1px solid #CFCFCF !important;
+		margin-left: 20px;
+	}
+
+	.simpleGeocoder .esriGeocoderContainer {
+		width: 230px !important;
+	}
+
+	.simpleGeocoder .esriGeocoderResults {
+		margin-left: 20px;
+		border: 1px solid #CFCFCF !important;
+	}
+
+
+	/* ------ MISC ------  */
+	.dijitSplitter {
+		margin-left: 270px !important;
+	}
+
+	.message-container {
+		width: 65%;
+		padding: 1em;
+		margin: auto;
+	}
+
+	.halfCircleRight {
+		height: 80px;
+		width: 40px;
+		border-radius: 0 80px 80px 0;
+		-moz-border-radius: 0 80px 80px 0;
+		-webkit-border-radius: 0 80px 80px 0;
+		background: #086B00;
+		opacity: 0.6;
+		float: left;
+		color: #FFF;
+		font-size: 4.0em;
+		padding-top: 10px;
+		padding-left: 5px;
+	}
+</style>
+
 </head>
 
 <body class="nihilo">
-<div class="wrapper">
-	<!-- HEADER -->
-	<div class="headerContainer">
-		<div class="header"></div>
+<!-- main window -->
+<div id="main-window" data-dojo-type="dijit.layout.BorderContainer"
+	 data-dojo-props="design:'headline', liveSplitters:true, gutters:false">
+
+	<!-- header -->
+	<div class="header" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
+		<div class="header-title"></div>
+		<div class="subheader-title"></div>
 		<div class="share">SHARE</div>
 	</div>
 
-	<!-- CONTENT -->
-	<div class="contentliquid">
-		<div class="content">
-			<!-- Map -->
-			<div id="map"></div>
-			<!-- Timeline -->
-			<div class="timelineContainer">
-				<div id="timeline"></div>
-			</div>
-			<!-- Timeline Legend -->
-			<div class="timelineLegendContainer">
-				<div class="halfCircleRight stepTwo">2</div>
-				<div class="stepMsg" style="width: 230px">
-					<span style="font-weight: bold">Click</span> timeline maps to view in main window.
-					<div class="feature-count"></div>
-				</div>
-
-				<div class="timelineLegendHeader"></div>
-
-				<div class="btn-group btn-group-vertical topo-legend" data-toggle="buttons">
-					<label data-placement="right" class="btn toggle-scale five">
-						<input type="checkbox" name="options"><span>250,000</span>
-					</label>
-					<label data-placement="right" class="btn toggle-scale four">
-						<input type="checkbox" name="options"><span>125,000</span>
-					</label>
-					<label data-placement="right" class="btn toggle-scale three">
-						<input type="checkbox" name="options"><span>63,360</span>
-					</label>
-					<label data-placement="right" class="btn toggle-scale two">
-						<input type="checkbox" name="options"><span>24,000</span>
-					</label>
-					<label data-placement="right" class="btn toggle-scale one">
-						<input type="checkbox" name="options"><span>12,000</span>
-					</label>
-				</div>
-			</div>
-			<!-- // END Timeline Legend -->
-		</div>
-	</div>
-
-	<!-- LEFT COLUMN -->
-	<div class="leftcolumn">
+	<!-- sidebar -->
+	<div class="sidebar" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'left'">
 		<div class="halfCircleRight stepOne">1</div>
-		<div class="stepMsg">
+		<div class="message-container">
 			<span style="font-weight: bold">Go</span> to the location you want to explore, then <span
-				style="font-weight: bold">Click</span> on a place to see its historical maps.
+				style="font-weight: bold">Click</span> timeline maps to view in main window.
 		</div>
-		<div id="search"></div>
-
+		<div id="geocoder"></div>
 		<div class="gridContainer">
-			<div class="halfCircleRight stepThree">3</div>
-			<div class="gridContainerMsg">
-				<span style="font-weight: bold">Slide</span> transparency control to compare maps.
+			<div class="halfCircleRight stepThree">2</div>
+			<div class="message-container">
+				<span style="font-weight: bold">Slide</span> transparency control to compare maps, or drag/drop to
+				re-order maps.
 			</div>
 			<div id="grid"></div>
 		</div>
+	</div>
+
+	<!-- map -->
+	<div id="map" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center', splitter:true">
+		<img id="loadingImg" src="images/loading.gif" style="position:absolute; right:512px; top:256px; z-index:100;"/>
+	</div>
+
+	<!-- timeline container -->
+	<div id="timeline-container" data-dojo-type="dijit.layout.ContentPane"
+		 data-dojo-props="region:'bottom', splitter:true">
+		<!-- timeline legend -->
+		<div class="timeline-legend-container">
+			<div class="message-container">
+				<!--<span style="font-weight: bold">Click</span> timeline maps to view in main window.-->
+			</div>
+
+			<div class="timeline-legend-header"></div>
+			<div class="btn-group btn-group-vertical topo-legend" data-toggle="buttons">
+				<label data-placement="right" class="btn toggle-scale five">
+					<input type="checkbox" name="options"><span>250,000</span>
+				</label>
+				<label data-placement="right" class="btn toggle-scale four">
+					<input type="checkbox" name="options"><span>125,000</span>
+				</label>
+				<label data-placement="right" class="btn toggle-scale three">
+					<input type="checkbox" name="options"><span>63,360</span>
+				</label>
+				<label data-placement="right" class="btn toggle-scale two">
+					<input type="checkbox" name="options"><span>24,000</span>
+				</label>
+				<label data-placement="right" class="btn toggle-scale one">
+					<input type="checkbox" name="options"><span>12,000</span>
+				</label>
+			</div>
+		</div>
+		<!-- timeline -->
+		<div id="timeline"></div>
 	</div>
 </div>
 </body>

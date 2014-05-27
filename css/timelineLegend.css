@@ -1,13 +1,13 @@
-#timeline-legend-container {
+/*#timeline-legend-container {
 	display: none;
 	position: absolute;
-	width: 260px;
+	width: 250px;
 	height: 315px;
 	margin-right: 5px;
 	bottom: 0;
 	padding: 5px;
 	background-color: #F0FDED;
-}
+}*/
 
 .timelineLegendHeader {
 	font-size: 1.0em;
@@ -24,7 +24,7 @@
 }
 
 .topo-legend {
-	margin-left: 55px;
+	margin-left: 5px;
 	width: 10px;
 }
 

@@ -3,7 +3,7 @@
 	position: absolute;
 	top: 200px;
 	width: 275px;
-	bottom: 0;
+	bottom: 60px;
 }
 
 /* */
@@ -16,11 +16,12 @@
 
 /* dGrid */
 #grid {
-	height: 95%;
+	height: 85%;
 	border: none;
 	margin-left: 25px;
-	width: 230px;
-	font-size: 0.85em;
+	margin-right: 5px;
+	/*width: 230px;*/
+	/*font-size: 0.90em;*/
 }
 
 /* Object ID */
@@ -36,7 +37,7 @@
 /* Cell text (map name, scale, etc...) */
 #grid .field-name {
 	width: 90%;
-	font-size: 0.9em;
+	/*font-size: 0.9em;*/
 }
 
 /*#grid .field-rmLayer {
@@ -48,7 +49,7 @@
 	width: 50%;
 	position: absolute;
 	left: 90px;
-	margin-top: 35%;
+	margin-top: 37%;
 }
 
 #grid .dgrid-cell {
@@ -75,18 +76,67 @@
 	text-align: center;
 }
 
+.dgrid-scroller {
+	overflow-y: auto !important;
+	margin-top: 0 !important;
+}
+
+
+/* -------- thumbnail --------- */
 .thumbnailMapName {
-	font-size: 1.2em;
+	font-size: 1.0em;
+	font-weight: 600;
+	padding-top: 3px;
 }
 
 .thumbnailMapImprintYear {
-	font-size: 1.2em;
+	font-size: 0.95em;
 	color: #707070;
 }
 
 .thumbnailMapScale {
 	font-size: 0.95em;
 	color: #707070;
+}
+
+.downloadLink a:link {
+	color: #666666;
+	font-size: 0.90em;
+}
+
+.downloadLink a:visited {
+	color: #666666;
+	font-size: 0.90em;
+}
+
+.downloadLink a:hover {
+	color: #1d2966;
+	font-size: 0.90em;
+}
+
+.rm-layer-btn {
+	width: 20px;
+	height: 20px;
+	position: absolute;
+	left: 5px;
+	border-radius: 10px;
+	background-color: black;
+	color: white;
+	border: 1px solid rgb(255, 178, 178);
+	opacity: 0.45;
+}
+
+.rm-layer-btn:hover {
+	background-color: #3f3f3f;
+	color: white;
+	border: 1px solid rgb(255, 24, 36);
+	opacity: 0.95;
+}
+
+.rm-layer-icon {
+	width: 90px;
+	float: left;
+	padding: 4px;
 }
 
 /* */

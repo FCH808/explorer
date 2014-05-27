@@ -1,5 +1,6 @@
 var Config = {
 	"APP_HEADER": "USGS Archival Topographic Map Explorer",
+	"APP_SUBHEADER": "Subheader goes here.....",
 	"STEP_ONE_MESSAGE":"",
 	"STEP_TWO_MESSAGE":"",
 	"STEP_THREE_MESSAGE":"",
@@ -44,6 +45,7 @@ var Config = {
 	"MSG_UNKNOWN":"Unknown",
 
 	"TIMELINE_STYLE": "box",
+	"TIMELINE_HEIGHT": "300px",
 	"TIMELINE_ZOOM_MIN":201536000000,
 	"TIMELINE_ZOOM_MAX":4153600000000,
 	"TIMELINE_CLUSTER":false,
