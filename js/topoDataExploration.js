@@ -189,7 +189,7 @@ require([
 				// timeline options
 				timelineOptions = {
 					'width':'100%',
-					'height':Config.TIMELINE_HEIGHT,
+					'height':Config.TIMELINE_HEIGHT + "px",
 					'style':Config.TIMELINE_STYLE,
 					'showNavigation':Config.TIMELINE_SHOW_NAVIGATION,
 					'max':new Date(Config.TIMELINE_MAX_DATE, 0, 0),
@@ -227,6 +227,32 @@ require([
 				});
 
 				watchSplitters(registry.byId("main-window"));
+
+				/*var legendNode = query(".topo-legend")[0];
+				array.forEach(Config.TIMELINE_LEGEND_VALUES, function(legendItem) {
+					var node = domConstruct.toDom('<label data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
+												'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
+												'</label>');
+					on(node, "click", function(evt) {
+						var selectedScale = evt.target.getAttribute("data-scale");
+						domClass.toggle(this, "sel");
+						if (domClass.contains(this, "sel")) {
+							var j = filter.indexOf(selectedScale);
+							if (j === -1) {
+								filter.push(selectedScale);
+							}
+							domStyle.set(this, "opacity", "0.3");
+						} else {
+							var k = filter.indexOf(selectedScale);
+							if (k !== -1) {
+								filter.splice(k, 1);
+							}
+							domStyle.set(this, "opacity", "01.0");
+						}
+						//drawTimeline(timelineData);
+					});
+					domConstruct.place(node, legendNode);
+				});*/
 			});
 
 			function watchSplitters(bc) {
@@ -375,16 +401,7 @@ require([
 				q.outFields = OUTFIELDS;
 				q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 				q.where = 'IsDefault = 1';
-
-				/*if (extentGraphic)
-				 map.graphics.remove(extentGraphic);*/
-				var subExtent = currentMapExtent.expand(0.60);
-				/*var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
-				 new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH,
-				 new Color([255, 0, 0]), 1), new Color([155, 255, 0, 0]));
-				 extentGraphic = new Graphic(subExtent, sfs);
-				 map.graphics.add(extentGraphic);*/
-				q.geometry = subExtent;
+				q.geometry = currentMapExtent.expand(0.60);
 
 				var deferred = qt.execute(q).addCallback(function (response) {
 					$('.feature-count').empty().append('(' + response.features.length + ')');
@@ -530,26 +547,18 @@ require([
 						timelineOptions.start = new Date(urlQueryObject.minDate, 0, 0);
 						timelineOptions.end = new Date(urlQueryObject.maxDate, 0, 0);
 					}
-
 					timeline = new links.Timeline(dom.byId('timeline'));
 					timeline.draw(filteredData, timelineOptions);
 					links.events.addListener(timeline, 'ready', onTimelineReady);
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
 					console.log("Redrawing TIMELINE");
-					if (timelineContainerGeometry) {
-						if (timelineContainerGeometry.h < 200) {
-							timelineOptions.style = "dot";
-							timelineOptions.height = (timelineContainerGeometry.h) + "px";
-							timeline.draw(filteredData, timelineOptions);
-						} else {
-							timelineOptions.style = "box";
-							timelineOptions.height = (timelineContainerGeometry.h) + "px";
-							timeline.draw(filteredData, timelineOptions);
-							//timeline.setData(filteredData);
-							//timeline.redraw();
-						}
-					}
+					var height = timelineContainerGeometry ? timelineContainerGeometry.h : Config.TIMELINE_HEIGHT;
+					timelineOptions.style = "box";
+					timelineOptions.height = height + "px";
+					timeline.draw(filteredData, timelineOptions);
+					//timeline.setData(filteredData);
+					//timeline.redraw();
 				}
 
 				$('.timelineItemTooltip').tooltipster({

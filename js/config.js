@@ -6,19 +6,24 @@ var Config = {
 	"STEP_THREE_MESSAGE":"",
 	"TIMELINE_LEGEND_HEADER":"Historical Map Scales",
 	"TIMELINE_LEGEND_VALUES":[{
-		"value": "250,000",
+		"label": "250,000",
+		"value": "250000",
 		"color": "#004ED7"
 	}, {
-		"value": "125,000",
+		"label": "125,000",
+		"value": "125000",
 		"color": "#0075C4"
 	}, {
-		"value": "63,360",
+		"label": "63,360",
+		"value": "63360",
 		"color": "#009CB0"
 	}, {
-		"value": "24,000",
+		"label": "24,000",
+		"value": "24000",
 		"color": "#00C49D"
 	}, {
-		"value": "12,000",
+		"label": "12,000",
+		"value": "12000",
 		"color": "#00EB89"
 	}],
 
@@ -45,7 +50,7 @@ var Config = {
 	"MSG_UNKNOWN":"Unknown",
 
 	"TIMELINE_STYLE": "box",
-	"TIMELINE_HEIGHT": "300px",
+	"TIMELINE_HEIGHT": "300",
 	"TIMELINE_ZOOM_MIN":201536000000,
 	"TIMELINE_ZOOM_MAX":4153600000000,
 	"TIMELINE_CLUSTER":false,
