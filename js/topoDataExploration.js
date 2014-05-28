@@ -479,8 +479,8 @@ require([
 				var imgSrc = Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN;
 
 				var node = domConstruct.create("div", {
-					class:"renderedCell",
-					innerHTML:"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
+					"class":"renderedCell",
+					"innerHTML":"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
 							"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
 							"<div class='thumbnailMapName'>" + mapName + "</div>" +
 							"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
@@ -537,19 +537,18 @@ require([
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
 					console.log("Redrawing TIMELINE");
-					console.log(timelineContainerGeometry);
-					if (timelineContainerGeometry && timelineContainerGeometry.h < 200) {
-						//var timelineFrame = query(".timeline-frame")[0];
-						//domStyle.set(timelineFrame, "height", "120");
-						timelineOptions.style = "dot";
-						timelineOptions.height = (timelineContainerGeometry.h) + "px";
-						timeline.draw(filteredData, timelineOptions);
-					} else {
-						timelineOptions.style = "box";
-						timelineOptions.height = 300 + "px";
-						//timeline.setData(filteredData);
-						timeline.draw(filteredData, timelineOptions);
-						//timeline.redraw();
+					if (timelineContainerGeometry) {
+						if (timelineContainerGeometry.h < 200) {
+							timelineOptions.style = "dot";
+							timelineOptions.height = (timelineContainerGeometry.h) + "px";
+							timeline.draw(filteredData, timelineOptions);
+						} else {
+							timelineOptions.style = "box";
+							timelineOptions.height = (timelineContainerGeometry.h) + "px";
+							timeline.draw(filteredData, timelineOptions);
+							//timeline.setData(filteredData);
+							//timeline.redraw();
+						}
 					}
 				}
 
