@@ -56,49 +56,49 @@ require([
 		function (array, declare, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
-				currentMapExtent,
+					currentMapExtent,
 
-				TOPO_MAP_SCALES,
-				OUTFIELDS,
-				PARAMS = '?self?culture=en&f=json&token=',
-				TOKEN,
-				IMAGE_SERVICE_URL,
-				imageServiceLayer,
+					TOPO_MAP_SCALES,
+					OUTFIELDS,
+					PARAMS = '?self?culture=en&f=json&token=',
+					TOKEN,
+					IMAGE_SERVICE_URL,
+					imageServiceLayer,
 
-				// dgrid store
-				store,
-				storeData = [],
+			// dgrid store
+					store,
+					storeData = [],
 
-				// dgrid
-				grid,
-				// dgrid columns
-				columns,
-				lastObjAdded,
-				mouseOverGraphic,
+			// dgrid
+					grid,
+			// dgrid columns
+					columns,
+					lastObjAdded,
+					mouseOverGraphic,
 
-				// timeline data and filters
-				timeline,
-				timelineOptions,
-				timelineData = [],
-				filter = [],
+			// timeline data and filters
+					timeline,
+					timelineOptions,
+					timelineData = [],
+					filter = [],
 
-				// URL params
-				fpx,
-				fpy,
+			// URL params
+					fpx,
+					fpy,
 
-				extentGraphic,
+					extentGraphic,
 
-				TIMELINE_VISIBLE,
-				// sharing URL
-				sharingUrl,
-				urlObject,
-				urlQueryObject,
-				// loading icon
-				loading,
+					TIMELINE_VISIBLE,
+			// sharing URL
+					sharingUrl,
+					urlObject,
+					urlQueryObject,
+			// loading icon
+					loading,
 
-				// timeline container dimensions
-				timelineContainerGeometry,
-				filteredArray;
+			// timeline container dimensions
+					timelineContainerGeometry,
+					filteredArray;
 
 			ready(function () {
 				parser.parse();
@@ -437,7 +437,7 @@ require([
 					drawTimeline(timelineData);
 
 					var timelineEventNode = query(".timeline-event");
-					on(timelineEventNode, mouse.enter, function(evt) {
+					on(timelineEventNode, mouse.enter, function (evt) {
 						if (evt.target.getAttribute('data-xmin')) {
 							var xmin = evt.target.getAttribute('data-xmin');
 							var ymin = evt.target.getAttribute('data-ymin');
@@ -448,12 +448,12 @@ require([
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
 						}
-  					});
-					on(timelineEventNode, mouse.leave, function(evt) {
+					});
+					on(timelineEventNode, mouse.leave, function (evt) {
 						if (mouseOverGraphic) {
 							map.graphics.remove(mouseOverGraphic);
 						}
-  					});
+					});
 				}); // END QUERY
 			}
 
@@ -468,13 +468,6 @@ require([
 
 			function mapLoadedHandler() {
 				console.log("mapLoadedHandler");
-				/*if (fpx && fpy) {
-				 var mp = new Point(fpx, fpy, new SpatialReference({ wkid:102100 }));
-				 var evtJson = {
-				 "mapPoint":mp
-				 };
-				 //executeQueryTask(evtJson);
-				 }*/
 			}
 
 			function thumbnailRenderCell(object, data, td, options) {
@@ -571,59 +564,68 @@ require([
 					if (sel[0].row !== undefined) {
 						var row = sel[0].row;
 						var objID = timelineData[row].objID;
-						var downloadLink = timelineData[row].downloadLink;
-						var whereClause = 'OBJECTID = ' + objID;
-						var qt = new QueryTask(IMAGE_SERVICE_URL);
-						var q = new Query();
-						q.returnGeometry = false;
-						q.outFields = OUTFIELDS;
-						q.where = whereClause;
-						qt.execute(q, function (rs) {
-							var extent = rs.features[0].geometry.getExtent();
-							var mapName = rs.features[0].attributes.Map_Name;
-							var dateCurrent = rs.features[0].attributes.DateCurrent;
-
-							if (dateCurrent === null)
-								dateCurrent = 'unknown';
-							var scale = rs.features[0].attributes.Map_Scale;
-							scale = number.format(scale, {
-								places:0
-							});
-
-							var mosaicRule = new MosaicRule({
-								"method":MosaicRule.METHOD_CENTER,
-								"ascending":true,
-								"operation":MosaicRule.OPERATION_FIRST,
-								"where":whereClause
-							});
-							params = new ImageServiceParameters();
-							params.noData = 0;
-							params.mosaicRule = mosaicRule;
-							imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-								imageServiceParameters:params,
-								opacity:1.0
-							});
-							map.addLayer(imageServiceLayer);
-
-							var firstRowObj = store.query({
-								objID:lastObjAdded
-							});
-							store.put({
-								id:"1",
-								objID:objID,
-								layer:imageServiceLayer,
-								name:mapName,
-								imprintYear:dateCurrent,
-								scale:scale,
-								downloadLink:downloadLink,
-								extent:extent
-							}, {
-								before:firstRowObj[0]
-							});
-							lastObjAdded = objID;
+						// check for existing ID's
+						var objIDs = store.query({
+							objID:objID
 						});
-						$('.stepOne').css('display', 'none');
-						$('.gridContainer').css('display', 'block');
+
+						if (objIDs.length < 1) {
+							var downloadLink = timelineData[row].downloadLink;
+							var whereClause = 'OBJECTID = ' + objID;
+							var qt = new QueryTask(IMAGE_SERVICE_URL);
+							var q = new Query();
+							q.returnGeometry = false;
+							q.outFields = OUTFIELDS;
+							q.where = whereClause;
+							qt.execute(q, function (rs) {
+								var extent = rs.features[0].geometry.getExtent();
+								var mapName = rs.features[0].attributes.Map_Name;
+								var dateCurrent = rs.features[0].attributes.DateCurrent;
+
+								if (dateCurrent === null)
+									dateCurrent = 'unknown';
+								var scale = rs.features[0].attributes.Map_Scale;
+								scale = number.format(scale, {
+									places:0
+								});
+
+								var mosaicRule = new MosaicRule({
+									"method":MosaicRule.METHOD_CENTER,
+									"ascending":true,
+									"operation":MosaicRule.OPERATION_FIRST,
+									"where":whereClause
+								});
+								params = new ImageServiceParameters();
+								params.noData = 0;
+								params.mosaicRule = mosaicRule;
+								imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
+									imageServiceParameters:params,
+									opacity:1.0
+								});
+								map.addLayer(imageServiceLayer);
+
+								var firstRowObj = store.query({
+									objID:lastObjAdded
+								});
+								store.put({
+									id:"1",
+									objID:objID,
+									layer:imageServiceLayer,
+									name:mapName,
+									imprintYear:dateCurrent,
+									scale:scale,
+									downloadLink:downloadLink,
+									extent:extent
+								}, {
+									before:firstRowObj[0]
+								});
+								lastObjAdded = objID;
+							});
+							$('.stepOne').css('display', 'none');
+							$('.gridContainer').css('display', 'block');
+						} else {
+							console.log(objID)
+						}
 					}
 				}
 			}
