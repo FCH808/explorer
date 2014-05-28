@@ -537,17 +537,16 @@ require([
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
 					console.log("Redrawing TIMELINE");
-					/*if (timelineContainerGeometry.h < 200) {
-					 var timelineFrame = dom.byId("timeline-frame");
-					 domStyle.set(timelineFrame, "height", "120");
-					 timelineOptions.style = "dot";
-					 timeline.draw(filteredData, timelineOptions);
-					 } else {
-					 timelineOptions.style = "box";
-					 */
-					timeline.setData(filteredData);
-					timeline.redraw();
-					//}
+					if (timelineContainerGeometry.h < 200) {
+						var timelineFrame = query(".timeline-frame")[0];
+						domStyle.set(timelineFrame, "height", "120");
+						timelineOptions.style = "dot";
+						timeline.draw(filteredData, timelineOptions);
+					} else {
+						timelineOptions.style = "box";
+						timeline.setData(filteredData);
+						timeline.redraw();
+					}
 				}
 
 				$('.timelineItemTooltip').tooltipster({
@@ -624,7 +623,7 @@ require([
 							$('.stepOne').css('display', 'none');
 							$('.gridContainer').css('display', 'block');
 						} else {
-							console.log(objID)
+							// already in the store/added to the map
 						}
 					}
 				}
