@@ -86,6 +86,10 @@ border-radius: 4px;
 -moz-border-radius: 4px;
 }
 
+.timeline-event-hover {
+	border: 2px solid red;
+}
+
 .timeline-content-image {
 	width:20px;
 	height:auto;

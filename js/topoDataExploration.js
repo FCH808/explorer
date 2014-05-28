@@ -438,7 +438,6 @@ require([
 
 					var timelineEventNode = query(".timeline-event");
 					on(timelineEventNode, mouse.enter, function(evt) {
-    					//domClass.add("hoverNode", "hoverClass");
 						if (evt.target.getAttribute('data-xmin')) {
 							var xmin = evt.target.getAttribute('data-xmin');
 							var ymin = evt.target.getAttribute('data-ymin');
@@ -451,7 +450,6 @@ require([
 						}
   					});
 					on(timelineEventNode, mouse.leave, function(evt) {
-    					//domClass.remove("hoverNode", "hoverClass");
 						if (mouseOverGraphic) {
 							map.graphics.remove(mouseOverGraphic);
 						}
@@ -505,7 +503,7 @@ require([
 						store.remove(objID);
 						if (store.data.length < 1) {
 							$('.gridContainer').css('display', 'none');
-							$('.stepTwo').css('display', 'block');
+							$('.stepOne').css('display', 'block');
 							map.graphics.remove(mouseOverGraphic);
 						}
 					}
