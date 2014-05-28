@@ -537,15 +537,19 @@ require([
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
 					console.log("Redrawing TIMELINE");
-					if (timelineContainerGeometry.h < 200) {
-						var timelineFrame = query(".timeline-frame")[0];
-						domStyle.set(timelineFrame, "height", "120");
+					console.log(timelineContainerGeometry);
+					if (timelineContainerGeometry && timelineContainerGeometry.h < 200) {
+						//var timelineFrame = query(".timeline-frame")[0];
+						//domStyle.set(timelineFrame, "height", "120");
 						timelineOptions.style = "dot";
+						timelineOptions.height = (timelineContainerGeometry.h) + "px";
 						timeline.draw(filteredData, timelineOptions);
 					} else {
 						timelineOptions.style = "box";
-						timeline.setData(filteredData);
-						timeline.redraw();
+						timelineOptions.height = 300 + "px";
+						//timeline.setData(filteredData);
+						timeline.draw(filteredData, timelineOptions);
+						//timeline.redraw();
 					}
 				}
 
