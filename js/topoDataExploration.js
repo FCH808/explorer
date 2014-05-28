@@ -13,6 +13,7 @@ require([
 	"dojo/dom-style",
 	"dojo/io-query",
 	"dojo/json",
+	"dojo/mouse",
 	"dojo/number",
 	"dojo/on",
 	"dojo/parser",
@@ -52,52 +53,52 @@ require([
 	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"dojo/domReady!"],
-		function (array, declare, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
+		function (array, declare, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
-					currentMapExtent,
+				currentMapExtent,
 
-					TOPO_MAP_SCALES,
-					OUTFIELDS,
-					PARAMS = '?self?culture=en&f=json&token=',
-					TOKEN,
-					IMAGE_SERVICE_URL,
-					imageServiceLayer,
+				TOPO_MAP_SCALES,
+				OUTFIELDS,
+				PARAMS = '?self?culture=en&f=json&token=',
+				TOKEN,
+				IMAGE_SERVICE_URL,
+				imageServiceLayer,
 
-			// dgrid store
-					store,
-					storeData = [],
-			// dgrid
-					grid,
-			// dgrid columns
-					columns,
-					lastObjAdded,
-					mouseOverGraphic,
+				// dgrid store
+				store,
+				storeData = [],
 
-			// timeline data and filters
-					timeline,
-					timelineOptions,
-					timelineData = [],
-					filter = [],
+				// dgrid
+				grid,
+				// dgrid columns
+				columns,
+				lastObjAdded,
+				mouseOverGraphic,
 
-			// URL params
-					fpx,
-					fpy,
+				// timeline data and filters
+				timeline,
+				timelineOptions,
+				timelineData = [],
+				filter = [],
 
-					extentGraphic,
+				// URL params
+				fpx,
+				fpy,
 
-					TIMELINE_VISIBLE,
-			// sharing URL
-					sharingUrl,
-					urlObject,
-					urlQueryObject,
-			// loading icon
-					loading,
+				extentGraphic,
 
-			// timeline container dimensions
-					timelineContainerGeometry,
+				TIMELINE_VISIBLE,
+				// sharing URL
+				sharingUrl,
+				urlObject,
+				urlQueryObject,
+				// loading icon
+				loading,
 
-					filteredArray;
+				// timeline container dimensions
+				timelineContainerGeometry,
+				filteredArray;
 
 			ready(function () {
 				parser.parse();
@@ -105,7 +106,6 @@ require([
 				TOPO_MAP_SCALES = Config.SCALES;
 				TOKEN = Config.TOKEN;
 				IMAGE_SERVICE_URL = 'http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer?self?culture=en&f=json&token=' + TOKEN;
-				//IMAGE_SERVICE_URL = Config.
 				TIMELINE_VISIBLE = false;
 
 				query(".header-title")[0].innerHTML = Config.APP_HEADER;
@@ -349,8 +349,6 @@ require([
 			}
 
 			function filterData(dataToFilter, filter) {
-				console.log("FILTER");
-				console.log(filter);
 				var filteredData = [];
 				var exclude = false;
 				array.forEach(dataToFilter, function (item) {
@@ -425,7 +423,9 @@ require([
 								"<div class='tooltipContent'>" + citation + "</div></div>";
 						timelineData.push({
 							'start':new Date(dateCurrent, 0, 0),
-							'content':'<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '"><span class="thumbnailLabel">' + mapName + '</span><br ><img data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '" style="width:20px; height:auto"></div>',
+							'content':'<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
+									'<span class="thumbnailLabel">' + mapName + '</span><br >' +
+									'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>',
 							'objID':objID,
 							'downloadLink':downloadLink,
 							'className':className
@@ -436,19 +436,26 @@ require([
 					//repositionMapDiv(map);
 					drawTimeline(timelineData);
 
-					$('.timeline-event').mouseover(function (evt) {
-						// TODO cheap hack
-						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
-						if (data.xmin) {
-							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+					var timelineEventNode = query(".timeline-event");
+					on(timelineEventNode, mouse.enter, function(evt) {
+    					//domClass.add("hoverNode", "hoverClass");
+						if (evt.target.getAttribute('data-xmin')) {
+							var xmin = evt.target.getAttribute('data-xmin');
+							var ymin = evt.target.getAttribute('data-ymin');
+							var xmax = evt.target.getAttribute('data-xmax');
+							var ymax = evt.target.getAttribute('data-ymax');
+							var extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
 							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.35]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
 						}
-					}).mouseout(function () {
-								if (mouseOverGraphic)
-									map.graphics.remove(mouseOverGraphic);
-							});
+  					});
+					on(timelineEventNode, mouse.leave, function(evt) {
+    					//domClass.remove("hoverNode", "hoverClass");
+						if (mouseOverGraphic) {
+							map.graphics.remove(mouseOverGraphic);
+						}
+  					});
 				}); // END QUERY
 			}
 
@@ -464,12 +471,12 @@ require([
 			function mapLoadedHandler() {
 				console.log("mapLoadedHandler");
 				/*if (fpx && fpy) {
-					var mp = new Point(fpx, fpy, new SpatialReference({ wkid:102100 }));
-					var evtJson = {
-						"mapPoint":mp
-					};
-					//executeQueryTask(evtJson);
-				}*/
+				 var mp = new Point(fpx, fpy, new SpatialReference({ wkid:102100 }));
+				 var evtJson = {
+				 "mapPoint":mp
+				 };
+				 //executeQueryTask(evtJson);
+				 }*/
 			}
 
 			function thumbnailRenderCell(object, data, td, options) {
@@ -480,29 +487,30 @@ require([
 				var downloadLink = object.downloadLink;
 				var imgSrc = Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN;
 
-				var div = document.createElement("div");
-				div.className = "renderedCell";
-				div.innerHTML = "<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
-						"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
-						"<div class='thumbnailMapName'>" + mapName + "</div>" +
-						"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
-						"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
-						"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download</a></div>";
-				div.getElementsByTagName('button')[0].onclick = function (evt) {
-					var objID = evt.target.dataset.objectid;
-					var storeObj = store.query({
-						objID:objID
-					});
+				var node = domConstruct.create("div", {
+					class:"renderedCell",
+					innerHTML:"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
+							"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
+							"<div class='thumbnailMapName'>" + mapName + "</div>" +
+							"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
+							"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
+							"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download</a></div>",
+					onclick:function (evt) {
+						var objID = evt.target.getAttribute('data-objectid');
+						var storeObj = store.query({
+							objID:objID
+						});
 
-					map.removeLayer(storeObj[0].layer);
-					store.remove(objID);
-					if (store.data.length < 1) {
-						$('.gridContainer').css('display', 'none');
-						$('.stepTwo').css('display', 'block');
-						map.graphics.remove(mouseOverGraphic);
+						map.removeLayer(storeObj[0].layer);
+						store.remove(objID);
+						if (store.data.length < 1) {
+							$('.gridContainer').css('display', 'none');
+							$('.stepTwo').css('display', 'block');
+							map.graphics.remove(mouseOverGraphic);
+						}
 					}
-				};
-				return div;
+				});
+				return node;
 			}
 
 			function drawTimeline(data) {
@@ -539,14 +547,15 @@ require([
 				} else {
 					console.log("Redrawing TIMELINE");
 					/*if (timelineContainerGeometry.h < 200) {
-						var timelineFrame = dom.byId("timeline-frame");
-						domStyle.set(timelineFrame, "height", "120");
-						timelineOptions.style = "dot";
-						timeline.draw(filteredData, timelineOptions);
-					} else {
-						timelineOptions.style = "box";
-					*/	timeline.setData(filteredData);
-						timeline.redraw();
+					 var timelineFrame = dom.byId("timeline-frame");
+					 domStyle.set(timelineFrame, "height", "120");
+					 timelineOptions.style = "dot";
+					 timeline.draw(filteredData, timelineOptions);
+					 } else {
+					 timelineOptions.style = "box";
+					 */
+					timeline.setData(filteredData);
+					timeline.redraw();
 					//}
 				}
 
@@ -598,7 +607,9 @@ require([
 							});
 							map.addLayer(imageServiceLayer);
 
-							var firstRowObj = store.query({objID:lastObjAdded})
+							var firstRowObj = store.query({
+								objID:lastObjAdded
+							});
 							store.put({
 								id:"1",
 								objID:objID,
@@ -699,7 +710,9 @@ require([
 			}
 
 			function initMap(urlQueryObject) {
-				var lat, lng, zl;
+				var lat,
+						lng,
+						zl;
 				if (urlQueryObject) {
 					lat = urlQueryObject.lat;
 					lng = urlQueryObject.lng;
@@ -725,7 +738,6 @@ require([
 				}, srcRef);
 				geocoder.startup();
 			}
-
 
 			function createMouseOverGraphic(borderColor, fillColor) {
 				var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,

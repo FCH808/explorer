@@ -85,3 +85,8 @@ border-width: 1px;
 border-radius: 4px;
 -moz-border-radius: 4px;
 }
+
+.timeline-content-image {
+	width:20px;
+	height:auto;
+}
