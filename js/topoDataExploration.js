@@ -463,7 +463,7 @@ require([
 						}
 					}).mouseout(function () {
 						map.graphics.remove(mouseOverGraphic);
-							}
+						});
 				}); // END QUERY
 			}
 
