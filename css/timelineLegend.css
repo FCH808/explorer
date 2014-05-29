@@ -16,10 +16,14 @@
 	margin-left: 55px;
 }
 
+.timeline-legend-container > div.btn-group.btn-group-vertical.topo-legend > label > span {
+	font-size: 0.95em !important;
+}
+
 /* Container for selecting thumbnails and slider controls */
 .toggle-scale {
 	height: 30px;
-	border-radius: 0 !important;
+	border-radius: 2px !important;
 	margin: 5px;
 }
 

@@ -1,7 +1,7 @@
 div.timeline-event-content {
+	font-size: 0.65em;
 	width: 65px !important;
 	height: 35px;
-	font-size: 0.8em;
 }
 
 div.timeline-event-content:hover {
@@ -64,10 +64,10 @@ div.timeline-axis-text {
 	color: #606060;
 	padding: 3px;
 	white-space: nowrap;
-	font-size: 0.90em;
+	font-size: 0.75em;
 	margin-left: -15px;
 	margin-top: 10px;
-	font-weight: 600;
+	font-weight: 500;
 }
 
 /* */

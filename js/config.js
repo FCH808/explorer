@@ -1,33 +1,36 @@
 var Config = {
 	"APP_HEADER": "USGS Archival Topographic Map Explorer",
-	"APP_SUBHEADER": "Subheader goes here.....",
+	"APP_SUBHEADER": "",
 	"STEP_ONE_MESSAGE":"",
 	"STEP_TWO_MESSAGE":"",
 	"STEP_THREE_MESSAGE":"",
 	"TIMELINE_LEGEND_HEADER":"Historical Map Scales",
 	"TIMELINE_LEGEND_VALUES":[{
 		"label": "250,000",
-		"value": "250000",
-		"color": "#004ED7"
+		"value": 250000,
+		"color": "#004ED7",
+		"className":"five"
 	}, {
 		"label": "125,000",
-		"value": "125000",
-		"color": "#0075C4"
+		"value": 125000,
+		"color": "#0075C4",
+		"className":"four"
 	}, {
-		"label": "63,360",
-		"value": "63360",
-		"color": "#009CB0"
+		"label": "62,500",
+		"value": 62500,
+		"color": "#009CB0",
+		"className":"three"
 	}, {
 		"label": "24,000",
-		"value": "24000",
-		"color": "#00C49D"
+		"value": 24000,
+		"color": "#00C49D",
+		"className":"two"
 	}, {
 		"label": "12,000",
-		"value": "12000",
-		"color": "#00EB89"
+		"value": 12000,
+		"color": "#00EB89",
+		"className":"one"
 	}],
-
-	"SCALES": [12000, 31680, 63360, 125000],
 
 	"TOKEN": "RV6esLk-q9nBWpbAXOuvsBdpQOP0OwS_pL6_0G8EBAf2IuB_KpRFNGU_74pQunz7jybjGwh1RFtHBY-ugETNuu5c-JvPx-okF4dRuN7lKRCJVrQIQe-3RrUi2SMliDjDFmhKDl32rDiV-RCd0KQ8mt3fNqVFz3YG85YoMk6iIF6n_QZkDv5wylPPYf7LZ45e",
 
@@ -39,9 +42,9 @@ var Config = {
 	"IMAGE_SERVER":"http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer/",
 	"MAP_SERVER": "http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps_Index/MapServer",// + "?self?culture=en&f=json&token=" + "IkxAypOD2nEVLGKrHr-SNYiFhlUs96IGpIaH2E1xXAB-JwIqiy--IotPbsr7nWVUoR3SzCiCtxCZTTZZfKvuEGEiX6idPZ_h4oc5-A71gJs9Z5yL_AVlUpmRtCn6BtmAYTb7cLTxerg0UEuhYwDtYk54RAE1AULhOjSY8ysOP-8MMRZIocFauQxB3eVUTHJS"
 
-	"MAP_INIT_LAT":37.772055,
-	"MAP_INIT_LNG":-122.437134,
-	"MAP_INIT_ZOOM":13,
+	"MAP_INIT_LAT":34.054064,
+	"MAP_INIT_LNG":-117.200089,
+	"MAP_INIT_ZOOM":11,
 
 	"TOPO_INDEX":"http://services.arcgis.com/YkVYBaX0zm7bsV3k/ArcGIS/rest/services/USGSTopoIndex/FeatureServer/0",
 

@@ -1,7 +1,7 @@
 .gridContainer {
 	display: none;
 	position: absolute;
-	top: 200px;
+	top: 180px;
 	width: 275px;
 	bottom: 60px;
 }
@@ -84,46 +84,47 @@
 
 /* -------- thumbnail --------- */
 .thumbnailMapName {
-	font-size: 1.0em;
+	font-size: 0.8em;
 	font-weight: 600;
 	padding-top: 3px;
 }
 
 .thumbnailMapImprintYear {
-	font-size: 0.95em;
+	font-size: 0.8em;
 	color: #707070;
 }
 
 .thumbnailMapScale {
-	font-size: 0.95em;
+	font-size: 0.8em;
 	color: #707070;
 }
 
 .downloadLink a:link {
+	font-size: 0.8em;
 	color: #666666;
-	font-size: 0.90em;
 }
 
 .downloadLink a:visited {
+	font-size: 0.8em;
 	color: #666666;
-	font-size: 0.90em;
 }
 
 .downloadLink a:hover {
+	font-size: 0.8em;
 	color: #1d2966;
-	font-size: 0.90em;
 }
 
 .rm-layer-btn {
-	width: 20px;
-	height: 20px;
+	width: 24px;
+	height: 24px;
 	position: absolute;
 	left: 5px;
-	border-radius: 10px;
+	border-radius: 12px;
 	background-color: black;
 	color: white;
 	border: 1px solid rgb(255, 178, 178);
 	opacity: 0.45;
+	font-size: 0.8em;
 }
 
 .rm-layer-btn:hover {

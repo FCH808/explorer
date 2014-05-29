@@ -58,7 +58,6 @@ require([
 			var map,
 					currentMapExtent,
 
-					TOPO_MAP_SCALES,
 					OUTFIELDS,
 					PARAMS = '?self?culture=en&f=json&token=',
 					TOKEN,
@@ -103,7 +102,6 @@ require([
 			ready(function () {
 				parser.parse();
 				OUTFIELDS = Config.OUTFIELDS;
-				TOPO_MAP_SCALES = Config.SCALES;
 				TOKEN = Config.TOKEN;
 				IMAGE_SERVICE_URL = 'http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer?self?culture=en&f=json&token=' + TOKEN;
 				TIMELINE_VISIBLE = false;
@@ -176,14 +174,14 @@ require([
 						map.graphics.remove(mouseOverGraphic);
 					var row = grid.row(event);
 					var extent = row.data.extent;
-					var sfs = createMouseOverGraphic(new Color([8, 68, 0, 1.0]), new Color([255, 255, 0, 0.0]));
+					var sfs = createMouseOverGraphic(new Color([0, 0, 255, 1.0]), new Color([255, 255, 0, 0.0]));
 					mouseOverGraphic = new Graphic(extent, sfs);
 					map.graphics.add(mouseOverGraphic);
 				});
 
 				grid.on(mouseUtil.leaveCell, function (event) {
-					if (mouseOverGraphic)
-						map.graphics.remove(mouseOverGraphic);
+					map.graphics.remove(mouseOverGraphic);
+					map.graphics.clear();
 				});
 
 				// timeline options
@@ -203,32 +201,7 @@ require([
 					'animate':Config.TIMELINE_ANIMATE
 				};
 
-				var buttons = query(".toggle-scale");
-				on(buttons, "click", function () {
-					domClass.toggle(this, "sel");
-					var selectedItem;
-					array.forEach(buttons, function (e, i) {
-						selectedItem = domAttr.get(e, "class").split(' ')[2];
-						if (domClass.contains(e, "sel")) {
-							var j = filter.indexOf(selectedItem);
-							if (j === -1) {
-								filter.push(selectedItem);
-							}
-							domStyle.set(e, "opacity", "0.3");
-						} else {
-							var k = filter.indexOf(selectedItem);
-							if (k !== -1) {
-								filter.splice(k, 1);
-							}
-							domStyle.set(e, "opacity", "01.0");
-						}
-					});
-					drawTimeline(timelineData);
-				});
-
-				watchSplitters(registry.byId("main-window"));
-
-				/*var legendNode = query(".topo-legend")[0];
+				var legendNode = query(".topo-legend")[0];
 				array.forEach(Config.TIMELINE_LEGEND_VALUES, function(legendItem) {
 					var node = domConstruct.toDom('<label data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
 												'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
@@ -249,10 +222,12 @@ require([
 							}
 							domStyle.set(this, "opacity", "01.0");
 						}
-						//drawTimeline(timelineData);
+						drawTimeline(timelineData);
 					});
 					domConstruct.place(node, legendNode);
-				});*/
+				});
+
+				watchSplitters(registry.byId("main-window"));
 			});
 
 			function watchSplitters(bc) {
@@ -269,7 +244,6 @@ require([
 					});
 					aspect.after(spl, "_stopDrag", function () {
 						domStyle.set(spl.child.domNode, "opacity", 1);
-						//var vs = win.getBox();
 						var node = dom.byId("timeline-container");
 						var computedStyle = domStyle.getComputedStyle(node);
 						timelineContainerGeometry = domGeom.getContentBox(node, computedStyle);
@@ -362,7 +336,7 @@ require([
 				var zoomLevel = map.getLevel();
 				var timelineDateRange = timeline.getDataRange();
 				var selectedItems = store.data;
-				var objectIDs = '';
+				var objectIDs = "";
 				array.forEach(selectedItems, function (selectedItem) {
 					objectIDs += selectedItem.objID + "|";
 				});
@@ -379,7 +353,7 @@ require([
 				var exclude = false;
 				array.forEach(dataToFilter, function (item) {
 					for (var i = 0; i < filter.length; i++) {
-						if (item.className === filter[i]) {
+						if (item.scale === number.parse(filter[i])) {
 							exclude = true;
 							break;
 						}
@@ -400,11 +374,11 @@ require([
 				q.returnGeometry = true;
 				q.outFields = OUTFIELDS;
 				q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-				q.where = 'IsDefault = 1';
+				q.where = "IsDefault = 1";
 				q.geometry = currentMapExtent.expand(0.60);
 
 				var deferred = qt.execute(q).addCallback(function (response) {
-					$('.feature-count').empty().append('(' + response.features.length + ')');
+					$(".feature-count").empty().append("(" + response.features.length + ")");
 					timelineData = [];
 					array.forEach(response.features, function (feature) {
 						var ext = feature.geometry.getExtent();
@@ -413,7 +387,8 @@ require([
 						var ymin = ext.ymin;
 						var ymax = ext.ymax;
 
-						var objID = feature.attributes.OBJECTID;
+						//var objID = feature.attributes.OBJECTID;
+						var objID = feature.attributes.SvcOID;
 						var mapName = feature.attributes.Map_Name;
 						var scale = feature.attributes.Map_Scale;
 						var dateCurrent = feature.attributes.DateCurren;
@@ -421,18 +396,24 @@ require([
 						var downloadLink = feature.attributes.Download_G;
 						var citation = feature.attributes.Citation;
 
-						var className = '';
-						if (scale <= TOPO_MAP_SCALES[0]) {
+						var className = "";
+						/*if (scale <= Config.TIMELINE_LEGEND_VALUES[4].value) {
 							className = 'one';
-						} else if (scale > TOPO_MAP_SCALES[0] && scale <= TOPO_MAP_SCALES[1]) {
+						} else if (scale > Config.TIMELINE_LEGEND_VALUES[4].value && scale <= Config.TIMELINE_LEGEND_VALUES[3].value) {
 							className = 'two';
-						} else if (scale > TOPO_MAP_SCALES[1] && scale <= TOPO_MAP_SCALES[2]) {
+						} else if (scale > Config.TIMELINE_LEGEND_VALUES[3].value && scale <= Config.TIMELINE_LEGEND_VALUES[2].value) {
 							className = 'three';
-						} else if (scale > TOPO_MAP_SCALES[2] && scale <= TOPO_MAP_SCALES[3]) {
+						} else if (scale > Config.TIMELINE_LEGEND_VALUES[2].value && scale <= Config.TIMELINE_LEGEND_VALUES[1].value) {
 							className = 'four';
-						} else if (scale > TOPO_MAP_SCALES[3]) {
+						} else if (scale >= Config.TIMELINE_LEGEND_VALUES[0].value) {
 							className = 'five';
-						}
+						}*/
+
+						array.forEach(Config.TIMELINE_LEGEND_VALUES, function(legendItem, index) {
+							if (scale <= legendItem.value && scale >= Config.TIMELINE_LEGEND_VALUES[index + 1].value) {
+								className = legendItem.className;
+							}
+						});
 
 						var tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
 								"<div class='tooltipContainer'>" +
@@ -445,6 +426,7 @@ require([
 									'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>',
 							'objID':objID,
 							'downloadLink':downloadLink,
+							'scale':scale,
 							'className':className
 						});
 					}); // END forEach
@@ -453,7 +435,7 @@ require([
 					//repositionMapDiv(map);
 					drawTimeline(timelineData);
 
-					var timelineEventNode = query(".timeline-event");
+					/*var timelineEventNode = query(".timeline-event");
 					on(timelineEventNode, mouse.enter, function (evt) {
 						if (evt.target.getAttribute('data-xmin')) {
 							var xmin = evt.target.getAttribute('data-xmin');
@@ -461,7 +443,7 @@ require([
 							var xmax = evt.target.getAttribute('data-xmax');
 							var ymax = evt.target.getAttribute('data-ymax');
 							var extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.35]));
+							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.0]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
 						}
@@ -470,6 +452,18 @@ require([
 						if (mouseOverGraphic) {
 							map.graphics.remove(mouseOverGraphic);
 						}
+					});*/
+					$('.timeline-event').mouseover(function (evt) {
+						// TODO cheap hack
+						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+						if (data.xmin) {
+							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
+							var sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+							mouseOverGraphic = new Graphic(extent, sfs);
+							map.graphics.add(mouseOverGraphic);
+						}
+					}).mouseout(function () {
+						map.graphics.clear();
 					});
 				}); // END QUERY
 			}
@@ -501,8 +495,8 @@ require([
 							"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
 							"<div class='thumbnailMapName'>" + mapName + "</div>" +
 							"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
-							"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
-							"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download</a></div>",
+							//"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
+							"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
 					onclick:function (evt) {
 						var objID = evt.target.getAttribute('data-objectid');
 						var storeObj = store.query({
@@ -515,6 +509,7 @@ require([
 							$('.gridContainer').css('display', 'none');
 							$('.stepOne').css('display', 'block');
 							map.graphics.remove(mouseOverGraphic);
+							map.graphics.clear();
 						}
 					}
 				});
@@ -752,7 +747,7 @@ require([
 
 			function createMouseOverGraphic(borderColor, fillColor) {
 				var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
-						new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, 2), fillColor);
+						new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, 2.5), fillColor);
 				return sfs;
 			}
 		});

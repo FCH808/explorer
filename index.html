@@ -40,7 +40,7 @@
 		padding: 0;
 		font-family: 'Open Sans', sans-serif;
 		color: #666666;
-		font-size: 0.85em;
+		font-size: 1.0em;
 	}
 
 	body {
@@ -63,21 +63,21 @@
 	}
 
 	.header-title {
-		font-size: 2.0em;
+		font-size: 1.6em;
 		padding-top: 10px;
 		padding-left: 10px;
 	}
 
 	.subheader-title {
-		font-size: 1.2em;
+		font-size: 0.9em;
 		padding-left: 20px;
 	}
 
 	.share {
 		float: right;
 		color: #a8a8a8;
-		font-size: 1.3em;
-		margin-top: -50px;
+		font-size: 0.9em;
+		margin-top: -30px;
 		margin-right: 10px;
 	}
 
@@ -122,9 +122,13 @@
 	}
 
 	.timeline-legend-header {
-		font-size: 1.3em;
+		font-size: 0.85em;
 		padding-bottom: 5px;
 		margin-left: 5px;
+	}
+
+	.timeline-legend-container > div.btn-group.btn-group-vertical.topo-legend > label > span {
+		font-size: 0.85em !important;
 	}
 
 	/* timeline */
@@ -184,6 +188,7 @@
 		width: 65%;
 		padding: 1em;
 		margin: auto;
+		font-size: 0.85em;
 	}
 
 	.halfCircleRight {
@@ -196,8 +201,8 @@
 		opacity: 0.6;
 		float: left;
 		color: #FFF;
-		font-size: 4.0em;
-		padding-top: 10px;
+		font-size: 3.0em;
+		padding-top: 5px;
 		padding-left: 5px;
 	}
 </style>
@@ -249,23 +254,7 @@
 			</div>
 
 			<div class="timeline-legend-header"></div>
-			<div class="btn-group btn-group-vertical topo-legend" data-toggle="buttons">
-				<label data-placement="right" class="btn toggle-scale five active">
-					<input type="checkbox" name="options"><span>250,000</span>
-				</label>
-				<label data-placement="right" class="btn toggle-scale four active">
-					<input type="checkbox" name="options"><span>125,000</span>
-				</label>
-				<label data-placement="right" class="btn toggle-scale three active">
-					<input type="checkbox" name="options"><span>63,360</span>
-				</label>
-				<label data-placement="right" class="btn toggle-scale two active">
-					<input type="checkbox" name="options"><span>24,000</span>
-				</label>
-				<label data-placement="right" class="btn toggle-scale one active">
-					<input type="checkbox" name="options"><span>12,000</span>
-				</label>
-			</div>
+			<div class="btn-group btn-group-vertical topo-legend" data-toggle="buttons"></div>
 		</div>
 		<!-- timeline -->
 		<div id="timeline"></div>
