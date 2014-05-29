@@ -442,7 +442,7 @@ require([
 							var xmax = evt.target.getAttribute('data-xmax');
 							var ymax = evt.target.getAttribute('data-ymax');
 							var extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.35]));
+							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.0]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
 						}
