@@ -7,27 +7,30 @@ var Config = {
 	"TIMELINE_LEGEND_HEADER":"Historical Map Scales",
 	"TIMELINE_LEGEND_VALUES":[{
 		"label": "250,000",
-		"value": "250000",
-		"color": "#004ED7"
+		"value": 250000,
+		"color": "#004ED7",
+		"className":"five"
 	}, {
 		"label": "125,000",
-		"value": "125000",
-		"color": "#0075C4"
+		"value": 125000,
+		"color": "#0075C4",
+		"className":"four"
 	}, {
-		"label": "63,360",
-		"value": "63360",
-		"color": "#009CB0"
+		"label": "62,500",
+		"value": 62500,
+		"color": "#009CB0",
+		"className":"three"
 	}, {
 		"label": "24,000",
-		"value": "24000",
-		"color": "#00C49D"
+		"value": 24000,
+		"color": "#00C49D",
+		"className":"two"
 	}, {
 		"label": "12,000",
-		"value": "12000",
-		"color": "#00EB89"
+		"value": 12000,
+		"color": "#00EB89",
+		"className":"one"
 	}],
-
-	"SCALES": [12000, 31680, 63360, 125000],
 
 	"TOKEN": "RV6esLk-q9nBWpbAXOuvsBdpQOP0OwS_pL6_0G8EBAf2IuB_KpRFNGU_74pQunz7jybjGwh1RFtHBY-ugETNuu5c-JvPx-okF4dRuN7lKRCJVrQIQe-3RrUi2SMliDjDFmhKDl32rDiV-RCd0KQ8mt3fNqVFz3YG85YoMk6iIF6n_QZkDv5wylPPYf7LZ45e",
 
