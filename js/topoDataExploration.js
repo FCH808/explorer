@@ -181,7 +181,7 @@ require([
 
 				grid.on(mouseUtil.leaveCell, function (event) {
 					map.graphics.remove(mouseOverGraphic);
-					console.log(map.graphics);
+					map.graphics.clear();
 				});
 
 				// timeline options
@@ -462,8 +462,8 @@ require([
 							map.graphics.add(mouseOverGraphic);
 						}
 					}).mouseout(function () {
-						map.graphics.remove(mouseOverGraphic);
-						});
+						map.graphics.clear();
+					});
 				}); // END QUERY
 			}
 
@@ -508,6 +508,7 @@ require([
 							$('.gridContainer').css('display', 'none');
 							$('.stepOne').css('display', 'block');
 							map.graphics.remove(mouseOverGraphic);
+							map.graphics.clear();
 						}
 					}
 				});
