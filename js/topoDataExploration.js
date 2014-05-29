@@ -180,8 +180,7 @@ require([
 				});
 
 				grid.on(mouseUtil.leaveCell, function (event) {
-					if (mouseOverGraphic)
-						map.graphics.remove(mouseOverGraphic);
+					map.graphics.remove(mouseOverGraphic);
 				});
 
 				// timeline options
