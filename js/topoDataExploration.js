@@ -181,6 +181,7 @@ require([
 
 				grid.on(mouseUtil.leaveCell, function (event) {
 					map.graphics.remove(mouseOverGraphic);
+					console.log(map.graphics);
 				});
 
 				// timeline options
@@ -461,9 +462,7 @@ require([
 							map.graphics.add(mouseOverGraphic);
 						}
 					}).mouseout(function () {
-								if (mouseOverGraphic)
-									map.graphics.remove(mouseOverGraphic);
-							});
+						map.graphics.remove(mouseOverGraphic);
 				}); // END QUERY
 			}
 
