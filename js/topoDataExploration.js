@@ -399,18 +399,6 @@ require([
 						var citation = feature.attributes.Citation;
 
 						var className = "";
-						/*if (scale <= Config.TIMELINE_LEGEND_VALUES[4].value) {
-							className = 'one';
-						} else if (scale > Config.TIMELINE_LEGEND_VALUES[4].value && scale <= Config.TIMELINE_LEGEND_VALUES[3].value) {
-							className = 'two';
-						} else if (scale > Config.TIMELINE_LEGEND_VALUES[3].value && scale <= Config.TIMELINE_LEGEND_VALUES[2].value) {
-							className = 'three';
-						} else if (scale > Config.TIMELINE_LEGEND_VALUES[2].value && scale <= Config.TIMELINE_LEGEND_VALUES[1].value) {
-							className = 'four';
-						} else if (scale >= Config.TIMELINE_LEGEND_VALUES[0].value) {
-							className = 'five';
-						}*/
-
 						array.forEach(Config.TIMELINE_LEGEND_VALUES, function(legendItem, index) {
 							if (scale <= legendItem.value && scale >= Config.TIMELINE_LEGEND_VALUES[index + 1].value) {
 								className = legendItem.className;
@@ -434,7 +422,6 @@ require([
 					}); // END forEach
 
 					updateUI();
-					//repositionMapDiv(map);
 					drawTimeline(timelineData);
 
 					/*var timelineEventNode = query(".timeline-event");
