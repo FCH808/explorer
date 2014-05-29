@@ -279,11 +279,13 @@ require([
 				q.returnGeometry = true;
 				q.outFields = OUTFIELDS;
 				array.forEach(urlQueryObject.oids.split("|"), function (oid) {
-					var whereStatement = "OBJECTID = " + oid;
+					//var whereStatement = "OBJECTID = " + oid;
+					var whereStatement = "SvcOID = " + oid;
 					q.where = whereStatement;
 					qt.execute(q, function (rs) {
 						var feature = rs.features[0];
-						var objID = feature.attributes.OBJECTID;
+						//var objID = feature.attributes.OBJECTID;
+						var objID = feature.attributes.SvcOID;
 						var extent = feature.geometry.getExtent();
 						var mapName = feature.attributes.Map_Name;
 						var dateCurrent = feature.attributes.DateCurrent;
