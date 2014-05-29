@@ -434,7 +434,7 @@ require([
 					//repositionMapDiv(map);
 					drawTimeline(timelineData);
 
-					var timelineEventNode = query(".timeline-event");
+					/*var timelineEventNode = query(".timeline-event");
 					on(timelineEventNode, mouse.enter, function (evt) {
 						if (evt.target.getAttribute('data-xmin')) {
 							var xmin = evt.target.getAttribute('data-xmin');
@@ -451,7 +451,20 @@ require([
 						if (mouseOverGraphic) {
 							map.graphics.remove(mouseOverGraphic);
 						}
-					});
+					});*/
+					$('.timeline-event').mouseover(function (evt) {
+						// TODO cheap hack
+						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+						if (data.xmin) {
+							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
+							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.0]));
+							mouseOverGraphic = new Graphic(extent, sfs);
+							map.graphics.add(mouseOverGraphic);
+						}
+					}).mouseout(function () {
+								if (mouseOverGraphic)
+									map.graphics.remove(mouseOverGraphic);
+							});
 				}); // END QUERY
 			}
 
