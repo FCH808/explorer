@@ -81,6 +81,7 @@ require([
 					timelineOptions,
 					timelineData = [],
 					filter = [],
+					TOPO_MAP_SCALES,
 
 			// URL params
 					fpx,
@@ -106,6 +107,7 @@ require([
 				TOKEN = Config.TOKEN;
 				IMAGE_SERVICE_URL = 'http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer?self?culture=en&f=json&token=' + TOKEN;
 				TIMELINE_VISIBLE = false;
+				TOPO_MAP_SCALES = Config.TIMELINE_LEGEND_VALUES;
 
 				query(".header-title")[0].innerHTML = Config.APP_HEADER;
 				query(".subheader-title")[0].innerHTML = Config.APP_SUBHEADER;
@@ -352,14 +354,125 @@ require([
 			}
 
 			function filterData(dataToFilter, filter) {
+
+				var _scales = [];
+				for (var i = 0; i < TOPO_MAP_SCALES.length; i++) {
+					_scales.push(TOPO_MAP_SCALES[i].value);
+				}
+				/*var position = array.indexOf(_scales, filter[0]);
+
+				 if (position !== -1) {
+				 var lowerBound,
+				 upperBound,
+				 current;
+				 if (TOPO_MAP_SCALES[position + 1] !== undefined) {
+				 lowerBound = TOPO_MAP_SCALES[(position + 1)].value;
+				 } else {
+				 lowerBound = "";
+				 }
+				 console.log("lowerBound: " + lowerBound);
+
+				 if (TOPO_MAP_SCALES[position].value)
+				 current = TOPO_MAP_SCALES[position].value;
+				 console.log("current: " + current);
+
+				 if (TOPO_MAP_SCALES[(position - 1)] !== undefined) {
+				 upperBound = TOPO_MAP_SCALES[(position - 1)].value;
+				 } else {
+				 upperBound = "";
+				 }
+				 console.log("upperBound: " + upperBound);
+				 }*/
+
 				var filteredData = [];
 				var exclude = false;
 				array.forEach(dataToFilter, function (item) {
 					for (var i = 0; i < filter.length; i++) {
-						if (item.scale === number.parse(filter[i])) {
+						/*var position = array.indexOf(_scales, filter[i]);
+						if (position !== -1) {
+							var lowerBound, upperBound, current;
+							if (TOPO_MAP_SCALES[position + 1] !== undefined) {
+								lowerBound = TOPO_MAP_SCALES[(position + 1)].value;
+							} else {
+								lowerBound = "";
+							}
+							console.log("lowerBound: " + lowerBound);
+
+							if (TOPO_MAP_SCALES[position].value)
+								current = TOPO_MAP_SCALES[position].value;
+							console.log("current: " + current);
+
+							if (TOPO_MAP_SCALES[(position - 1)] !== undefined) {
+								upperBound = TOPO_MAP_SCALES[(position - 1)].value;
+							} else {
+								upperBound = "";
+							}
+							console.log("upperBound: " + upperBound);
+						}
+						//console.log(item.scale + "\t" + number.parse(filter[i]));
+						if (lowerBound === "") {
+							if (item.scale <= number.parse(filter[i])) {
+								exclude = true;
+								break;
+							}
+						} else {
+							if (item.scale >= lowerBound && item.scale <= number.parse(filter[i])) {
+								exclude = true;
+								break;
+							}
+						}*/
+
+						var currentFilter = number.parse(filter[i]);
+						var currentScale = item.scale;
+						var filterPosition = array.indexOf(_scales, currentFilter);
+						console.log(filterPosition + "\t" + currentScale + "\t" + currentFilter);
+
+						var lowerBound, upperBound, current;
+						if (filterPosition !== -1) {
+							if (TOPO_MAP_SCALES[filterPosition + 1] !== undefined) {
+								lowerBound = TOPO_MAP_SCALES[(filterPosition + 1)].value;
+							} else {
+								lowerBound = "";
+							}
+							console.log("lowerBound: " + lowerBound);
+
+							if (TOPO_MAP_SCALES[filterPosition].value)
+								current = TOPO_MAP_SCALES[filterPosition].value;
+							console.log("current: " + current);
+
+							if (TOPO_MAP_SCALES[(filterPosition - 1)] !== undefined) {
+								upperBound = TOPO_MAP_SCALES[(filterPosition - 1)].value;
+							} else {
+								upperBound = "";
+							}
+							console.log("upperBound: " + upperBound);
+						}
+
+						if (lowerBound === "") {
+							if (currentScale <= currentFilter) {
+								exclude = true;
+								break;
+							}
+						}
+
+						if (upperBound === "") {
+							if (currentScale >= currentFilter) {
+								exclude = true;
+								break;
+							}
+						}
+
+						if (lowerBound !== ""  && upperBound !== "") {
+							if (currentScale > lowerBound && currentScale < upperBound) {
+								exclude = true;
+								break;
+							}
+						}
+
+						/*if (currentScale === currentFilter) {
 							exclude = true;
 							break;
-						}
+						}*/
 					}
 
 					if (!exclude) {
@@ -399,12 +512,24 @@ require([
 						var downloadLink = feature.attributes.Download_G;
 						var citation = feature.attributes.Citation;
 
-						var className = "";
-						array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem, index) {
-							if (scale <= legendItem.value && scale >= Config.TIMELINE_LEGEND_VALUES[index + 1].value) {
-								className = legendItem.className;
-							}
-						});
+						var className = '';
+						if (scale <= TOPO_MAP_SCALES[4].value) {
+							className = 'one';
+						} else if (scale > TOPO_MAP_SCALES[4].value && scale <= TOPO_MAP_SCALES[3].value) {
+							className = 'two';
+						} else if (scale > TOPO_MAP_SCALES[3].value && scale <= TOPO_MAP_SCALES[2].value) {
+							className = 'three';
+						} else if (scale > TOPO_MAP_SCALES[2].value && scale <= TOPO_MAP_SCALES[1].value) {
+							className = 'four';
+						} else if (scale >= TOPO_MAP_SCALES[0].value) {
+							className = 'five';
+						}
+
+						/*array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem, index) {
+						 if (scale <= legendItem.value && scale >= Config.TIMELINE_LEGEND_VALUES[index + 1].value) {
+						 className = legendItem.className;
+						 }
+						 });*/
 
 						var tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
 								"<div class='tooltipContainer'>" +
@@ -453,8 +578,8 @@ require([
 							map.graphics.add(mouseOverGraphic);
 						}
 					}).mouseout(function () {
-						map.graphics.clear();
-					});
+								map.graphics.clear();
+							});
 				}); // END QUERY
 			}
 
@@ -480,8 +605,8 @@ require([
 				var imgSrc = Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN;
 
 				var tooltipContent = "<img class='tooltipThumbnail' src='" + imgSrc + "'>" +
-								"<div class='tooltipContainer'>" +
-								"<div class='tooltipHeader'>" + mapName + " (" + imprintYear + ")</div>";
+						"<div class='tooltipContainer'>" +
+						"<div class='tooltipHeader'>" + mapName + " (" + imprintYear + ")</div>";
 
 				var node = domConstruct.create("div", {
 					"class":"renderedCell",
