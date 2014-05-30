@@ -1,6 +1,7 @@
 require([
 	"dojo/_base/array",
 	"dojo/_base/declare",
+	"dojo/fx",
 	"dojo/_base/lang",
 	"dojo/_base/window",
 	"dojo/Deferred",
@@ -53,7 +54,7 @@ require([
 	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"dojo/domReady!"],
-		function (array, declare, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
+		function (array, declare, fx, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, Polygon, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
 					currentMapExtent,
@@ -202,11 +203,11 @@ require([
 				};
 
 				var legendNode = query(".topo-legend")[0];
-				array.forEach(Config.TIMELINE_LEGEND_VALUES, function(legendItem) {
+				array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem) {
 					var node = domConstruct.toDom('<label data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
-												'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
-												'</label>');
-					on(node, "click", function(evt) {
+							'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
+							'</label>');
+					on(node, "click", function (evt) {
 						var selectedScale = evt.target.getAttribute("data-scale");
 						domClass.toggle(this, "sel");
 						if (domClass.contains(this, "sel")) {
@@ -399,7 +400,7 @@ require([
 						var citation = feature.attributes.Citation;
 
 						var className = "";
-						array.forEach(Config.TIMELINE_LEGEND_VALUES, function(legendItem, index) {
+						array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem, index) {
 							if (scale <= legendItem.value && scale >= Config.TIMELINE_LEGEND_VALUES[index + 1].value) {
 								className = legendItem.className;
 							}
@@ -425,28 +426,28 @@ require([
 					drawTimeline(timelineData);
 
 					/*var timelineEventNode = query(".timeline-event");
-					on(timelineEventNode, mouse.enter, function (evt) {
-						if (evt.target.getAttribute('data-xmin')) {
-							var xmin = evt.target.getAttribute('data-xmin');
-							var ymin = evt.target.getAttribute('data-ymin');
-							var xmax = evt.target.getAttribute('data-xmax');
-							var ymax = evt.target.getAttribute('data-ymax');
-							var extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-							var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.0]));
-							mouseOverGraphic = new Graphic(extent, sfs);
-							map.graphics.add(mouseOverGraphic);
-						}
-					});
-					on(timelineEventNode, mouse.leave, function (evt) {
-						if (mouseOverGraphic) {
-							map.graphics.remove(mouseOverGraphic);
-						}
-					});*/
+					 on(timelineEventNode, mouse.enter, function (evt) {
+					 if (evt.target.getAttribute('data-xmin')) {
+					 var xmin = evt.target.getAttribute('data-xmin');
+					 var ymin = evt.target.getAttribute('data-ymin');
+					 var xmax = evt.target.getAttribute('data-xmax');
+					 var ymax = evt.target.getAttribute('data-ymax');
+					 var extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
+					 var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.0]));
+					 mouseOverGraphic = new Graphic(extent, sfs);
+					 map.graphics.add(mouseOverGraphic);
+					 }
+					 });
+					 on(timelineEventNode, mouse.leave, function (evt) {
+					 if (mouseOverGraphic) {
+					 map.graphics.remove(mouseOverGraphic);
+					 }
+					 });*/
 					$('.timeline-event').mouseover(function (evt) {
 						// TODO cheap hack
 						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 						if (data.xmin) {
-							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
+							var extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
 							var sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
@@ -478,13 +479,17 @@ require([
 				var downloadLink = object.downloadLink;
 				var imgSrc = Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN;
 
+				var tooltipContent = "<img class='tooltipThumbnail' src='" + imgSrc + "'>" +
+								"<div class='tooltipContainer'>" +
+								"<div class='tooltipHeader'>" + mapName + " (" + imprintYear + ")</div>";
+
 				var node = domConstruct.create("div", {
 					"class":"renderedCell",
 					"innerHTML":"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
 							"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
 							"<div class='thumbnailMapName'>" + mapName + "</div>" +
 							"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
-							//"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
+						//"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
 							"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
 					onclick:function (evt) {
 						var objID = evt.target.getAttribute('data-objectid');
@@ -502,6 +507,14 @@ require([
 						}
 					}
 				});
+
+				$('.rm-layer-icon').tooltipster({
+					theme:'tooltipster-shadow',
+					contentAsHTML:true,
+					position:'right',
+					offsetY:20
+				});
+
 				return node;
 			}
 
