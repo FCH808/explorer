@@ -528,10 +528,9 @@ require([
 						 }
 						 });*/
 
-						console.log(lod);
 						var tooltipContent = "",
 								timelineItemContent = "";
-						if (lod >= 11) {
+						if (lod >= 12) {
 							tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
 								"<div class='tooltipContainer'>" +
 								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
@@ -557,12 +556,11 @@ require([
 							'className':className
 						});
 					}); // END forEach
-					console.log(timelineData.length)
 
 					updateUI();
 					drawTimeline(timelineData);
 
-					$('.timeline-event').mouseenter(function (evt) {
+					/*$('.timeline-event').mouseenter(function (evt) {
 						// TODO IE / What a mess!
 						var xmin, ymin, xmax, ymax, extent, sfs;
 						if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
@@ -584,11 +582,8 @@ require([
 							map.graphics.add(mouseOverGraphic);
 						}
 					}).mouseleave(function () {
-								map.graphics.clear();
-							});
-
-
-
+						map.graphics.clear();
+					});*/
 				}); // END QUERY
 			}
 
@@ -698,6 +693,31 @@ require([
 					position:'right',
 					offsetY:20
 				});
+
+				$('.timeline-event').mouseenter(function (evt) {
+						// TODO IE / What a mess!
+						var xmin, ymin, xmax, ymax, extent, sfs;
+						if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
+							xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
+							xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
+							ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
+							ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
+							extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
+							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+							mouseOverGraphic = new Graphic(extent, sfs);
+							map.graphics.add(mouseOverGraphic);
+						}
+						// TODO
+						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+						if (data) {
+							extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+							mouseOverGraphic = new Graphic(extent, sfs);
+							map.graphics.add(mouseOverGraphic);
+						}
+					}).mouseleave(function () {
+						map.graphics.clear();
+					});
 			}
 
 			function onSelect() {
