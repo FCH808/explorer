@@ -73,7 +73,6 @@ require([
 					grid,
 			// dgrid columns
 					columns,
-					lastObjAdded,
 					mouseOverGraphic,
 
 			// timeline data and filters
@@ -316,7 +315,15 @@ require([
 						});
 						map.addLayer(imageServiceLayer);
 
-						var firstRowObj = store.query({objID:lastObjAdded});
+						var _firstRow;
+						if (query(".dgrid-row", grid.domNode)[0]) {
+							var rowId = query(".dgrid-row", grid.domNode)[0].id;
+							_firstRow = rowId.split("-")[2]
+						}
+						var firstRowObj = store.query({
+							objID:_firstRow
+						});
+
 						store.put({
 							id:"1",
 							objID:objID,
@@ -329,7 +336,6 @@ require([
 						}, {
 							before:firstRowObj[0]
 						});
-						lastObjAdded = objID;
 					});
 				});
 				$('.stepTwo').css('display', 'none');
@@ -532,17 +538,17 @@ require([
 								timelineItemContent = "";
 						if (lod >= 12) {
 							tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
-								"<div class='tooltipContainer'>" +
-								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
-								"<div class='tooltipContent'>" + citation + "</div></div>";
+									"<div class='tooltipContainer'>" +
+									"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+									"<div class='tooltipContent'>" + citation + "</div></div>";
 
 							timelineItemContent = '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
 									'<span class="thumbnailLabel">' + mapName + '</span><br >' +
 									'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>';
 						} else {
 							tooltipContent = "<div class='tooltipContainer'>" +
-								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
-								"<div class='tooltipContent'>" + citation + "</div></div>";
+									"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+									"<div class='tooltipContent'>" + citation + "</div></div>";
 							timelineItemContent = '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
 									'<span class="thumbnailLabel">' + mapName + '</span>';
 						}
@@ -561,29 +567,29 @@ require([
 					drawTimeline(timelineData);
 
 					/*$('.timeline-event').mouseenter(function (evt) {
-						// TODO IE / What a mess!
-						var xmin, ymin, xmax, ymax, extent, sfs;
-						if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
-							xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
-							xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
-							ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
-							ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
-							extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
-							mouseOverGraphic = new Graphic(extent, sfs);
-							map.graphics.add(mouseOverGraphic);
-						}
-						// TODO
-						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
-						if (data) {
-							extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
-							mouseOverGraphic = new Graphic(extent, sfs);
-							map.graphics.add(mouseOverGraphic);
-						}
-					}).mouseleave(function () {
-						map.graphics.clear();
-					});*/
+					 // TODO IE / What a mess!
+					 var xmin, ymin, xmax, ymax, extent, sfs;
+					 if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
+					 xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
+					 xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
+					 ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
+					 ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
+					 extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
+					 sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+					 mouseOverGraphic = new Graphic(extent, sfs);
+					 map.graphics.add(mouseOverGraphic);
+					 }
+					 // TODO
+					 var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+					 if (data) {
+					 extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+					 sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+					 mouseOverGraphic = new Graphic(extent, sfs);
+					 map.graphics.add(mouseOverGraphic);
+					 }
+					 }).mouseleave(function () {
+					 map.graphics.clear();
+					 });*/
 				}); // END QUERY
 			}
 
@@ -695,29 +701,29 @@ require([
 				});
 
 				$('.timeline-event').mouseenter(function (evt) {
-						// TODO IE / What a mess!
-						var xmin, ymin, xmax, ymax, extent, sfs;
-						if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
-							xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
-							xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
-							ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
-							ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
-							extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
-							mouseOverGraphic = new Graphic(extent, sfs);
-							map.graphics.add(mouseOverGraphic);
-						}
-						// TODO
-						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
-						if (data) {
-							extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
-							mouseOverGraphic = new Graphic(extent, sfs);
-							map.graphics.add(mouseOverGraphic);
-						}
-					}).mouseleave(function () {
-						map.graphics.clear();
-					});
+					// TODO IE / What a mess!
+					var xmin, ymin, xmax, ymax, extent, sfs;
+					if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
+						xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
+						xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
+						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
+						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
+						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
+						sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+						mouseOverGraphic = new Graphic(extent, sfs);
+						map.graphics.add(mouseOverGraphic);
+					}
+					// TODO
+					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+					if (data) {
+						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+						sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+						mouseOverGraphic = new Graphic(extent, sfs);
+						map.graphics.add(mouseOverGraphic);
+					}
+				}).mouseleave(function () {
+							map.graphics.clear();
+						});
 			}
 
 			function onSelect() {
@@ -766,9 +772,15 @@ require([
 								});
 								map.addLayer(imageServiceLayer);
 
+								var _firstRow;
+								if (query(".dgrid-row", grid.domNode)[0]) {
+									var rowId = query(".dgrid-row", grid.domNode)[0].id;
+									_firstRow = rowId.split("-")[2]
+								}
 								var firstRowObj = store.query({
-									objID:lastObjAdded
+									objID:_firstRow
 								});
+
 								store.put({
 									id:"1",
 									objID:objID,
@@ -781,7 +793,6 @@ require([
 								}, {
 									before:firstRowObj[0]
 								});
-								lastObjAdded = objID;
 							});
 							$('.stepOne').css('display', 'none');
 							$('.gridContainer').css('display', 'block');
