@@ -480,6 +480,7 @@ require([
 			}
 
 			function extentChangeHandler(evt) {
+				var lod = evt.lod.level;
 				currentMapExtent = evt.extent;
 				var qt = new QueryTask(Config.TOPO_INDEX);
 				var q = new Query();
@@ -527,43 +528,40 @@ require([
 						 }
 						 });*/
 
-						var tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
+						console.log(lod);
+						var tooltipContent = "",
+								timelineItemContent = "";
+						if (lod >= 11) {
+							tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
 								"<div class='tooltipContainer'>" +
 								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
 								"<div class='tooltipContent'>" + citation + "</div></div>";
+
+							timelineItemContent = '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
+									'<span class="thumbnailLabel">' + mapName + '</span><br >' +
+									'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>';
+						} else {
+							tooltipContent = "<div class='tooltipContainer'>" +
+								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+								"<div class='tooltipContent'>" + citation + "</div></div>";
+							timelineItemContent = '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
+									'<span class="thumbnailLabel">' + mapName + '</span>';
+						}
+
 						timelineData.push({
 							'start':new Date(dateCurrent, 0, 0),
-							'content':'<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
-									'<span class="thumbnailLabel">' + mapName + '</span><br >' +
-									'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>',
+							'content':timelineItemContent,
 							'objID':objID,
 							'downloadLink':downloadLink,
 							'scale':scale,
 							'className':className
 						});
 					}); // END forEach
+					console.log(timelineData.length)
 
 					updateUI();
 					drawTimeline(timelineData);
 
-					/*var timelineEventNode = query(".timeline-event");
-					 on(timelineEventNode, mouse.enter, function (evt) {
-					 if (evt.target.getAttribute('data-xmin')) {
-					 var xmin = evt.target.getAttribute('data-xmin');
-					 var ymin = evt.target.getAttribute('data-ymin');
-					 var xmax = evt.target.getAttribute('data-xmax');
-					 var ymax = evt.target.getAttribute('data-ymax');
-					 var extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-					 var sfs = createMouseOverGraphic(new Color([8, 68, 0]), new Color([255, 255, 0, 0.0]));
-					 mouseOverGraphic = new Graphic(extent, sfs);
-					 map.graphics.add(mouseOverGraphic);
-					 }
-					 });
-					 on(timelineEventNode, mouse.leave, function (evt) {
-					 if (mouseOverGraphic) {
-					 map.graphics.remove(mouseOverGraphic);
-					 }
-					 });*/
 					$('.timeline-event').mouseenter(function (evt) {
 						// TODO IE / What a mess!
 						var xmin, ymin, xmax, ymax, extent, sfs;
