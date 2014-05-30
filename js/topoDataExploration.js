@@ -206,11 +206,12 @@ require([
 
 				var legendNode = query(".topo-legend")[0];
 				array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem) {
-					var node = domConstruct.toDom('<label data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
+					var node = domConstruct.toDom('<label data-scale="' + legendItem.value + '" data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
 							'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
 							'</label>');
 					on(node, "click", function (evt) {
 						var selectedScale = evt.target.getAttribute("data-scale");
+						console.log(selectedScale);
 						domClass.toggle(this, "sel");
 						if (domClass.contains(this, "sel")) {
 							var j = filter.indexOf(selectedScale);
@@ -674,7 +675,7 @@ require([
 				});
 
 				if (timeline === undefined) {
-					console.log("Creating TIMELINE");
+					//console.log("Creating TIMELINE");
 					if (urlQueryObject) {
 						timelineOptions.start = new Date(urlQueryObject.minDate, 0, 0);
 						timelineOptions.end = new Date(urlQueryObject.maxDate, 0, 0);
@@ -684,7 +685,7 @@ require([
 					links.events.addListener(timeline, 'ready', onTimelineReady);
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
-					console.log("Redrawing TIMELINE");
+					//console.log("Redrawing TIMELINE");
 					var height = timelineContainerGeometry ? timelineContainerGeometry.h : Config.TIMELINE_HEIGHT;
 					timelineOptions.style = "box";
 					timelineOptions.height = height + "px";
