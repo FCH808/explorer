@@ -571,7 +571,7 @@ require([
 							xmax = evt.target.getAttribute("data-xmax");
 							ymin = evt.target.getAttribute("data-ymin");
 							ymax = evt.target.getAttribute("data-ymax");
-							extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+							extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
 							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
