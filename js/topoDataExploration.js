@@ -388,38 +388,38 @@ require([
 				array.forEach(dataToFilter, function (item) {
 					for (var i = 0; i < filter.length; i++) {
 						/*var position = array.indexOf(_scales, filter[i]);
-						if (position !== -1) {
-							var lowerBound, upperBound, current;
-							if (TOPO_MAP_SCALES[position + 1] !== undefined) {
-								lowerBound = TOPO_MAP_SCALES[(position + 1)].value;
-							} else {
-								lowerBound = "";
-							}
-							console.log("lowerBound: " + lowerBound);
+						 if (position !== -1) {
+						 var lowerBound, upperBound, current;
+						 if (TOPO_MAP_SCALES[position + 1] !== undefined) {
+						 lowerBound = TOPO_MAP_SCALES[(position + 1)].value;
+						 } else {
+						 lowerBound = "";
+						 }
+						 console.log("lowerBound: " + lowerBound);
 
-							if (TOPO_MAP_SCALES[position].value)
-								current = TOPO_MAP_SCALES[position].value;
-							console.log("current: " + current);
+						 if (TOPO_MAP_SCALES[position].value)
+						 current = TOPO_MAP_SCALES[position].value;
+						 console.log("current: " + current);
 
-							if (TOPO_MAP_SCALES[(position - 1)] !== undefined) {
-								upperBound = TOPO_MAP_SCALES[(position - 1)].value;
-							} else {
-								upperBound = "";
-							}
-							console.log("upperBound: " + upperBound);
-						}
-						//console.log(item.scale + "\t" + number.parse(filter[i]));
-						if (lowerBound === "") {
-							if (item.scale <= number.parse(filter[i])) {
-								exclude = true;
-								break;
-							}
-						} else {
-							if (item.scale >= lowerBound && item.scale <= number.parse(filter[i])) {
-								exclude = true;
-								break;
-							}
-						}*/
+						 if (TOPO_MAP_SCALES[(position - 1)] !== undefined) {
+						 upperBound = TOPO_MAP_SCALES[(position - 1)].value;
+						 } else {
+						 upperBound = "";
+						 }
+						 console.log("upperBound: " + upperBound);
+						 }
+						 //console.log(item.scale + "\t" + number.parse(filter[i]));
+						 if (lowerBound === "") {
+						 if (item.scale <= number.parse(filter[i])) {
+						 exclude = true;
+						 break;
+						 }
+						 } else {
+						 if (item.scale >= lowerBound && item.scale <= number.parse(filter[i])) {
+						 exclude = true;
+						 break;
+						 }
+						 }*/
 
 						var currentFilter = number.parse(filter[i]);
 						var currentScale = item.scale;
@@ -457,7 +457,7 @@ require([
 							}
 						}
 
-						if (lowerBound !== ""  && upperBound !== "") {
+						if (lowerBound !== "" && upperBound !== "") {
 							if (currentScale > lowerBound && currentScale < upperBound) {
 								exclude = true;
 								break;
@@ -465,9 +465,9 @@ require([
 						}
 
 						/*if (currentScale === currentFilter) {
-							exclude = true;
-							break;
-						}*/
+						 exclude = true;
+						 break;
+						 }*/
 					}
 
 					if (!exclude) {
@@ -572,7 +572,7 @@ require([
 							ymin = evt.target.getAttribute("data-ymin");
 							ymax = evt.target.getAttribute("data-ymax");
 							extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+							sfs = createMouseOverGraphic(new Color([0, 0, 255, 0.5]), new Color([255, 255, 0, 0.0]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
 						}
@@ -581,7 +581,34 @@ require([
 						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 						if (data.xmin) {
 							extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-							sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+							sfs = createMouseOverGraphic(new Color([0, 0, 255, 0.5]), new Color([255, 255, 0, 0.0]));
+							mouseOverGraphic = new Graphic(extent, sfs);
+							map.graphics.add(mouseOverGraphic);
+						}
+					}).mouseout(function () {
+								map.graphics.clear();
+							});
+
+
+					$('.timeline-event-content').mouseover(function (evt) {
+						// TODO IE
+						var xmin, ymin, xmax, ymax, extent, sfs;
+						if (evt.target.getAttribute("data-xmin")) {
+							xmin = evt.target.getAttribute("data-xmin");
+							xmax = evt.target.getAttribute("data-xmax");
+							ymin = evt.target.getAttribute("data-ymin");
+							ymax = evt.target.getAttribute("data-ymax");
+							extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
+							sfs = createMouseOverGraphic(new Color([0, 0, 255, 0.5]), new Color([255, 255, 0, 0.0]));
+							mouseOverGraphic = new Graphic(extent, sfs);
+							map.graphics.add(mouseOverGraphic);
+						}
+
+						// TODO
+						var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+						if (data.xmin) {
+							extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+							sfs = createMouseOverGraphic(new Color([0, 0, 255, 0.5]), new Color([255, 255, 0, 0.0]));
 							mouseOverGraphic = new Graphic(extent, sfs);
 							map.graphics.add(mouseOverGraphic);
 						}
