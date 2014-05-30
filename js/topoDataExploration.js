@@ -257,13 +257,13 @@ require([
 			function showLoading() {
 				esri.show(loading);
 				map.disableMapNavigation();
-				map.hideZoomSlider();
+				//map.hideZoomSlider();
 			}
 
 			function hideLoading() {
 				esri.hide(loading);
 				map.enableMapNavigation();
-				map.showZoomSlider();
+				//map.showZoomSlider();
 			}
 
 			function checkUrlParams() {
