@@ -123,6 +123,12 @@ require([
 				on(map, "update-start", showLoading);
 				on(map, "update-end", hideLoading);
 				on(query(".share")[0], 'click', setSharingUrl);
+				on(geocoder, "find-results", function(results) {
+					console.log(results);
+				});
+				on(geocoder, "select", function(results) {
+					console.log(results);
+				});
 
 				columns = [
 					{
@@ -565,31 +571,6 @@ require([
 
 					updateUI();
 					drawTimeline(timelineData);
-
-					/*$('.timeline-event').mouseenter(function (evt) {
-					 // TODO IE / What a mess!
-					 var xmin, ymin, xmax, ymax, extent, sfs;
-					 if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
-					 xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
-					 xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
-					 ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
-					 ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
-					 extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-					 sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
-					 mouseOverGraphic = new Graphic(extent, sfs);
-					 map.graphics.add(mouseOverGraphic);
-					 }
-					 // TODO
-					 var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
-					 if (data) {
-					 extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-					 sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
-					 mouseOverGraphic = new Graphic(extent, sfs);
-					 map.graphics.add(mouseOverGraphic);
-					 }
-					 }).mouseleave(function () {
-					 map.graphics.clear();
-					 });*/
 				}); // END QUERY
 			}
 
@@ -674,7 +655,7 @@ require([
 				});
 
 				if (timeline === undefined) {
-					//console.log("Creating TIMELINE");
+					console.log("Creating TIMELINE");
 					if (urlQueryObject) {
 						timelineOptions.start = new Date(urlQueryObject.minDate, 0, 0);
 						timelineOptions.end = new Date(urlQueryObject.maxDate, 0, 0);
@@ -684,7 +665,7 @@ require([
 					links.events.addListener(timeline, 'ready', onTimelineReady);
 					links.events.addListener(timeline, 'select', onSelect);
 				} else {
-					//console.log("Redrawing TIMELINE");
+					console.log("Redrawing TIMELINE");
 					var height = timelineContainerGeometry ? timelineContainerGeometry.h : Config.TIMELINE_HEIGHT;
 					timelineOptions.style = "box";
 					timelineOptions.height = height + "px";
