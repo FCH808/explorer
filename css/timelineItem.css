@@ -1,4 +1,4 @@
-div.timeline-event-content {
+/*div.timeline-event-content {
 	font-size: 0.65em;
 	width: 65px !important;
 	height: 35px;
@@ -6,6 +6,29 @@ div.timeline-event-content {
 
 div.timeline-event-content:hover {
 	cursor: pointer;
+}
+*/
+
+div.withThumbnail {
+	font-size: 0.65em;
+	width: 65px;
+	height: 35px;
+}
+
+div.withThumbnail:hover {
+	cursor: pointer;
+	color: #ffffff;
+}
+
+div.noThumbnail {
+	font-size: 0.70em;
+	width: 75px;
+	height: 15px;
+}
+
+div.noThumbnail:hover {
+	cursor: pointer;
+	color: #ffffff;
 }
 
 div.timeline-event-box.inScale {

@@ -400,40 +400,6 @@ require([
 				var exclude = false;
 				array.forEach(dataToFilter, function (item) {
 					for (var i = 0; i < filter.length; i++) {
-						/*var position = array.indexOf(_scales, filter[i]);
-						 if (position !== -1) {
-						 var lowerBound, upperBound, current;
-						 if (TOPO_MAP_SCALES[position + 1] !== undefined) {
-						 lowerBound = TOPO_MAP_SCALES[(position + 1)].value;
-						 } else {
-						 lowerBound = "";
-						 }
-						 console.log("lowerBound: " + lowerBound);
-
-						 if (TOPO_MAP_SCALES[position].value)
-						 current = TOPO_MAP_SCALES[position].value;
-						 console.log("current: " + current);
-
-						 if (TOPO_MAP_SCALES[(position - 1)] !== undefined) {
-						 upperBound = TOPO_MAP_SCALES[(position - 1)].value;
-						 } else {
-						 upperBound = "";
-						 }
-						 console.log("upperBound: " + upperBound);
-						 }
-						 //console.log(item.scale + "\t" + number.parse(filter[i]));
-						 if (lowerBound === "") {
-						 if (item.scale <= number.parse(filter[i])) {
-						 exclude = true;
-						 break;
-						 }
-						 } else {
-						 if (item.scale >= lowerBound && item.scale <= number.parse(filter[i])) {
-						 exclude = true;
-						 break;
-						 }
-						 }*/
-
 						var currentFilter = number.parse(filter[i]);
 						var currentScale = item.scale;
 						var filterPosition = array.indexOf(_scales, currentFilter);
@@ -476,11 +442,6 @@ require([
 								break;
 							}
 						}
-
-						/*if (currentScale === currentFilter) {
-						 exclude = true;
-						 break;
-						 }*/
 					}
 
 					if (!exclude) {
@@ -548,14 +509,14 @@ require([
 									"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
 									"<div class='tooltipContent'>" + citation + "</div></div>";
 
-							timelineItemContent = '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
+							timelineItemContent = '<div class="timelineItemTooltip withThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
 									'<span class="thumbnailLabel">' + mapName + '</span><br >' +
 									'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>';
 						} else {
 							tooltipContent = "<div class='tooltipContainer'>" +
 									"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
 									"<div class='tooltipContent'>" + citation + "</div></div>";
-							timelineItemContent = '<div class="timelineItemTooltip" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
+							timelineItemContent = '<div class="timelineItemTooltip noThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
 									'<span class="thumbnailLabel">' + mapName + '</span>';
 						}
 
