@@ -258,10 +258,10 @@ require([
 				var q = new Query();
 				q.returnGeometry = true;
 				q.outFields = OUTFIELDS;
-				array.forEach(urlQueryObject.oids.split("|"), function (oid) {
-					console.log(oid);
+
+				if (urlQueryObject.oids.length > 0) {
+					array.forEach(urlQueryObject.oids.split("|"), function (oid) {
 					var whereStatement = "OBJECTID = " + oid;
-					//var whereStatement = "SvcOID = " + oid;
 					q.where = whereStatement;
 					qt.execute(q, function (rs) {
 						var feature = rs.features[0];
@@ -316,15 +316,15 @@ require([
 						});
 					});
 				});
-				$(".stepTwo").css("display", "none");
-				$(".gridContainer").css("display", "block");
+					$(".stepTwo").css("display", "none");
+					$(".gridContainer").css("display", "block");
+				}
 			}
 
 			function share() {
 				var lat = map.extent.getCenter().getLatitude();
 				var lng = map.extent.getCenter().getLongitude();
 				var zoomLevel = map.getLevel();
-				//var timelineDateRange = timeline.getDataRange();
 				var timelineDateRange = timeline.getVisibleChartRange();
 				var selectedItems = store.data;
 				var objectIDs = "";
@@ -340,10 +340,6 @@ require([
 				var pathName = window.location.pathname;
 				var fileName = "";
 				var pathArray = window.location.pathname.split('/');
-				console.log(protocol);
-				console.log(host);
-				console.log(pathName);
-				console.log(pathArray);
 				if (pathArray[pathArray.length - 1] !== "index.html") {
 					fileName = "index.html";
 				} else {
@@ -351,7 +347,6 @@ require([
 				}
 
 				sharingUrl = protocol + "//" + host + pathName + fileName + "?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
-				console.log(sharingUrl);
 				window.open(sharingUrl);
 			}
 
