@@ -259,13 +259,15 @@ require([
 				var q = new Query();
 				q.returnGeometry = true;
 				q.outFields = OUTFIELDS;
-
 				if (urlQueryObject.oids.length > 0) {
+					var downloadIds = urlQueryObject.dlids.split("|");
 					array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
-						console.log(index + "\t" + oid);
+						console.log(urlQueryObject);
+						console.log(DOWNLOAD_PATH + urlQueryObject.downloadIds[index]);
 						var whereStatement = "OBJECTID = " + oid;
 						q.where = whereStatement;
-						qt.execute(q, function (rs) {
+
+						var deferred = qt.execute(q).addCallback(function (rs) {
 							var feature = rs.features[0];
 							var objID = feature.attributes.OBJECTID;
 							//var objID = feature.attributes.SvcOID;
@@ -295,15 +297,6 @@ require([
 							});
 							map.addLayer(imageServiceLayer);
 
-							var _firstRow;
-							if (query(".dgrid-row", grid.domNode)[0]) {
-								var rowId = query(".dgrid-row", grid.domNode)[0].id;
-								_firstRow = rowId.split("-")[2]
-							}
-							var firstRowObj = store.query({
-								objID:_firstRow
-							});
-
 							store.put({
 								id:"1",
 								objID:objID,
@@ -311,10 +304,8 @@ require([
 								name:mapName,
 								imprintYear:dateCurrent,
 								scale:scale,
-								downloadLink:DOWNLOAD_PATH + urlQueryObject.dl[index],
+								downloadLink:DOWNLOAD_PATH + urlQueryObject.downloadIds[index],
 								extent:extent
-							}, {
-								before:firstRowObj[0]
 							});
 						});
 					});
@@ -327,13 +318,14 @@ require([
 				var lng = map.extent.getCenter().getLongitude();
 				var zoomLevel = map.getLevel();
 				var timelineDateRange = timeline.getVisibleChartRange();
-				var selectedItems = store.data;
+
 				var objectIDs = "";
 				var downloadIDs = "";
-				array.forEach(selectedItems, function (selectedItem) {
-					objectIDs += selectedItem.objID + "|";
-					// TODO
-					downloadIDs += selectedItem.downloadLink.split("=")[1] + "|";
+				query('.dgrid-row', grid.domNode).forEach(function (node) {
+					var row = grid.row(node);
+					console.log(row.data);
+					objectIDs += row.data.objID + "|";
+					downloadIDs += row.data.downloadLink.split("=")[1] + "|";
 				});
 				objectIDs = objectIDs.substr(0, objectIDs.length - 1);
 				downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
@@ -355,7 +347,7 @@ require([
 						"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
 						"&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() +
 						"&oids=" + objectIDs +
-						"&dl=" + downloadIDs;
+						"&dlids=" + downloadIDs;
 				window.open(sharingUrl);
 			}
 
@@ -524,7 +516,7 @@ require([
 				var downloadLink = object.downloadLink;
 				var imgSrc = Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN;
 
-				var tooltipContent = "<div class='tooltipContainer'>" + mapName + "</div>";
+				var tooltipContent = "<span class='tooltipContainer'>" + mapName + "</span>";
 
 				var node = domConstruct.create("div", {
 					"class":"renderedCell",
@@ -549,14 +541,6 @@ require([
 						}
 					}
 				});
-
-				$(".thumbnailMapName").tooltipster({
-					theme:"tooltipster-shadow",
-					contentAsHTML:true,
-					position:"right",
-					offsetY:20
-				});
-
 				return node;
 			}
 
