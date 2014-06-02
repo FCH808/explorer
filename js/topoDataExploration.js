@@ -334,9 +334,24 @@ require([
 				objectIDs = objectIDs.substr(0, objectIDs.length - 1);
 				var minDate = new Date(timelineDateRange.start);
 				var maxDate = new Date(timelineDateRange.end);
-				console.log(minDate);
-				console.log(maxDate);
-				sharingUrl = window.location.href + "?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
+
+				var protocol = window.location.protocol;
+				var host = window.location.host;
+				var pathName = window.location.pathname;
+				var fileName = "";
+				var pathArray = window.location.pathname.split('/');
+				console.log(protocol);
+				console.log(host);
+				console.log(pathName);
+				console.log(pathArray);
+				if (pathArray[pathArray.length - 1] !== "index.html") {
+					fileName = "index.html";
+				} else {
+					fileName = "";
+				}
+
+				sharingUrl = protocol + "//" + host + pathName + fileName + "?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
+				console.log(sharingUrl);
 				window.open(sharingUrl);
 			}
 
