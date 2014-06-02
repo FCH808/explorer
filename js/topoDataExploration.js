@@ -329,7 +329,7 @@ require([
 				var timelineDateRange = timeline.getVisibleChartRange();
 				var selectedItems = store.data;
 				var objectIDs = "";
-				var downloadIDs = ""
+				var downloadIDs = "";
 				array.forEach(selectedItems, function (selectedItem) {
 					objectIDs += selectedItem.objID + "|";
 					// TODO
@@ -446,7 +446,6 @@ require([
 							var dateCurrent = feature.attributes.DateCurren;
 							var imprintYear = feature.attributes.Imprint_Ye;
 							var downloadLink = feature.attributes.Download_G;
-							DOWNLOAD_PATH = downloadLink;
 							var citation = feature.attributes.Citation;
 
 							// TODO Hard-coded for now
@@ -522,13 +521,10 @@ require([
 				var objID = object.objID;
 				var mapName = object.name;
 				var imprintYear = object.imprintYear;
-				var scale = object.scale;
 				var downloadLink = object.downloadLink;
 				var imgSrc = Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN;
 
-				var tooltipContent = "<img class='tooltipThumbnail' src='" + imgSrc + "'>" +
-						"<div class='tooltipContainer'>" +
-						"<div class='tooltipHeader'>" + mapName + " (" + imprintYear + ")</div>";
+				var tooltipContent = "<div class='tooltipContainer'>" + mapName + "</div>";
 
 				var node = domConstruct.create("div", {
 					"class":"renderedCell",
@@ -536,7 +532,6 @@ require([
 							"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
 							"<div class='thumbnailMapName'>" + mapName + "</div>" +
 							"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
-						//"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
 							"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
 					onclick:function (evt) {
 						var objID = evt.target.getAttribute("data-objectid");
@@ -555,7 +550,7 @@ require([
 					}
 				});
 
-				$(".rm-layer-icon").tooltipster({
+				$(".thumbnailMapName").tooltipster({
 					theme:"tooltipster-shadow",
 					contentAsHTML:true,
 					position:"right",
