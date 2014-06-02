@@ -115,7 +115,7 @@ require([
 				on(map, "extent-change", extentChangeHandler);
 				on(map, "update-start", showLoading);
 				on(map, "update-end", hideLoading);
-				on(query(".share")[0], "click", setSharingUrl);
+				on(query(".share")[0], "click", share);
 				on(geocoder, "find-results", function (results) {
 					console.log(results);
 				});
@@ -252,19 +252,21 @@ require([
 				}
 			}
 
-			function initStore() {
+			function initStore(urlQueryObject) {
+				console.log(urlQueryObject);
 				var qt = new QueryTask(IMAGE_SERVICE_URL);
 				var q = new Query();
 				q.returnGeometry = true;
 				q.outFields = OUTFIELDS;
 				array.forEach(urlQueryObject.oids.split("|"), function (oid) {
-					//var whereStatement = "OBJECTID = " + oid;
-					var whereStatement = "SvcOID = " + oid;
+					console.log(oid);
+					var whereStatement = "OBJECTID = " + oid;
+					//var whereStatement = "SvcOID = " + oid;
 					q.where = whereStatement;
 					qt.execute(q, function (rs) {
 						var feature = rs.features[0];
-						//var objID = feature.attributes.OBJECTID;
-						var objID = feature.attributes.SvcOID;
+						var objID = feature.attributes.OBJECTID;
+						//var objID = feature.attributes.SvcOID;
 						var extent = feature.geometry.getExtent();
 						var mapName = feature.attributes.Map_Name;
 						var dateCurrent = feature.attributes.DateCurrent;
@@ -318,20 +320,23 @@ require([
 				$(".gridContainer").css("display", "block");
 			}
 
-			function setSharingUrl() {
+			function share() {
 				var lat = map.extent.getCenter().getLatitude();
 				var lng = map.extent.getCenter().getLongitude();
 				var zoomLevel = map.getLevel();
-				var timelineDateRange = timeline.getDataRange();
+				//var timelineDateRange = timeline.getDataRange();
+				var timelineDateRange = timeline.getVisibleChartRange();
 				var selectedItems = store.data;
 				var objectIDs = "";
 				array.forEach(selectedItems, function (selectedItem) {
 					objectIDs += selectedItem.objID + "|";
 				});
 				objectIDs = objectIDs.substr(0, objectIDs.length - 1);
-				var minDate = new Date(timelineDateRange.min);
-				var maxDate = new Date(timelineDateRange.max);
-				sharingUrl = window.location.href + "index.html?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
+				var minDate = new Date(timelineDateRange.start);
+				var maxDate = new Date(timelineDateRange.end);
+				console.log(minDate);
+				console.log(maxDate);
+				sharingUrl = window.location.href + "?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
 				window.open(sharingUrl);
 			}
 
@@ -661,7 +666,7 @@ require([
 								var _firstRow;
 								if (query(".dgrid-row", grid.domNode)[0]) {
 									var rowId = query(".dgrid-row", grid.domNode)[0].id;
-									_firstRow = rowId.split("-")[2]
+									_firstRow = rowId.split("-")[2];
 								}
 								var firstRowObj = store.query({
 									objID: _firstRow
@@ -704,7 +709,7 @@ require([
 						object.id = calculateOrder(this, object, options && options.before);
 						return Memory.prototype.put.call(this, object, options);
 					},
-					// Memory"s add does not need to be augmented since it calls put
+					// Memory's add does not need to be augmented since it calls put
 					copy: function (object, options) {
 						// summary:
 						//		Given an item already in the store, creates a copy of it.
