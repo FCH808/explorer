@@ -64,5 +64,8 @@ var Config = {
 	"TIMELINE_ANIMATE":true,
 
 	"ZOOM_LEVEL_THRESHHOLD": 9,
-	"THUMBNAIL_VISIBLE_THRESHHOLD": 12
+	"THUMBNAIL_VISIBLE_THRESHHOLD": 12,
+
+	// TMP
+	"DOWNLOAD_PATH": "http://ims.er.usgs.gov/gda_services/download?item_id="
 };

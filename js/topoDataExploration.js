@@ -62,6 +62,7 @@ require([
 					TOKEN,
 					IMAGE_SERVICE_URL,
 					imageServiceLayer,
+					DOWNLOAD_PATH,
 
 			// dgrid store
 					store,
@@ -100,6 +101,7 @@ require([
 				for (var i = 0; i < TOPO_MAP_SCALES.length; i++) {
 					scales.push(TOPO_MAP_SCALES[i].value);
 				}
+				DOWNLOAD_PATH = Config.DOWNLOAD_PATH;
 
 				setAppHeaderTitle(Config.APP_HEADER);
 				setAppHeaderSubtitle(Config.APP_SUBHEADER);
@@ -117,46 +119,46 @@ require([
 				on(map, "update-end", hideLoading);
 				on(query(".share")[0], "click", share);
 				on(geocoder, "find-results", function (results) {
-					console.log(results);
+					//console.log(results);
 				});
 				on(geocoder, "select", function (results) {
-					console.log(results);
+					//console.log(results);
 				});
 
 				columns = [
 					{
-						label: " ",
-						field: "objID",
-						hidden: true
+						label:" ",
+						field:"objID",
+						hidden:true
 					},
 					{
-						label: " ",
-						field: "name",
-						renderCell: thumbnailRenderCell
+						label:" ",
+						field:"name",
+						renderCell:thumbnailRenderCell
 					},
 					editor({
-						label: " ",
-						field: "transparency",
-						editorArgs: {
-							value: 1.0,
-							minimum: 0,
-							maximum: 1.0,
-							intermediateChanges: true
+						label:" ",
+						field:"transparency",
+						editorArgs:{
+							value:1.0,
+							minimum:0,
+							maximum:1.0,
+							intermediateChanges:true
 						}
 					}, HorizontalSlider)
 				];
 
 				grid = new (declare([Grid, Selection, DnD, Keyboard]))({
-					store: store = createOrderedStore(storeData, {
-						idProperty: "objID"
+					store:store = createOrderedStore(storeData, {
+						idProperty:"objID"
 					}),
-					columns: columns,
-					showHeader: false,
-					selectionMode: "single",
-					dndParams: {
-						singular: true
+					columns:columns,
+					showHeader:false,
+					selectionMode:"single",
+					dndParams:{
+						singular:true
 					},
-					getObjectDndType: function (item) {
+					getObjectDndType:function (item) {
 						return [item.type ? item.type : this.dndSourceType];
 					}
 				}, "grid");
@@ -167,19 +169,19 @@ require([
 
 				// timeline options
 				timelineOptions = {
-					"width": "100%",
-					"height": Config.TIMELINE_HEIGHT + "px",
-					"style": Config.TIMELINE_STYLE,
-					"showNavigation": Config.TIMELINE_SHOW_NAVIGATION,
-					"max": new Date(Config.TIMELINE_MAX_DATE, 0, 0),
-					"min": new Date(Config.TIMELINE_MIN_DATE, 0, 0),
-					"scale": links.Timeline.StepDate.SCALE.YEAR,
-					"step": Config.TIMELINE_STEP,
-					"stackEvents": true,
-					"zoomMax": Config.TIMELINE_ZOOM_MAX,
-					"zoomMin": Config.TIMELINE_ZOOM_MIN,
-					"cluster": Config.TIMELINE_CLUSTER,
-					"animate": Config.TIMELINE_ANIMATE
+					"width":"100%",
+					"height":Config.TIMELINE_HEIGHT + "px",
+					"style":Config.TIMELINE_STYLE,
+					"showNavigation":Config.TIMELINE_SHOW_NAVIGATION,
+					"max":new Date(Config.TIMELINE_MAX_DATE, 0, 0),
+					"min":new Date(Config.TIMELINE_MIN_DATE, 0, 0),
+					"scale":links.Timeline.StepDate.SCALE.YEAR,
+					"step":Config.TIMELINE_STEP,
+					"stackEvents":true,
+					"zoomMax":Config.TIMELINE_ZOOM_MAX,
+					"zoomMin":Config.TIMELINE_ZOOM_MIN,
+					"cluster":Config.TIMELINE_CLUSTER,
+					"animate":Config.TIMELINE_ANIMATE
 				};
 
 				var legendNode = query(".topo-legend")[0];
@@ -253,71 +255,70 @@ require([
 			}
 
 			function initStore(urlQueryObject) {
-				console.log(urlQueryObject);
 				var qt = new QueryTask(IMAGE_SERVICE_URL);
 				var q = new Query();
 				q.returnGeometry = true;
 				q.outFields = OUTFIELDS;
 
 				if (urlQueryObject.oids.length > 0) {
-					array.forEach(urlQueryObject.oids.split("|"), function (oid) {
-					var whereStatement = "OBJECTID = " + oid;
-					q.where = whereStatement;
-					qt.execute(q, function (rs) {
-						var feature = rs.features[0];
-						var objID = feature.attributes.OBJECTID;
-						//var objID = feature.attributes.SvcOID;
-						var extent = feature.geometry.getExtent();
-						var mapName = feature.attributes.Map_Name;
-						var dateCurrent = feature.attributes.DateCurrent;
+					array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
+						console.log(index + "\t" + oid);
+						var whereStatement = "OBJECTID = " + oid;
+						q.where = whereStatement;
+						qt.execute(q, function (rs) {
+							var feature = rs.features[0];
+							var objID = feature.attributes.OBJECTID;
+							//var objID = feature.attributes.SvcOID;
+							var extent = feature.geometry.getExtent();
+							var mapName = feature.attributes.Map_Name;
+							var dateCurrent = feature.attributes.DateCurrent;
 
-						if (dateCurrent === null)
-							dateCurrent = "unknown";
-						var scale = feature.attributes.Map_Scale;
-						scale = number.format(scale, {
-							places: 0
-						});
+							if (dateCurrent === null)
+								dateCurrent = "unknown";
+							var scale = feature.attributes.Map_Scale;
+							scale = number.format(scale, {
+								places:0
+							});
 
-						var mosaicRule = new MosaicRule({
-							"method": MosaicRule.METHOD_CENTER,
-							"ascending": true,
-							"operation": MosaicRule.OPERATION_FIRST,
-							"where": whereStatement
-						});
-						params = new ImageServiceParameters();
-						params.noData = 0;
-						params.mosaicRule = mosaicRule;
-						imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-							imageServiceParameters: params,
-							opacity: 1.0
-						});
-						map.addLayer(imageServiceLayer);
+							var mosaicRule = new MosaicRule({
+								"method":MosaicRule.METHOD_CENTER,
+								"ascending":true,
+								"operation":MosaicRule.OPERATION_FIRST,
+								"where":whereStatement
+							});
+							params = new ImageServiceParameters();
+							params.noData = 0;
+							params.mosaicRule = mosaicRule;
+							imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
+								imageServiceParameters:params,
+								opacity:1.0
+							});
+							map.addLayer(imageServiceLayer);
 
-						var _firstRow;
-						if (query(".dgrid-row", grid.domNode)[0]) {
-							var rowId = query(".dgrid-row", grid.domNode)[0].id;
-							_firstRow = rowId.split("-")[2]
-						}
-						var firstRowObj = store.query({
-							objID: _firstRow
-						});
+							var _firstRow;
+							if (query(".dgrid-row", grid.domNode)[0]) {
+								var rowId = query(".dgrid-row", grid.domNode)[0].id;
+								_firstRow = rowId.split("-")[2]
+							}
+							var firstRowObj = store.query({
+								objID:_firstRow
+							});
 
-						store.put({
-							id: "1",
-							objID: objID,
-							layer: imageServiceLayer,
-							name: mapName,
-							imprintYear: dateCurrent,
-							scale: scale,
-							downloadLink: "TODO",
-							extent: extent
-						}, {
-							before: firstRowObj[0]
+							store.put({
+								id:"1",
+								objID:objID,
+								layer:imageServiceLayer,
+								name:mapName,
+								imprintYear:dateCurrent,
+								scale:scale,
+								downloadLink:DOWNLOAD_PATH + urlQueryObject.dl[index],
+								extent:extent
+							}, {
+								before:firstRowObj[0]
+							});
 						});
 					});
-				});
-					$(".stepTwo").css("display", "none");
-					$(".gridContainer").css("display", "block");
+					showGrid();
 				}
 			}
 
@@ -328,10 +329,14 @@ require([
 				var timelineDateRange = timeline.getVisibleChartRange();
 				var selectedItems = store.data;
 				var objectIDs = "";
+				var downloadIDs = ""
 				array.forEach(selectedItems, function (selectedItem) {
 					objectIDs += selectedItem.objID + "|";
+					// TODO
+					downloadIDs += selectedItem.downloadLink.split("=")[1] + "|";
 				});
 				objectIDs = objectIDs.substr(0, objectIDs.length - 1);
+				downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
 				var minDate = new Date(timelineDateRange.start);
 				var maxDate = new Date(timelineDateRange.end);
 
@@ -346,7 +351,11 @@ require([
 					fileName = "";
 				}
 
-				sharingUrl = protocol + "//" + host + pathName + fileName + "?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel + "&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() + "&oids=" + objectIDs;
+				sharingUrl = protocol + "//" + host + pathName + fileName +
+						"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
+						"&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() +
+						"&oids=" + objectIDs +
+						"&dl=" + downloadIDs;
 				window.open(sharingUrl);
 			}
 
@@ -437,6 +446,7 @@ require([
 							var dateCurrent = feature.attributes.DateCurren;
 							var imprintYear = feature.attributes.Imprint_Ye;
 							var downloadLink = feature.attributes.Download_G;
+							DOWNLOAD_PATH = downloadLink;
 							var citation = feature.attributes.Citation;
 
 							// TODO Hard-coded for now
@@ -479,12 +489,12 @@ require([
 							}
 
 							timelineData.push({
-								"start": new Date(dateCurrent, 0, 0),
-								"content": timelineItemContent,
-								"objID": objID,
-								"downloadLink": downloadLink,
-								"scale": scale,
-								"className": className
+								"start":new Date(dateCurrent, 0, 0),
+								"content":timelineItemContent,
+								"objID":objID,
+								"downloadLink":downloadLink,
+								"scale":scale,
+								"className":className
 							});
 						}); // END forEach
 
@@ -496,13 +506,13 @@ require([
 			}
 
 			/*function updateUI() {
-				if ($(".timelineContainer").css("display") === "none") {
-					$(".timelineContainer").css("display", "block");
-					$(".timelineLegendContainer").css("display", "block");
-					$(".stepOne").css("display", "none");
-					$(".stepTwo").css("display", "block");
-				}
-			}*/
+			 if ($(".timelineContainer").css("display") === "none") {
+			 $(".timelineContainer").css("display", "block");
+			 $(".timelineLegendContainer").css("display", "block");
+			 $(".stepOne").css("display", "none");
+			 $(".stepTwo").css("display", "block");
+			 }
+			 }*/
 
 			function mapLoadedHandler() {
 				console.log("mapLoadedHandler");
@@ -521,17 +531,17 @@ require([
 						"<div class='tooltipHeader'>" + mapName + " (" + imprintYear + ")</div>";
 
 				var node = domConstruct.create("div", {
-					"class": "renderedCell",
-					"innerHTML": "<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
+					"class":"renderedCell",
+					"innerHTML":"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
 							"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
 							"<div class='thumbnailMapName'>" + mapName + "</div>" +
 							"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
 						//"<div class='thumbnailMapScale'>1 : " + scale + "</div>" +
 							"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
-					onclick: function (evt) {
+					onclick:function (evt) {
 						var objID = evt.target.getAttribute("data-objectid");
 						var storeObj = store.query({
-							objID: objID
+							objID:objID
 						});
 
 						map.removeLayer(storeObj[0].layer);
@@ -540,15 +550,16 @@ require([
 							hideGrid();
 							map.graphics.remove(mouseOverGraphic);
 							map.graphics.clear();
+
 						}
 					}
 				});
 
 				$(".rm-layer-icon").tooltipster({
-					theme: "tooltipster-shadow",
-					contentAsHTML: true,
-					position: "right",
-					offsetY: 20
+					theme:"tooltipster-shadow",
+					contentAsHTML:true,
+					position:"right",
+					offsetY:20
 				});
 
 				return node;
@@ -595,10 +606,10 @@ require([
 				}
 
 				$(".timelineItemTooltip").tooltipster({
-					theme: "tooltipster-shadow",
-					contentAsHTML: true,
-					position: "right",
-					offsetY: 20
+					theme:"tooltipster-shadow",
+					contentAsHTML:true,
+					position:"right",
+					offsetY:20
 				});
 
 				$(".timeline-event").mouseenter(function (evt) {
@@ -609,7 +620,7 @@ require([
 						xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
 						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
 						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
-						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid: 102100 }));
+						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
 						sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
@@ -617,7 +628,7 @@ require([
 					// TODO
 					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 					if (data) {
-						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
+						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
 						sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
@@ -635,7 +646,7 @@ require([
 						var objID = timelineData[row].objID;
 						// check to see if the timeline item is currently selected
 						var objIDs = store.query({
-							objID: objID
+							objID:objID
 						});
 
 						if (objIDs.length < 1) {
@@ -655,21 +666,21 @@ require([
 									dateCurrent = "unknown";
 								var scale = rs.features[0].attributes.Map_Scale;
 								scale = number.format(scale, {
-									places: 0
+									places:0
 								});
 
 								var mosaicRule = new MosaicRule({
-									"method": MosaicRule.METHOD_CENTER,
-									"ascending": true,
-									"operation": MosaicRule.OPERATION_FIRST,
-									"where": whereClause
+									"method":MosaicRule.METHOD_CENTER,
+									"ascending":true,
+									"operation":MosaicRule.OPERATION_FIRST,
+									"where":whereClause
 								});
 								params = new ImageServiceParameters();
 								params.noData = 0;
 								params.mosaicRule = mosaicRule;
 								imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-									imageServiceParameters: params,
-									opacity: 1.0
+									imageServiceParameters:params,
+									opacity:1.0
 								});
 								map.addLayer(imageServiceLayer);
 
@@ -679,23 +690,23 @@ require([
 									_firstRow = rowId.split("-")[2];
 								}
 								var firstRowObj = store.query({
-									objID: _firstRow
+									objID:_firstRow
 								});
 
 								store.put({
-									id: "1",
-									objID: objID,
-									layer: imageServiceLayer,
-									name: mapName,
-									imprintYear: dateCurrent,
-									scale: scale,
-									downloadLink: downloadLink,
-									extent: extent
+									id:"1",
+									objID:objID,
+									layer:imageServiceLayer,
+									name:mapName,
+									imprintYear:dateCurrent,
+									scale:scale,
+									downloadLink:downloadLink,
+									extent:extent
 								}, {
-									before: firstRowObj[0]
+									before:firstRowObj[0]
 								});
 							});
-							hideGrid();
+							showGrid();
 						} else {
 							// already in the store/added to the map
 						}
@@ -713,14 +724,14 @@ require([
 
 			function createOrderedStore(data, options) {
 				// Instantiate a Memory store modified to support ordering.
-				return Observable(new Memory(lang.mixin({data: data,
-					idProperty: "id",
-					put: function (object, options) {
+				return Observable(new Memory(lang.mixin({data:data,
+					idProperty:"id",
+					put:function (object, options) {
 						object.id = calculateOrder(this, object, options && options.before);
 						return Memory.prototype.put.call(this, object, options);
 					},
 					// Memory's add does not need to be augmented since it calls put
-					copy: function (object, options) {
+					copy:function (object, options) {
 						// summary:
 						//		Given an item already in the store, creates a copy of it.
 						//		(i.e., shallow-clones the item sans id, then calls add)
@@ -741,10 +752,10 @@ require([
 						}
 						this.add(obj, options);
 					},
-					query: function (query, options) {
+					query:function (query, options) {
 						options = options || {};
 						options.sort = [
-							{attribute: "id"}
+							{attribute:"id"}
 						];
 						return Memory.prototype.query.call(this, query, options);
 					}
@@ -796,18 +807,18 @@ require([
 					zl = Config.MAP_INIT_ZOOM;
 				}
 				map = new Map("map", {
-					basemap: "topo",
-					center: [lng, lat],
-					zoom: zl
+					basemap:"topo",
+					center:[lng, lat],
+					zoom:zl
 				});
 			}
 
 			function initGeocoderDijit(srcRef) {
 				geocoder = new Geocoder({
-					map: map,
-					autoComplete: true,
-					showResults: true,
-					placeholder: "Find a Place"
+					map:map,
+					autoComplete:true,
+					showResults:true,
+					placeholder:"Find a Place"
 				}, srcRef);
 				geocoder.startup();
 			}
@@ -819,7 +830,14 @@ require([
 			}
 
 			function hideGrid() {
+				$(".stepOne").css("display", "block");
+				$(".stepTwo").css("display", "none");
+				$(".gridContainer").css("display", "none");
+			}
+
+			function showGrid() {
 				$(".stepOne").css("display", "none");
+				$(".stepTwo").css("display", "block");
 				$(".gridContainer").css("display", "block");
 			}
 
