@@ -263,7 +263,7 @@ require([
 					var downloadIds = urlQueryObject.dlids.split("|");
 					array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
 						console.log(urlQueryObject);
-						console.log(DOWNLOAD_PATH + urlQueryObject.downloadIds[index]);
+						console.log(DOWNLOAD_PATH + downloadIds[index]);
 						var whereStatement = "OBJECTID = " + oid;
 						q.where = whereStatement;
 
@@ -304,7 +304,7 @@ require([
 								name:mapName,
 								imprintYear:dateCurrent,
 								scale:scale,
-								downloadLink:DOWNLOAD_PATH + urlQueryObject.downloadIds[index],
+								downloadLink:DOWNLOAD_PATH + downloadIds[index],
 								extent:extent
 							});
 						});
