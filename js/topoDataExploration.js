@@ -201,7 +201,7 @@ require([
 							if (k !== -1) {
 								filter.splice(k, 1);
 							}
-							domStyle.set(this, "opacity", "01.0");
+							domStyle.set(this, "opacity", "1.0");
 						}
 						drawTimeline(timelineData);
 					});
@@ -224,7 +224,7 @@ require([
 						 });*/
 					});
 					aspect.after(spl, "_stopDrag", function () {
-						domStyle.set(spl.child.domNode, "opacity", 1);
+						domStyle.set(spl.child.domNode, "opacity", "1.0");
 						var node = dom.byId("timeline-container");
 						var computedStyle = domStyle.getComputedStyle(node);
 						timelineContainerGeometry = domGeom.getContentBox(node, computedStyle);
@@ -424,6 +424,7 @@ require([
 							var downloadLink = feature.attributes.Download_G;
 							var citation = feature.attributes.Citation;
 
+							// TODO Hard-coded for now
 							var className = "";
 							if (scale <= TOPO_MAP_SCALES[4].value) {
 								className = "one";
@@ -445,7 +446,7 @@ require([
 
 							var tooltipContent = "",
 									timelineItemContent = "";
-							if (lod >= 12) {
+							if (lod >= Config.THUMBNAIL_VISIBLE_THRESHHOLD) {
 								tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
 										"<div class='tooltipContainer'>" +
 										"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
