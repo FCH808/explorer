@@ -67,5 +67,9 @@ var Config = {
 	"THUMBNAIL_VISIBLE_THRESHHOLD": 12,
 
 	// TMP
-	"DOWNLOAD_PATH": "http://ims.er.usgs.gov/gda_services/download?item_id="
+	"DOWNLOAD_PATH": "http://ims.er.usgs.gov/gda_services/download?item_id=",
+
+	"IMAGE_FILL_OPACITY": 0.0,
+	"IMAGE_BORDER_OPACITY": 1.0,
+	"IMAGE_BORDER_WIDTH": 2.0
 };

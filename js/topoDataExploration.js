@@ -84,7 +84,7 @@ require([
 
 			// sharing URL
 					sharingUrl,
-					urlObject,
+					//urlObject,
 					urlQueryObject,
 			// loading icon
 					loading,
@@ -107,16 +107,16 @@ require([
 				setAppHeaderSubtitle(Config.APP_SUBHEADER);
 				setTimelineLegendHeaderTitle(Config.TIMELINE_LEGEND_HEADER);
 
-				checkUrlParams();
-				initMap(urlQueryObject);
+				urlQueryObject = getUrlParameters();
+				initBaseMap(urlQueryObject);
 				initGeocoderDijit("geocoder");
-
 				loading = dom.byId("loadingImg");
+				initUrlParamData(urlQueryObject);
 
 				on(map, "load", mapLoadedHandler);
 				on(map, "extent-change", extentChangeHandler);
-				on(map, "update-start", showLoading);
-				on(map, "update-end", hideLoading);
+				on(map, "update-start", showLoadingIndicator);
+				on(map, "update-end", hideLoadingIndicator);
 				on(query(".share")[0], "click", share);
 				on(geocoder, "find-results", function (results) {
 					//console.log(results);
@@ -236,30 +236,28 @@ require([
 				});
 			}
 
-			function showLoading() {
+			function showLoadingIndicator() {
 				esri.show(loading);
 				map.disableMapNavigation();
 			}
 
-			function hideLoading() {
+			function hideLoadingIndicator() {
 				esri.hide(loading);
 				map.enableMapNavigation();
 			}
 
-			function checkUrlParams() {
-				urlObject = urlUtils.urlToObject(window.location.href);
-				if (urlObject.query) {
-					urlQueryObject = urlObject.query;
-					initStore(urlQueryObject);
-				}
+			function getUrlParameters() {
+				var urlObject = urlUtils.urlToObject(window.location.href);
+				return urlObject.query;
 			}
 
-			function initStore(urlQueryObject) {
-				var qt = new QueryTask(IMAGE_SERVICE_URL);
-				var q = new Query();
-				q.returnGeometry = true;
-				q.outFields = OUTFIELDS;
-				if (urlQueryObject.oids.length > 0) {
+			function initUrlParamData(urlQueryObject) {
+				if (urlQueryObject) {
+					var qt = new QueryTask(IMAGE_SERVICE_URL);
+					var q = new Query();
+					q.returnGeometry = true;
+					q.outFields = OUTFIELDS;
+					if (urlQueryObject.oids.length > 0) {
 					var downloadIds = urlQueryObject.dlids.split("|");
 					array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
 						console.log(urlQueryObject);
@@ -311,6 +309,7 @@ require([
 					});
 					showGrid();
 				}
+				}
 			}
 
 			function share() {
@@ -318,12 +317,10 @@ require([
 				var lng = map.extent.getCenter().getLongitude();
 				var zoomLevel = map.getLevel();
 				var timelineDateRange = timeline.getVisibleChartRange();
-
 				var objectIDs = "";
 				var downloadIDs = "";
 				query('.dgrid-row', grid.domNode).forEach(function (node) {
 					var row = grid.row(node);
-					console.log(row.data);
 					objectIDs += row.data.objID + "|";
 					downloadIDs += row.data.downloadLink.split("=")[1] + "|";
 				});
@@ -600,7 +597,7 @@ require([
 						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
 						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
 						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-						sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+						sfs = createMouseOverGraphic(new Color([0, 0, 255, Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
 					}
@@ -608,7 +605,7 @@ require([
 					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 					if (data) {
 						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-						sfs = createMouseOverGraphic(new Color([0, 0, 255]), new Color([255, 255, 0, 0.0]));
+						sfs = createMouseOverGraphic(new Color([0, 0, 255, Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
 					}
@@ -772,23 +769,21 @@ require([
 				}
 			}
 
-			function initMap(urlQueryObject) {
-				var lat,
-						lng,
-						zl;
+			function initBaseMap(urlQueryObject) {
+				var _lat, _lng, _lod;
 				if (urlQueryObject) {
-					lat = urlQueryObject.lat;
-					lng = urlQueryObject.lng;
-					zl = urlQueryObject.zl;
+					_lat = urlQueryObject.lat;
+					_lng = urlQueryObject.lng;
+					_lod = urlQueryObject.zl;
 				} else {
-					lat = Config.MAP_INIT_LAT;
-					lng = Config.MAP_INIT_LNG;
-					zl = Config.MAP_INIT_ZOOM;
+					_lat = Config.MAP_INIT_LAT;
+					_lng = Config.MAP_INIT_LNG;
+					_lod = Config.MAP_INIT_ZOOM;
 				}
 				map = new Map("map", {
 					basemap:"topo",
-					center:[lng, lat],
-					zoom:zl
+					center:[_lng, _lat],
+					zoom:_lod
 				});
 			}
 
@@ -804,7 +799,7 @@ require([
 
 			function createMouseOverGraphic(borderColor, fillColor) {
 				var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
-						new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, 2.5), fillColor);
+						new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, Config.IMAGE_BORDER_WIDTH), fillColor);
 				return sfs;
 			}
 
@@ -830,7 +825,7 @@ require([
 					map.graphics.remove(mouseOverGraphic);
 				var row = grid.row(evt);
 				var extent = row.data.extent;
-				var sfs = createMouseOverGraphic(new Color([0, 0, 255, 1.0]), new Color([255, 255, 0, 0.0]));
+				var sfs = createMouseOverGraphic(new Color([0, 0, 255, , Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
 				mouseOverGraphic = new Graphic(extent, sfs);
 				map.graphics.add(mouseOverGraphic);
 				//var slider = query(".dijitSliderH")[0];
