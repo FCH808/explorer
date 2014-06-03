@@ -34,202 +34,206 @@
 <script src="js/topoDataExploration.js"></script>
 
 <style>
-	html, body {
-		height: 100%;
-		width: 100%;
-		margin: 0;
-		padding: 0;
-		font-family: 'Open Sans', sans-serif;
-		color: #666666;
-		font-size: 1.0em;
-	}
+html, body {
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	font-family: 'Open Sans', sans-serif;
+	color: #666666;
+	font-size: 1.0em;
+}
 
-	body {
-		overflow: hidden;
-	}
+body {
+	overflow: hidden;
+}
 
-		/* ------ main window ------ */
-	#main-window {
-		height: 100%;
-		width: 100%;
-	}
+	/* ------ main window ------ */
+#main-window {
+	height: 100%;
+	width: 100%;
+}
 
-		/* ------ header ------ */
-	.header {
-		height: 70px;
-		margin: 0;
-		background-color: rgb(8, 68, 0);
-		color: white;
-		overflow: hidden;
-	}
+	/* ------ header ------ */
+.header {
+	height: 70px;
+	margin: 0;
+	background-color: rgb(8, 68, 0);
+	color: white;
+	overflow: hidden;
+}
 
-	.header-title {
-		font-size: 1.6em;
-		padding-top: 10px;
-		padding-left: 10px;
-	}
+.header-title {
+	font-size: 1.6em;
+	padding-top: 10px;
+	padding-left: 10px;
+}
 
-	.subheader-title {
-		font-size: 0.9em;
-		padding-left: 20px;
-	}
+.subheader-title {
+	font-size: 0.9em;
+	padding-left: 20px;
+}
 
-	.share {
-		float: right;
-		color: #a8a8a8;
-		font-size: 0.9em;
-		margin-top: -30px;
-		margin-right: 10px;
-	}
+.share {
+	float: right;
+	color: #a8a8a8;
+	font-size: 0.9em;
+	margin-top: -30px;
+	margin-right: 10px;
+}
 
-	.share:hover {
-		cursor: pointer;
-		color: #FFF;
-	}
+.share:hover {
+	cursor: pointer;
+	color: #FFF;
+}
 
-		/* ------ side bar ------*/
-	.sidebar {
-		height: 100% !important;
-		width: 270px;
-		margin: 0;
-		overflow: hidden;
-	}
+	/* ------ side bar ------*/
+.sidebar {
+	height: 100% !important;
+	width: 270px;
+	margin: 0;
+	overflow: hidden;
+}
 
-		/* ------ map container ------ */
-	#map {
-		margin: 0;
-	}
+	/* ------ map container ------ */
+#map {
+	margin: 0;
+}
 
-	.map .logo-med {
-		opacity: 0.75 !important;
-	}
+.map .logo-med {
+	opacity: 0.75 !important;
+}
 
-		/* ------ timeline container ------*/
-	#timeline-container {
-		height: 310px;
-		margin-left: 270px;
-		overflow: hidden;
-	}
+	/* ------ timeline container ------*/
+#timeline-container {
+	height: 310px;
+	margin-left: 270px;
+	overflow: hidden;
+}
 
-	#timelineDisableMessageContainer {
-		display: none;
-		height: 310px;
-		right: 0;
-		left: 0;
-		overflow: hidden;
-		background-color: #525252;
-		position: absolute;
-		opacity: 0.65;
-		margin: auto;
-		color: white;
-		font-size: 1.7em;
-		text-align: center;
-		z-index: 300;
-	}
+#timelineDisableMessageContainer {
+	display: none;
+	height: 310px;
+	right: 0;
+	left: 0;
+	overflow: hidden;
+	background-color: #7C7C7C;
+	position: absolute;
+	opacity: 0.65;
+	margin: auto;
+	color: white;
+	font-size: 1.7em;
+	text-align: center;
+	z-index: 300;
+	vertical-align: middle;
+	display: table-cell;
+	line-height: 200px;
+	/* font-weight: 500; */
+}
 
-		/* timeline legend */
-	.timeline-legend-container {
-		float: left;
-		color: #666;
-		width: 200px;
-	}
+	/* timeline legend */
+.timeline-legend-container {
+	float: left;
+	color: #666;
+	width: 200px;
+}
 
-	.timeline-legend-header {
-		font-size: 0.85em;
-		padding-bottom: 5px;
-		margin-left: 5px;
-	}
+.timeline-legend-header {
+	font-size: 0.85em;
+	padding-bottom: 5px;
+	margin-left: 5px;
+}
 
-	.timeline-legend-container > div.btn-group.btn-group-vertical.topo-legend > label > span {
-		font-size: 0.85em !important;
-	}
+.timeline-legend-container > div.btn-group.btn-group-vertical.topo-legend > label > span {
+	font-size: 0.85em !important;
+}
 
-		/* timeline */
-	#timeline {
-		margin-left: 200px;
-	}
+	/* timeline */
+#timeline {
+	margin-left: 200px;
+}
 
-	.timeline-frame {
-		border: none !important;
-	}
+.timeline-frame {
+	border: none !important;
+}
 
-	.timeline-event-dot {
-		/*border-color: rgb(8, 68, 0) !important;*/
-	}
+.timeline-event-dot {
+	/*border-color: rgb(8, 68, 0) !important;*/
+}
 
-	.timeline-event-selected {
-		border-color: #ff000a !important;
-	}
+.timeline-event-selected {
+	border-color: #ff000a !important;
+}
 
-	.timeline-navigation {
-		position: absolute;
-		/* right: 10px; */
-		top: 10px;
-		left: 10px;
-		opacity: 0.85;
-		width: 150px;
-	}
+.timeline-navigation {
+	position: absolute;
+	/* right: 10px; */
+	top: 10px;
+	left: 10px;
+	opacity: 0.85;
+	width: 150px;
+}
 
-		/* ------ geocoder ------  */
-	.esriSimpleSliderTL {
-		top: 10px !important;
-		left: 10px !important;
-	}
+	/* ------ geocoder ------  */
+.esriSimpleSliderTL {
+	top: 10px !important;
+	left: 10px !important;
+}
 
-	.simpleGeocoder .esriGeocoder {
-		border: 1px solid #CFCFCF !important;
-		margin-left: 20px;
-	}
+.simpleGeocoder .esriGeocoder {
+	border: 1px solid #CFCFCF !important;
+	margin-left: 20px;
+}
 
-	.simpleGeocoder .esriGeocoderContainer {
-		width: 230px !important;
-	}
+.simpleGeocoder .esriGeocoderContainer {
+	width: 230px !important;
+}
 
-	.simpleGeocoder .esriGeocoderResults {
-		margin-left: 20px;
-		border: 1px solid #CFCFCF !important;
-	}
+.simpleGeocoder .esriGeocoderResults {
+	margin-left: 20px;
+	border: 1px solid #CFCFCF !important;
+}
 
-		/* ------ MISC ------  */
-	.dijitSplitter {
-		margin-left: 270px !important;
-	}
+	/* ------ MISC ------  */
+.dijitSplitter {
+	margin-left: 270px !important;
+}
 
-	.message-container {
-		width: 65%;
-		padding: 1em;
-		margin: auto;
-		font-size: 0.85em;
-	}
+.message-container {
+	width: 65%;
+	padding: 1em;
+	margin: auto;
+	font-size: 0.85em;
+}
 
-	.halfCircleRight {
-		height: 80px;
-		width: 40px;
-		border-radius: 0 80px 80px 0;
-		-moz-border-radius: 0 80px 80px 0;
-		-webkit-border-radius: 0 80px 80px 0;
-		background: #086B00;
-		opacity: 0.6;
-		float: left;
-		color: #FFF;
-		color: #FFF;
-		font-size: 3.0em;
-		padding-top: 5px;
-		padding-left: 5px;
-		margin-top: 5px;
-	}
+.halfCircleRight {
+	height: 80px;
+	width: 40px;
+	border-radius: 0 80px 80px 0;
+	-moz-border-radius: 0 80px 80px 0;
+	-webkit-border-radius: 0 80px 80px 0;
+	background: #086B00;
+	opacity: 0.6;
+	float: left;
+	color: #FFF;
+	color: #FFF;
+	font-size: 3.0em;
+	padding-top: 5px;
+	padding-left: 5px;
+	margin-top: 5px;
+}
 
-	#loadingImg {
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		z-index: 100;
-		opacity: 0.55;
-	}
+#loadingImg {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	z-index: 100;
+	opacity: 0.55;
+}
 
-	.dijitSliderH {
-		/*opacity: 0.25;*/
-	}
+.dijitSliderH {
+	/*opacity: 0.25;*/
+}
 </style>
 
 </head>
