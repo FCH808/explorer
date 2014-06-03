@@ -417,7 +417,7 @@ require([
 					q.outFields = OUTFIELDS;
 					q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 					q.where = "IsDefault = 1";
-					q.geometry = currentMapExtent.expand(0.60);
+					q.geometry = currentMapExtent.expand(Config.EXTENT_EXPAND);
 
 					var deferred = qt.execute(q).addCallback(function (response) {
 						$(".feature-count").empty().append("(" + response.features.length + ")");
@@ -489,7 +489,7 @@ require([
 						drawTimeline(timelineData);
 					}); // END QUERY
 				} else {
-					domStyle.set("timeline", "opacity", "0.2");
+					domStyle.set("timeline", "opacity", "0.55");
 				}
 			}
 
