@@ -84,7 +84,7 @@ require([
 
 			// sharing URL
 					sharingUrl,
-					//urlObject,
+			//urlObject,
 					urlQueryObject,
 			// loading icon
 					loading,
@@ -258,57 +258,63 @@ require([
 					q.returnGeometry = true;
 					q.outFields = OUTFIELDS;
 					if (urlQueryObject.oids.length > 0) {
-					var downloadIds = urlQueryObject.dlids.split("|");
-					array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
-						console.log(urlQueryObject);
-						console.log(DOWNLOAD_PATH + downloadIds[index]);
-						var whereStatement = "OBJECTID = " + oid;
-						q.where = whereStatement;
+						var downloadIds = urlQueryObject.dlids.split("|");
+						array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
+							console.log("outer: " + index);
+							var whereStatement = "OBJECTID = " + oid;
+							q.where = whereStatement;
 
-						var deferred = qt.execute(q).addCallback(function (rs) {
-							var feature = rs.features[0];
-							var objID = feature.attributes.OBJECTID;
-							//var objID = feature.attributes.SvcOID;
-							var extent = feature.geometry.getExtent();
-							var mapName = feature.attributes.Map_Name;
-							var dateCurrent = feature.attributes.DateCurrent;
+							var deferred = new Deferred();
 
-							if (dateCurrent === null)
-								dateCurrent = "unknown";
-							var scale = feature.attributes.Map_Scale;
-							scale = number.format(scale, {
-								places:0
+							qt.execute(q).addCallback(function (rs) {
+								var feature = rs.features[0];
+
+								deferred.resolve(feature);
 							});
+							deferred.then(function (feature) {
+								var objID = feature.attributes.OBJECTID;
+								var extent = feature.geometry.getExtent();
+								var mapName = feature.attributes.Map_Name;
+								var dateCurrent = feature.attributes.DateCurrent;
 
-							var mosaicRule = new MosaicRule({
-								"method":MosaicRule.METHOD_CENTER,
-								"ascending":true,
-								"operation":MosaicRule.OPERATION_FIRST,
-								"where":whereStatement
-							});
-							params = new ImageServiceParameters();
-							params.noData = 0;
-							params.mosaicRule = mosaicRule;
-							imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-								imageServiceParameters:params,
-								opacity:1.0
-							});
-							map.addLayer(imageServiceLayer);
+								console.log("inner: " + index + "\t" + mapName);
 
-							store.put({
-								id:"1",
-								objID:objID,
-								layer:imageServiceLayer,
-								name:mapName,
-								imprintYear:dateCurrent,
-								scale:scale,
-								downloadLink:DOWNLOAD_PATH + downloadIds[index],
-								extent:extent
+								if (dateCurrent === null)
+									dateCurrent = "unknown";
+								var scale = feature.attributes.Map_Scale;
+								scale = number.format(scale, {
+									places:0
+								});
+
+								var mosaicRule = new MosaicRule({
+									"method":MosaicRule.METHOD_CENTER,
+									"ascending":true,
+									"operation":MosaicRule.OPERATION_FIRST,
+									"where":whereStatement
+								});
+								params = new ImageServiceParameters();
+								params.noData = 0;
+								params.mosaicRule = mosaicRule;
+								imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
+									imageServiceParameters:params,
+									opacity:1.0
+								});
+								map.addLayer(imageServiceLayer);
+
+								store.put({
+									id:index,
+									objID:objID,
+									layer:imageServiceLayer,
+									name:mapName,
+									imprintYear:dateCurrent,
+									scale:scale,
+									downloadLink:DOWNLOAD_PATH + downloadIds[index],
+									extent:extent
+								});
 							});
 						});
-					});
-					showGrid();
-				}
+						showGrid();
+					}
 				}
 			}
 
