@@ -111,6 +111,22 @@
 		overflow: hidden;
 	}
 
+	#timelineDisableMessageContainer {
+		display: none;
+		height: 310px;
+		right: 0;
+		left: 0;
+		overflow: hidden;
+		background-color: #525252;
+		position: absolute;
+		opacity: 0.65;
+		margin: auto;
+		color: white;
+		font-size: 1.7em;
+		text-align: center;
+		z-index: 300;
+	}
+
 		/* timeline legend */
 	.timeline-legend-container {
 		float: left;
@@ -262,6 +278,7 @@
 			<div class="timeline-legend-header"></div>
 			<div class="btn-group btn-group-vertical topo-legend" data-toggle="buttons"></div>
 		</div>
+		<div id="timelineDisableMessageContainer">Zoom closer on the map to enable the timeline</div>
 		<!-- timeline -->
 		<div id="timeline"></div>
 	</div>

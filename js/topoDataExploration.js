@@ -410,6 +410,7 @@ require([
 				var lod = evt.lod.level;
 				if (lod > Config.ZOOM_LEVEL_THRESHHOLD) {
 					domStyle.set("timeline", "opacity", "1.0");
+					domStyle.set("timelineDisableMessageContainer", "display", "none");
 					currentMapExtent = evt.extent;
 					var qt = new QueryTask(Config.TOPO_INDEX);
 					var q = new Query();
@@ -489,7 +490,8 @@ require([
 						drawTimeline(timelineData);
 					}); // END QUERY
 				} else {
-					domStyle.set("timeline", "opacity", "0.55");
+					domStyle.set("timeline", "opacity", "0.65");
+					domStyle.set("timelineDisableMessageContainer", "display", "block");
 				}
 			}
 
