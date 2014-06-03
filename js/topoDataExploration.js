@@ -19,6 +19,7 @@ require([
 	"dojo/number",
 	"dojo/on",
 	"dojo/parser",
+	"dojo/promise/all",
 	"dojo/query",
 	"dojo/ready",
 	"dojo/topic",
@@ -53,7 +54,7 @@ require([
 	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"dojo/domReady!"],
-		function (array, declare, fx, lang, win, Deferred, DeferredList, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
+		function (array, declare, fx, lang, win, Deferred, DeferredList, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
 					currentMapExtent,
@@ -269,51 +270,15 @@ require([
 								return deferred.resolve(feature);
 							});
 							deferreds.push(deferred);
-							/*deferred.then(function (feature) {
-							 var objID = feature.attributes.OBJECTID;
-							 var extent = feature.geometry.getExtent();
-							 var mapName = feature.attributes.Map_Name;
-							 var dateCurrent = feature.attributes.DateCurrent;
-
-							 console.log("inner: " + index + "\t" + mapName);
-
-							 if (dateCurrent === null)
-							 dateCurrent = "unknown";
-							 var scale = feature.attributes.Map_Scale;
-							 scale = number.format(scale, {
-							 places:0
-							 });
-
-							 var mosaicRule = new MosaicRule({
-							 "method":MosaicRule.METHOD_CENTER,
-							 "ascending":true,
-							 "operation":MosaicRule.OPERATION_FIRST,
-							 "where":whereStatement
-							 });
-							 params = new ImageServiceParameters();
-							 params.noData = 0;
-							 params.mosaicRule = mosaicRule;
-							 imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-							 imageServiceParameters:params,
-							 opacity:1.0
-							 });
-							 map.addLayer(imageServiceLayer);
-
-							 store.put({
-							 id:index,
-							 objID:objID,
-							 layer:imageServiceLayer,
-							 name:mapName,
-							 imprintYear:dateCurrent,
-							 scale:scale,
-							 downloadLink:DOWNLOAD_PATH + downloadIds[index],
-							 extent:extent
-							 });
-							 });// END deferred*/
 						});// END forEach
+
+						/*all(deferreds).then(function(results){
+							console.log(results);
+						});*/
+						// create a DeferredList to aggregate the state
 						var deferredList = new DeferredList(deferreds);
 						deferredList.then(function (result) {
-							//var downloadIds = urlQueryObject.dlids.split("|");
+							var downloadIds = urlQueryObject.dlids.split("|");
 							array.forEach(result, function (result, index) {
 								var feature = result[1];
 								var objID = feature.attributes.OBJECTID;
@@ -351,23 +316,12 @@ require([
 									name:mapName,
 									imprintYear:dateCurrent,
 									scale:scale,
-									downloadLink:DOWNLOAD_PATH,// + downloadIds[index],
+									downloadLink:DOWNLOAD_PATH + downloadIds[index],
 									extent:extent
 								});
-								console.log(scale + "\t" + mapName);
-								/*
-								store.put({
-									id:"1",
-									objID:objID,
-									layer:imageServiceLayer,
-									name:mapName,
-									imprintYear:dateCurrent,
-									scale:scale,
-									downloadLink:DOWNLOAD_PATH,// + downloadIds[index],
-									extent:extent
-								});*/
-							});
-						});
+							});// End forEach
+						});// END DeferredList
+
 						showGrid();
 					}
 				}
