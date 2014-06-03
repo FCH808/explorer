@@ -5,6 +5,7 @@ require([
 	"dojo/_base/lang",
 	"dojo/_base/window",
 	"dojo/Deferred",
+	"dojo/DeferredList",
 	"dojo/aspect",
 	"dojo/dom",
 	"dojo/dom-attr",
@@ -52,7 +53,7 @@ require([
 	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"dojo/domReady!"],
-		function (array, declare, fx, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
+		function (array, declare, fx, lang, win, Deferred, DeferredList, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
 					currentMapExtent,
@@ -258,26 +259,67 @@ require([
 					q.returnGeometry = true;
 					q.outFields = OUTFIELDS;
 					if (urlQueryObject.oids.length > 0) {
-						var downloadIds = urlQueryObject.dlids.split("|");
+						var deferreds = [];
 						array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
-							console.log("outer: " + index);
+							var deferred = new Deferred();
 							var whereStatement = "OBJECTID = " + oid;
 							q.where = whereStatement;
-
-							var deferred = new Deferred();
-
-							qt.execute(q).addCallback(function (rs) {
+							deferred = qt.execute(q).addCallback(function (rs) {
 								var feature = rs.features[0];
-
-								deferred.resolve(feature);
+								return deferred.resolve(feature);
 							});
-							deferred.then(function (feature) {
+							deferreds.push(deferred);
+							/*deferred.then(function (feature) {
+							 var objID = feature.attributes.OBJECTID;
+							 var extent = feature.geometry.getExtent();
+							 var mapName = feature.attributes.Map_Name;
+							 var dateCurrent = feature.attributes.DateCurrent;
+
+							 console.log("inner: " + index + "\t" + mapName);
+
+							 if (dateCurrent === null)
+							 dateCurrent = "unknown";
+							 var scale = feature.attributes.Map_Scale;
+							 scale = number.format(scale, {
+							 places:0
+							 });
+
+							 var mosaicRule = new MosaicRule({
+							 "method":MosaicRule.METHOD_CENTER,
+							 "ascending":true,
+							 "operation":MosaicRule.OPERATION_FIRST,
+							 "where":whereStatement
+							 });
+							 params = new ImageServiceParameters();
+							 params.noData = 0;
+							 params.mosaicRule = mosaicRule;
+							 imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
+							 imageServiceParameters:params,
+							 opacity:1.0
+							 });
+							 map.addLayer(imageServiceLayer);
+
+							 store.put({
+							 id:index,
+							 objID:objID,
+							 layer:imageServiceLayer,
+							 name:mapName,
+							 imprintYear:dateCurrent,
+							 scale:scale,
+							 downloadLink:DOWNLOAD_PATH + downloadIds[index],
+							 extent:extent
+							 });
+							 });// END deferred*/
+						});// END forEach
+						var deferredList = new DeferredList(deferreds);
+						deferredList.then(function (result) {
+							//var downloadIds = urlQueryObject.dlids.split("|");
+							array.forEach(result, function (result, index) {
+								var feature = result[1];
 								var objID = feature.attributes.OBJECTID;
 								var extent = feature.geometry.getExtent();
 								var mapName = feature.attributes.Map_Name;
 								var dateCurrent = feature.attributes.DateCurrent;
-
-								console.log("inner: " + index + "\t" + mapName);
 
 								if (dateCurrent === null)
 									dateCurrent = "unknown";
@@ -290,8 +332,9 @@ require([
 									"method":MosaicRule.METHOD_CENTER,
 									"ascending":true,
 									"operation":MosaicRule.OPERATION_FIRST,
-									"where":whereStatement
+									"where":"OBJECTID = " + objID
 								});
+
 								params = new ImageServiceParameters();
 								params.noData = 0;
 								params.mosaicRule = mosaicRule;
@@ -302,15 +345,27 @@ require([
 								map.addLayer(imageServiceLayer);
 
 								store.put({
-									id:index,
+									id:"1",
 									objID:objID,
 									layer:imageServiceLayer,
 									name:mapName,
 									imprintYear:dateCurrent,
 									scale:scale,
-									downloadLink:DOWNLOAD_PATH + downloadIds[index],
+									downloadLink:DOWNLOAD_PATH,// + downloadIds[index],
 									extent:extent
 								});
+								console.log(scale + "\t" + mapName);
+								/*
+								store.put({
+									id:"1",
+									objID:objID,
+									layer:imageServiceLayer,
+									name:mapName,
+									imprintYear:dateCurrent,
+									scale:scale,
+									downloadLink:DOWNLOAD_PATH,// + downloadIds[index],
+									extent:extent
+								});*/
 							});
 						});
 						showGrid();
@@ -689,7 +744,7 @@ require([
 								}, {
 									before:firstRowObj[0]
 								});
-							});
+							}); // END execute
 							showGrid();
 						} else {
 							// already in the store/added to the map
