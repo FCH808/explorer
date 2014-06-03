@@ -272,15 +272,9 @@ require([
 							deferreds.push(deferred);
 						});// END forEach
 
-						/*all(deferreds).then(function(results){
-							console.log(results);
-						});*/
-						// create a DeferredList to aggregate the state
-						var deferredList = new DeferredList(deferreds);
-						deferredList.then(function (result) {
+						all(deferreds).then(function(results) {
 							var downloadIds = urlQueryObject.dlids.split("|");
-							array.forEach(result, function (result, index) {
-								var feature = result[1];
+							array.forEach(results, function (feature, index) {
 								var objID = feature.attributes.OBJECTID;
 								var extent = feature.geometry.getExtent();
 								var mapName = feature.attributes.Map_Name;
@@ -320,8 +314,7 @@ require([
 									extent:extent
 								});
 							});// End forEach
-						});// END DeferredList
-
+						});
 						showGrid();
 					}
 				}
