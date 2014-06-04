@@ -28,11 +28,12 @@ body {
 .header-title {
 	padding-top: 10px;
 	padding-left: 10px;
+	font-size: 1.6em;
 }
 
 .subheader-title {
-	font-size: 0.9em;
 	padding-left: 20px;
+	font-size: 0.9em;
 }
 
 	/* ------ side bar ------*/
@@ -168,11 +169,7 @@ body {
 	border-radius: 0 80px 80px 0;
 	-moz-border-radius: 0 80px 80px 0;
 	-webkit-border-radius: 0 80px 80px 0;
-	background: #086B00;
-	opacity: 0.6;
 	float: left;
-	color: #FFF;
-	color: #FFF;
 	font-size: 3.0em;
 	padding-top: 5px;
 	padding-left: 5px;

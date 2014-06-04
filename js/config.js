@@ -10,15 +10,24 @@ var Config = {
 	/* Header text size */
 	"APP_HEADER_TEXT_SIZE":"1.6em",
 	/* Header text */
-	"APP_HEADER":"USGS Archival Topographic Map Explorer",
-	/* Subheader text */
-	"APP_SUBHEADER":"",
+	"APP_HEADER_TEXT":"USGS Archival Topographic Map Explorer",
 
+	/* Header text color */
+	"APP_SUBHEADER_TEXT_COLOR":"white",
+	/* Header text size */
+	"APP_SUBHEADER_TEXT_SIZE":"0.9em",
+	/* Subheader text */
+	"APP_SUBHEADER_TEXT":"",
+
+	/* Step Messages */
 	"STEP_ONE_MESSAGE":"<span style='font-weight: bold'>Zoom or Search</span> to a location to explore the map collection.",
 	"STEP_ONE_HALF_CIRCLE_MSG":"1",
 	"STEP_TWO_MESSAGE":"<span style='font-weight: bold'>Slide</span> transparency on map to compare, or drag/drop to re-order maps.",
 	"STEP_TWO_HALF_CIRCLE_MSG":"2",
-	"STEP_THREE_MESSAGE":"",
+
+	"HALF_CIRCLE_BACKGROUND_COLOR" : "#086B00",
+	"HALF_CIRCLE_COLOR" : "white",
+	"HALF_CIRCLE_OPACITY" : "0.5",
 
 	"TIMELINE_MESSAGE":"<span style='font-weight: bold'>Click</span> on a map title in the timeline to display the map.",
 
@@ -68,9 +77,14 @@ var Config = {
 	"IMAGE_SERVER":"http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer/",
 	"MAP_SERVER":"http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps_Index/MapServer", // + "?self?culture=en&f=json&token=" + "IkxAypOD2nEVLGKrHr-SNYiFhlUs96IGpIaH2E1xXAB-JwIqiy--IotPbsr7nWVUoR3SzCiCtxCZTTZZfKvuEGEiX6idPZ_h4oc5-A71gJs9Z5yL_AVlUpmRtCn6BtmAYTb7cLTxerg0UEuhYwDtYk54RAE1AULhOjSY8ysOP-8MMRZIocFauQxB3eVUTHJS"
 
-	"MAP_INIT_LAT":29.939833,
-	"MAP_INIT_LNG":-90.076046,
-	"MAP_INIT_ZOOM":12,
+	/* Basemap properties */
+	"BASEMAP_STYLE": "topo",
+	"BASEMAP_INIT_LAT":29.939833,
+	"BASEMAP_INIT_LNG":-90.076046,
+	"BASEMAP_INIT_ZOOM":12,
+
+	/* Geocoder Dijit */
+	"GEOCODER_PLACEHOLDER": "Find a Place",
 
 	"TOPO_INDEX":"http://services.arcgis.com/YkVYBaX0zm7bsV3k/ArcGIS/rest/services/USGSTopoIndex/FeatureServer/0",
 

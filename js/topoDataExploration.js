@@ -1,7 +1,7 @@
 require([
 	"dojo/_base/array",
 	"dojo/_base/declare",
-	"dojo/fx",
+	"dojo/_base/fx",
 	"dojo/_base/lang",
 	"dojo/_base/window",
 	"dojo/Deferred",
@@ -108,12 +108,14 @@ require([
 				DOWNLOAD_PATH = Config.DOWNLOAD_PATH;
 
 				setAppHeaderStyle(Config.APP_HEADER_TEXT_COLOR, Config.APP_HEADER_BACKGROUND_COLOR);
-				setAppHeaderTitle(Config.APP_HEADER);
-				setAppHeaderSubtitle(Config.APP_SUBHEADER);
+				setAppHeaderTitle(Config.APP_HEADER_TEXT);
+				setAppHeaderSubtitle(Config.APP_SUBHEADER_TEXT);
+
 				setAppMessage(".step-one-message", Config.STEP_ONE_MESSAGE);
 				setAppMessage(".step-one-half-circle-msg", Config.STEP_ONE_HALF_CIRCLE_MSG);
 				setAppMessage(".step-two-message", Config.STEP_TWO_MESSAGE);
 				setAppMessage(".step-two-half-circle-msg", Config.STEP_TWO_HALF_CIRCLE_MSG);
+				setHalfCircleStyle(Config.HALF_CIRCLE_BACKGROUND_COLOR, Config.HALF_CIRCLE_COLOR, Config.HALF_CIRCLE_OPACITY);
 				setTimelineLegendHeaderTitle(Config.TIMELINE_LEGEND_HEADER);
 				setAppMessage(".timelineMessage", Config.TIMELINE_MESSAGE);
 				setAppMessage(".timelineDisableMessageContainer", Config.TIMELINE_DISABLED_MESSAGE);
@@ -273,6 +275,21 @@ require([
 						var node = dom.byId("timeline-container");
 						var computedStyle = domStyle.getComputedStyle(node);
 						timelineContainerGeometry = domGeom.getContentBox(node, computedStyle);
+						/*if (timelineContainerGeometry.h < 200) {
+						 var n = registry.byId("timeline-container").domNode;
+						 fx.animateProperty({
+						 node:n,
+						 duration:1000,
+						 properties:{
+						 height: {
+						 end: 310
+						 }
+						 },
+						 onEnd:function () {
+						 registry.byId("main-window").layout();
+						 }
+						 }).play();
+						 }*/
 						//moveConnects[spl.widgetId].remove();
 						//delete moveConnects[spl.widgetId];
 					});
@@ -322,7 +339,7 @@ require([
 								var dateCurrent = feature.attributes.DateCurrent;
 
 								if (dateCurrent === null)
-									dateCurrent = "unknown";
+									dateCurrent = Config.MSG_UNKNOWN;
 								var scale = feature.attributes.Map_Scale;
 								scale = number.format(scale, {
 									places:0
@@ -712,7 +729,6 @@ require([
 				});
 
 				if (timeline === undefined) {
-					console.log("Creating TIMELINE");
 					if (urlQueryObject) {
 						timelineOptions.start = new Date(urlQueryObject.minDate, 0, 0);
 						timelineOptions.end = new Date(urlQueryObject.maxDate, 0, 0);
@@ -722,7 +738,6 @@ require([
 					links.events.addListener(timeline, "ready", onTimelineReady);
 					links.events.addListener(timeline, "select", onSelect);
 				} else {
-					console.log("Redrawing TIMELINE");
 					var height = timelineContainerGeometry ? timelineContainerGeometry.h : Config.TIMELINE_HEIGHT;
 					timelineOptions.style = "box";
 					timelineOptions.height = height + "px";
@@ -789,7 +804,7 @@ require([
 								var dateCurrent = rs.features[0].attributes.DateCurrent;
 
 								if (dateCurrent === null)
-									dateCurrent = "unknown";
+									dateCurrent = Config.MSG_UNKNOWN;
 								var scale = rs.features[0].attributes.Map_Scale;
 								scale = number.format(scale, {
 									places:0
@@ -842,10 +857,6 @@ require([
 
 			function onTimelineReady() {
 				console.log("TIMELINE READY");
-			}
-
-			function onRangeChanged(properties) {
-				console.log(properties);
 			}
 
 			function createOrderedStore(data, options) {
@@ -926,12 +937,12 @@ require([
 					_lng = urlQueryObject.lng;
 					_lod = urlQueryObject.zl;
 				} else {
-					_lat = Config.MAP_INIT_LAT;
-					_lng = Config.MAP_INIT_LNG;
-					_lod = Config.MAP_INIT_ZOOM;
+					_lat = Config.BASEMAP_INIT_LAT;
+					_lng = Config.BASEMAP_INIT_LNG;
+					_lod = Config.BASEMAP_INIT_ZOOM;
 				}
 				map = new Map("map", {
-					basemap:"topo",
+					basemap:Config.BASEMAP_STYLE,
 					center:[_lng, _lat],
 					zoom:_lod
 				});
@@ -942,7 +953,9 @@ require([
 					map:map,
 					autoComplete:true,
 					showResults:true,
-					placeholder:"Find a Place"
+					arcgisGeocoder:{
+						placeholder:Config.GEOCODER_PLACEHOLDER
+					}
 				}, srcRef);
 				geocoder.startup();
 			}
@@ -992,13 +1005,12 @@ require([
 			}
 
 			function setAppHeaderStyle(txtColor, backgroundColor) {
-				query(".header").style("color", "white");
-				query(".header").style("background-color", "rgb(8, 68, 0)");
+				query(".header").style("color", txtColor);
+				query(".header").style("background-color", backgroundColor);
 			}
 
 			function setAppHeaderTitle(str) {
 				query(".header-title")[0].innerHTML = str;
-				query(".header-title").style("font-size", "1.6em");
 			}
 
 			function setAppHeaderSubtitle(str) {
@@ -1011,6 +1023,12 @@ require([
 
 			function setTimelineLegendHeaderTitle(str) {
 				query(".timeline-legend-header")[0].innerHTML = str;
+			}
+
+			function setHalfCircleStyle(backgroundColor, color, opacity) {
+				query(".halfCircleRight").style("backgroundColor", backgroundColor);
+				query(".halfCircleRight").style("color", color);
+				query(".halfCircleRight").style("opacity", opacity);
 			}
 
 
