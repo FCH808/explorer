@@ -1,9 +1,15 @@
 var Config = {
+	"APP_TITLE": "USGS Archival Topographic Map Explorer",
 	"APP_HEADER": "USGS Archival Topographic Map Explorer",
 	"APP_SUBHEADER": "",
-	"STEP_ONE_MESSAGE":"",
-	"STEP_TWO_MESSAGE":"",
+	"STEP_ONE_MESSAGE":"<span style='font-weight: bold'>Zoom or Search</span> to a location to explore the map collection.",
+	"STEP_ONE_HALF_CIRCLE_MSG": "1",
+	"STEP_TWO_MESSAGE":"<span style='font-weight: bold'>Slide</span> transparency on map to compare, or drag/drop to re-order maps.",
+	"STEP_TWO_HALF_CIRCLE_MSG": "2",
 	"STEP_THREE_MESSAGE":"",
+
+	"TIMELINE_MESSAGE": "<span style='font-weight: bold'>Click</span> on a map title in the timeline to display the map.",
+
 	"TIMELINE_LEGEND_HEADER":"Historical Map Scales",
 	"TIMELINE_LEGEND_VALUES":[{
 		"label": "250,000",
@@ -31,6 +37,8 @@ var Config = {
 		"color": "#00EB89",
 		"className":"one"
 	}],
+
+	"TIMELINE_DISABLED_MESSAGE": "Zoom closer on the map to enable the timeline",
 
 	"TOKEN": "RV6esLk-q9nBWpbAXOuvsBdpQOP0OwS_pL6_0G8EBAf2IuB_KpRFNGU_74pQunz7jybjGwh1RFtHBY-ugETNuu5c-JvPx-okF4dRuN7lKRCJVrQIQe-3RrUi2SMliDjDFmhKDl32rDiV-RCd0KQ8mt3fNqVFz3YG85YoMk6iIF6n_QZkDv5wylPPYf7LZ45e",
 

@@ -95,6 +95,7 @@ require([
 
 			ready(function () {
 				parser.parse();
+				document.title = Config.APP_TITLE;
 				OUTFIELDS = Config.OUTFIELDS;
 				TOKEN = Config.TOKEN;
 				IMAGE_SERVICE_URL = "http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer?self?culture=en&f=json&token=" + TOKEN;
@@ -106,7 +107,13 @@ require([
 
 				setAppHeaderTitle(Config.APP_HEADER);
 				setAppHeaderSubtitle(Config.APP_SUBHEADER);
+				setAppMessage(".step-one-message", Config.STEP_ONE_MESSAGE);
+				setAppMessage(".step-one-half-circle-msg", Config.STEP_ONE_HALF_CIRCLE_MSG);
+				setAppMessage(".step-two-message", Config.STEP_TWO_MESSAGE);
+				setAppMessage(".step-two-half-circle-msg", Config.STEP_TWO_HALF_CIRCLE_MSG);
 				setTimelineLegendHeaderTitle(Config.TIMELINE_LEGEND_HEADER);
+				setAppMessage(".timelineMessage", Config.TIMELINE_MESSAGE);
+				setAppMessage(".timelineDisableMessageContainer", Config.TIMELINE_DISABLED_MESSAGE);
 
 				urlQueryObject = getUrlParameters();
 				initBaseMap(urlQueryObject);
@@ -434,7 +441,8 @@ require([
 				var lod = map.getLevel();
 				if (lod > Config.ZOOM_LEVEL_THRESHHOLD) {
 					domStyle.set("timeline", "opacity", "1.0");
-					domStyle.set("timelineDisableMessageContainer", "display", "none");
+					query(".timelineDisableMessageContainer").style("display", "none");
+
 					var qt = new QueryTask(Config.TOPO_INDEX);
 					var q = new Query();
 					q.returnGeometry = true;
@@ -514,7 +522,7 @@ require([
 					}); // END QUERY
 				} else {
 					domStyle.set("timeline", "opacity", "0.65");
-					domStyle.set("timelineDisableMessageContainer", "display", "block");
+					query(".timelineDisableMessageContainer").style("display", "block");
 				}
 			}
 
@@ -522,7 +530,7 @@ require([
 				var lod = evt.lod.level;
 				if (lod > Config.ZOOM_LEVEL_THRESHHOLD) {
 					domStyle.set("timeline", "opacity", "1.0");
-					domStyle.set("timelineDisableMessageContainer", "display", "none");
+					query(".timelineDisableMessageContainer").style("display", "none");
 					currentMapExtent = evt.extent;
 					var qt = new QueryTask(Config.TOPO_INDEX);
 					var q = new Query();
@@ -603,7 +611,7 @@ require([
 					}); // END QUERY
 				} else {
 					domStyle.set("timeline", "opacity", "0.65");
-					domStyle.set("timelineDisableMessageContainer", "display", "block");
+					query(".timelineDisableMessageContainer").style("display", "block");
 				}
 			}
 
@@ -961,6 +969,10 @@ require([
 
 			function setAppHeaderSubtitle(str) {
 				query(".subheader-title")[0].innerHTML = str;
+			}
+
+			function setAppMessage(node, str) {
+				query(node)[0].innerHTML = str;
 			}
 
 			function setTimelineLegendHeaderTitle(str) {
