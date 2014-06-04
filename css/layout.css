@@ -109,6 +109,7 @@ body {
 	/* timeline */
 #timeline {
 	margin-left: 200px;
+	padding-right: 5px;
 }
 
 .timeline-frame {
