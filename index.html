@@ -1,96 +1,91 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta http-equiv="Cache-Control:public, max-age=3600">
-<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta http-equiv="Cache-Control:public, max-age=3600">
+		<meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
 
-<title></title>
+		<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/dojo/dijit/themes/nihilo/nihilo.css"/>
+		<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css"/>
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" type="text/css" href="css/tooltip.css"/>
+		<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css"/>
+		<link rel="stylesheet" type="text/css" href="css/slider.css"/>
+		<link rel="stylesheet" type="text/css" href="css/layout.css"/>
+		<link rel="stylesheet" type="text/css" href="css/timeline.css"/>
+		<link rel="stylesheet" type="text/css" href="css/timelineItem.css"/>
+		<link rel="stylesheet" type="text/css" href="css/grid.css"/>
+		<link rel="stylesheet" type="text/css" href="css/social.css"/>
+		<link rel="stylesheet" type="text/css" href="css/timelineLegend.css"/>
+		<link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
 
-<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/dojo/dijit/themes/nihilo/nihilo.css"/>
-<link rel="stylesheet" href="http://js.arcgis.com/3.9/js/esri/css/esri.css"/>
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css">
-<link rel="stylesheet" type="text/css" href="css/tooltip.css"/>
-<link rel="stylesheet" type="text/css" href="css/themes/tooltipster-shadow.css"/>
-<link rel="stylesheet" type="text/css" href="css/slider.css"/>
-<link rel="stylesheet" type="text/css" href="css/layout.css"/>
-<link rel="stylesheet" type="text/css" href="css/timeline.css"/>
-<link rel="stylesheet" type="text/css" href="css/timelineItem.css"/>
-<link rel="stylesheet" type="text/css" href="css/grid.css"/>
-<link rel="stylesheet" type="text/css" href="css/social.css"/>
-<link rel="stylesheet" type="text/css" href="css/timelineLegend.css"/>
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+		<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
+		<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script src="http://js.arcgis.com/3.9/"></script>
+		<script src="js/tooltip-min.js"></script>
+		<script src="js/config.js"></script>
+		<script src="js/tmin.js"></script>
+		<script src="js/topoDataExploration.js"></script>
+	</head>
 
-<link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
+	<body class="nihilo">
+		<!-- main window -->
+		<div id="main-window" data-dojo-type="dijit.layout.BorderContainer" data-dojo-props="design:'headline', liveSplitters:true, gutters:false">
 
-<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
-<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.min.js"></script>
-<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-<script src="http://js.arcgis.com/3.9/"></script>
-<script src="js/tooltip-min.js"></script>
-<script src="js/config.js"></script>
-<script src="js/tmin.js"></script>
-<script src="js/topoDataExploration.js"></script>
-</head>
+		<!-- header -->
+		<div class="header" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
+			<div class="header-title"></div>
+			<div class="subheader-title"></div>
 
-<body class="nihilo">
-<!-- main window -->
-<div id="main-window" data-dojo-type="dijit.layout.BorderContainer"
-	 data-dojo-props="design:'headline', liveSplitters:true, gutters:false">
+			<div id="social">
+				<i class="shareIcon share_facebook socialIcon-facebook-squared-1"></i>
+				<i class="socialIcon-twitter-1 shareIcon share_twitter"></i>
+				<i class="socialIcon-link shareIcon share_bitly" id="bitlyIcon" title="Get a short link to the application"></i>
 
-	<!-- header -->
-	<div class="header" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
-		<div class="header-title"></div>
-		<div class="subheader-title"></div>
-
-		<div id="social">
-			<i class="shareIcon share_facebook socialIcon-facebook-squared-1"></i>
-			<i class="socialIcon-twitter-1 shareIcon share_twitter"></i>
-			<i class="socialIcon-link shareIcon share_bitly" id="bitlyIcon" title="Get a short link to the application"></i>
-
-			<div class="popover fade left in" style="display: none;">
-				<div class="arrow"></div>
-				<div class="popover-content" id="bitlyContent">
-					<div style="width:150px; height:30px">
-						<input id="bitlyInput" type="text" value="" style="width: 150px;">
+				<div class="popover fade left in" style="display: none;">
+					<div class="arrow"></div>
+					<div class="popover-content" id="bitlyContent">
+						<div style="width:150px; height:30px">
+							<input id="bitlyInput" type="text" value="" style="width: 150px;">
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<!-- sidebar -->
-	<div class="sidebar" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'left'">
-		<div class="halfCircleRight stepOne step-one-half-circle-msg"></div>
-		<div class="message-container step-one-message"></div>
-		<div id="geocoder"></div>
-		<div class="gridContainer">
-			<div class="halfCircleRight stepThree step-two-half-circle-msg"></div>
-			<div class="message-container step-two-message"></div>
-			<div id="grid"></div>
+		<!-- sidebar container -->
+		<div class="sidebar" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'left'">
+			<div class="halfCircleRight stepOne step-one-half-circle-msg"></div>
+			<div class="message-container step-one-message"></div>
+			<div id="geocoder"></div>
+			<div class="gridContainer">
+				<div class="halfCircleRight stepThree step-two-half-circle-msg"></div>
+				<div class="message-container step-two-message"></div>
+				<div id="grid"></div>
+			</div>
+		</div>
+
+		<!-- map container -->
+		<div id="map" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center', splitter:true">
+			<img id="loadingImg" src="images/loading2.gif"/>
+		</div>
+
+		<!-- timeline container -->
+		<div id="timeline-container" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'bottom', splitter:true">
+			<!-- timeline legend -->
+			<div class="timeline-legend-container">
+				<div class="message-container"></div>
+				<div class="timeline-legend-header"></div>
+				<div class="btn-group btn-group-vertical topo-legend" data-toggle="buttons"></div>
+			</div>
+			<div class="timelineDisableMessageContainer"></div>
+			<div class="timelineMessage"></div>
+			<!-- timeline -->
+			<div id="timeline"></div>
 		</div>
 	</div>
-
-	<!-- map -->
-	<div id="map" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'center', splitter:true">
-		<img id="loadingImg" src="images/loading2.gif"/>
-	</div>
-
-	<!-- timeline container -->
-	<div id="timeline-container" data-dojo-type="dijit.layout.ContentPane"
-		 data-dojo-props="region:'bottom', splitter:true">
-		<!-- timeline legend -->
-		<div class="timeline-legend-container">
-			<div class="message-container"></div>
-			<div class="timeline-legend-header"></div>
-			<div class="btn-group btn-group-vertical topo-legend" data-toggle="buttons"></div>
-		</div>
-		<div class="timelineDisableMessageContainer"></div>
-		<div class="timelineMessage"></div>
-		<!-- timeline -->
-		<div id="timeline"></div>
-	</div>
-</div>
 </body>
 </html>

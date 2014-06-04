@@ -115,10 +115,10 @@ require([
 				setAppMessage(".timelineMessage", Config.TIMELINE_MESSAGE);
 				setAppMessage(".timelineDisableMessageContainer", Config.TIMELINE_DISABLED_MESSAGE);
 
+				loading = dom.byId("loadingImg");
 				urlQueryObject = getUrlParameters();
 				initBaseMap(urlQueryObject);
 				initGeocoderDijit("geocoder");
-				loading = dom.byId("loadingImg");
 				initUrlParamData(urlQueryObject);
 
 				on(map, "load", mapLoadedHandler);

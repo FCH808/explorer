@@ -65,9 +65,10 @@ body {
 
 .timelineDisableMessageContainer {
 	display: none;
-	height: 310px;
 	right: 0;
 	left: 0;
+	top: 0;
+	bottom: 0;
 	overflow: hidden;
 	background-color: #7C7C7C;
 	position: absolute;
