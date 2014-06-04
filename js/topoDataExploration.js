@@ -5,6 +5,7 @@ require([
 	"dojo/_base/lang",
 	"dojo/_base/window",
 	"dojo/Deferred",
+	"dojo/DeferredList",
 	"dojo/aspect",
 	"dojo/dom",
 	"dojo/dom-attr",
@@ -18,6 +19,7 @@ require([
 	"dojo/number",
 	"dojo/on",
 	"dojo/parser",
+	"dojo/promise/all",
 	"dojo/query",
 	"dojo/ready",
 	"dojo/topic",
@@ -52,7 +54,7 @@ require([
 	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"dojo/domReady!"],
-		function (array, declare, fx, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
+		function (array, declare, fx, lang, win, Deferred, DeferredList, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
 					currentMapExtent,
@@ -258,6 +260,7 @@ require([
 					q.returnGeometry = true;
 					q.outFields = OUTFIELDS;
 					if (urlQueryObject.oids.length > 0) {
+<<<<<<< HEAD
 						var downloadIds = urlQueryObject.dlids.split("|");
 						var objectIds = urlQueryObject.oids.split("|");
 						array.forEach(objectIds, function (oid, index) {
@@ -283,10 +286,47 @@ require([
 									"operation": MosaicRule.OPERATION_FIRST,
 									"where": whereStatement
 								});
+=======
+						var deferreds = [];
+						array.forEach(urlQueryObject.oids.split("|"), function (oid, index) {
+							var deferred = new Deferred();
+							var whereStatement = "OBJECTID = " + oid;
+							q.where = whereStatement;
+							deferred = qt.execute(q).addCallback(function (rs) {
+								var feature = rs.features[0];
+								return deferred.resolve(feature);
+							});
+							deferreds.push(deferred);
+						});// END forEach
+
+						all(deferreds).then(function(results) {
+							var downloadIds = urlQueryObject.dlids.split("|");
+							array.forEach(results, function (feature, index) {
+								var objID = feature.attributes.OBJECTID;
+								var extent = feature.geometry.getExtent();
+								var mapName = feature.attributes.Map_Name;
+								var dateCurrent = feature.attributes.DateCurrent;
+
+								if (dateCurrent === null)
+									dateCurrent = "unknown";
+								var scale = feature.attributes.Map_Scale;
+								scale = number.format(scale, {
+									places:0
+								});
+
+								var mosaicRule = new MosaicRule({
+									"method":MosaicRule.METHOD_CENTER,
+									"ascending":true,
+									"operation":MosaicRule.OPERATION_FIRST,
+									"where":"OBJECTID = " + objID
+								});
+
+>>>>>>> a31309835f3fb1a269ad3e35179c37de3163c5cc
 								params = new ImageServiceParameters();
 								params.noData = 0;
 								params.mosaicRule = mosaicRule;
 								imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
+<<<<<<< HEAD
 									imageServiceParameters: params,
 									opacity: 1.0
 								});
@@ -304,6 +344,24 @@ require([
 									extent: extent
 								});
 							});
+=======
+									imageServiceParameters:params,
+									opacity:1.0
+								});
+								map.addLayer(imageServiceLayer);
+
+								store.put({
+									id:"1",
+									objID:objID,
+									layer:imageServiceLayer,
+									name:mapName,
+									imprintYear:dateCurrent,
+									scale:scale,
+									downloadLink:DOWNLOAD_PATH + downloadIds[index],
+									extent:extent
+								});
+							});// End forEach
+>>>>>>> a31309835f3fb1a269ad3e35179c37de3163c5cc
 						});
 						showGrid();
 					}
@@ -409,6 +467,7 @@ require([
 				var lod = evt.lod.level;
 				if (lod > Config.ZOOM_LEVEL_THRESHHOLD) {
 					domStyle.set("timeline", "opacity", "1.0");
+					domStyle.set("timelineDisableMessageContainer", "display", "none");
 					currentMapExtent = evt.extent;
 					var qt = new QueryTask(Config.TOPO_INDEX);
 					var q = new Query();
@@ -416,7 +475,7 @@ require([
 					q.outFields = OUTFIELDS;
 					q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 					q.where = "IsDefault = 1";
-					q.geometry = currentMapExtent.expand(0.60);
+					q.geometry = currentMapExtent.expand(Config.EXTENT_EXPAND);
 
 					var deferred = qt.execute(q).addCallback(function (response) {
 						//$(".feature-count").empty().append("(" + response.features.length + ")");
@@ -488,7 +547,8 @@ require([
 						drawTimeline(timelineData);
 					}); // END QUERY
 				} else {
-					domStyle.set("timeline", "opacity", "0.2");
+					domStyle.set("timeline", "opacity", "0.65");
+					domStyle.set("timelineDisableMessageContainer", "display", "block");
 				}
 			}
 
@@ -680,7 +740,7 @@ require([
 								}, {
 									before: firstRowObj[0]
 								});
-							});
+							}); // END execute
 							showGrid();
 						} else {
 							// already in the store/added to the map
@@ -804,12 +864,14 @@ require([
 
 			function hideGrid() {
 				$(".stepOne").css("display", "block");
+				$("#timelineMessage").css("opacity", "1.0");
 				$(".stepTwo").css("display", "none");
 				$(".gridContainer").css("display", "none");
 			}
 
 			function showGrid() {
 				$(".stepOne").css("display", "none");
+				$("#timelineMessage").css("opacity", "0.0");
 				$(".stepTwo").css("display", "block");
 				$(".gridContainer").css("display", "block");
 			}
