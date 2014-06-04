@@ -19,6 +19,7 @@
 <link rel="stylesheet" type="text/css" href="css/timeline.css"/>
 <link rel="stylesheet" type="text/css" href="css/timelineItem.css"/>
 <link rel="stylesheet" type="text/css" href="css/grid.css"/>
+<link rel="stylesheet" type="text/css" href="css/social.css"/>
 <link rel="stylesheet" type="text/css" href="css/timelineLegend.css"/>
 
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,600,700' rel='stylesheet' type='text/css'>
@@ -72,19 +73,6 @@ body {
 .subheader-title {
 	font-size: 0.9em;
 	padding-left: 20px;
-}
-
-.share {
-	float: right;
-	color: #a8a8a8;
-	font-size: 0.9em;
-	margin-top: -30px;
-	margin-right: 10px;
-}
-
-.share:hover {
-	cursor: pointer;
-	color: #FFF;
 }
 
 	/* ------ side bar ------*/
@@ -253,7 +241,21 @@ body {
 	<div class="header" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:'top'">
 		<div class="header-title"></div>
 		<div class="subheader-title"></div>
-		<div class="share">SHARE</div>
+
+		<div id="social">
+			<i class="shareIcon share_facebook socialIcon-facebook-squared-1"></i>
+			<i class="socialIcon-twitter-1 shareIcon share_twitter"></i>
+			<i class="socialIcon-link shareIcon share_bitly" id="bitlyIcon" title="Get a short link to the application"></i>
+
+			<div class="popover fade left in" style="display: none;">
+				<div class="arrow"></div>
+				<div class="popover-content" id="bitlyContent">
+					<div style="width:150px; height:30px">
+						<input id="bitlyInput" type="text" value="" style="width: 150px;">
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<!-- sidebar -->
