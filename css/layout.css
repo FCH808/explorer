@@ -68,6 +68,7 @@ body {
 	left: 500px;
 	bottom: 5px;
 	position: absolute;
+	background-color: rgb(237, 255, 237);;
 }
 
 .timelineLegendContainer {
