@@ -29,6 +29,9 @@ var Config = {
 	"HALF_CIRCLE_COLOR" : "white",
 	"HALF_CIRCLE_OPACITY" : "0.5",
 
+	/* Timeline Container */
+	"TIMELINE_CONTAINER_BACKGROUND_COLOR": "rgb(242, 252, 242)",
+
 	"TIMELINE_MESSAGE":"<span style='font-weight: bold'>Click</span> on a map title in the timeline to display the map.",
 
 	"TIMELINE_LEGEND_HEADER":"Historical Map Scales",
@@ -65,7 +68,12 @@ var Config = {
 		}
 	],
 
+	/* Timeline disabled message */
 	"TIMELINE_DISABLED_MESSAGE":"Zoom closer on the map to enable the timeline",
+	"TIMELINE_DISABLED_BACKGROUND_COLOR":"#7C7C7C",
+	"TIMELINE_DISABLED_COLOR":"white",
+	"TIMELINE_DISABLED_BACKGROUND_OPACITY":"0.65",
+	"TIMELINE_DISABLED_BACKGROUND_FONT_SIZE": "1.7em",
 
 	"TOKEN":"04QDlTJ8GZUUva8naL0wGvh3VvkjKJj4zWvasskfpvSOmPVrEkYTYIxq9NfWVTQXcRHPRRsa__RWLSkrXutQ2l2Qsq5wp35iEnk8yvqEXT5kjmnpU4C-CC4HHnSDAUzaXTK8KG_NYRSSKTn-Hpca5NhfgvtOnj_-WblSTT7UAakJtVBs-z75mOOBEm_2TrMH",
 
@@ -84,7 +92,7 @@ var Config = {
 	"BASEMAP_INIT_ZOOM":12,
 
 	/* Geocoder Dijit */
-	"GEOCODER_PLACEHOLDER": "Find a Place",
+	"GEOCODER_PLACEHOLDER_TEXT": "Find a Place",
 
 	"TOPO_INDEX":"http://services.arcgis.com/YkVYBaX0zm7bsV3k/ArcGIS/rest/services/USGSTopoIndex/FeatureServer/0",
 

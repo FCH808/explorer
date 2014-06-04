@@ -58,7 +58,6 @@ body {
 	height: 310px;
 	margin-left: 270px;
 	overflow: hidden;
-	background-color: rgb(242, 252, 242);
 }
 
 .timelineDisableMessageContainer {
@@ -68,18 +67,14 @@ body {
 	top: 0;
 	bottom: 0;
 	overflow: hidden;
-	background-color: #7C7C7C;
 	position: absolute;
-	opacity: 0.65;
 	margin: auto;
-	color: white;
 	font-size: 1.7em;
 	text-align: center;
 	z-index: 300;
 	vertical-align: middle;
 	display: table-cell;
 	line-height: 200px;
-	/* font-weight: 500; */
 }
 
 .timelineMessage {

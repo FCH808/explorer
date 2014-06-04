@@ -118,7 +118,9 @@ require([
 				setHalfCircleStyle(Config.HALF_CIRCLE_BACKGROUND_COLOR, Config.HALF_CIRCLE_COLOR, Config.HALF_CIRCLE_OPACITY);
 				setTimelineLegendHeaderTitle(Config.TIMELINE_LEGEND_HEADER);
 				setAppMessage(".timelineMessage", Config.TIMELINE_MESSAGE);
+				setTimelineDisabledMessageStyle(Config.TIMELINE_DISABLED_BACKGROUND_COLOR, Config.TIMELINE_DISABLED_COLOR, Config.TIMELINE_DISABLED_BACKGROUND_OPACITY);
 				setAppMessage(".timelineDisableMessageContainer", Config.TIMELINE_DISABLED_MESSAGE);
+				setTimelineContainerStyle(Config.TIMELINE_CONTAINER_BACKGROUND_COLOR);
 
 				loading = dom.byId("loadingImg");
 				urlQueryObject = getUrlParameters();
@@ -953,8 +955,9 @@ require([
 					map:map,
 					autoComplete:true,
 					showResults:true,
+					searchDelay: 250,
 					arcgisGeocoder:{
-						placeholder:Config.GEOCODER_PLACEHOLDER
+						placeholder:Config.GEOCODER_PLACEHOLDER_TEXT
 					}
 				}, srcRef);
 				geocoder.startup();
@@ -1029,6 +1032,16 @@ require([
 				query(".halfCircleRight").style("backgroundColor", backgroundColor);
 				query(".halfCircleRight").style("color", color);
 				query(".halfCircleRight").style("opacity", opacity);
+			}
+
+			function setTimelineContainerStyle(backgroundColor) {
+				domStyle.set(dom.byId("timeline-container"), "backgroundColor", backgroundColor);
+			}
+
+			function setTimelineDisabledMessageStyle(backgroundColor, color, opacity) {
+				query(".timelineDisableMessageContainer").style("backgroundColor", backgroundColor);
+				query(".timelineDisableMessageContainer").style("color", color);
+				query(".timelineDisableMessageContainer").style("opacity", opacity);
 			}
 
 
