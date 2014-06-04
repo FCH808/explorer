@@ -219,9 +219,9 @@ require([
 						});
 						var i = _tmpFilters.indexOf(num);
 						if (_tmpFilters[i] !== undefined) {
-							console.log(_tmpFilters[i]);
 							domClass.toggle(node, "sel");
 							domStyle.set(node, "opacity", "0.3");
+							filter.push(_tmpFilters[i]);
 						} else {
 
 						}
@@ -1027,10 +1027,6 @@ require([
 
 			function shareTwitter() {
 				var url = getSharingUrl();
-				/*var options = 'text=' + encodeURIComponent($('#title').text()) +
-				 '&url=' + encodeURIComponent(url) +
-				 '&related=' + Config.SHARING_RELATED +
-				 '&hashtags=' + Config.SHARING_HASHTAG;*/
 
 				var bitlyUrls = [
 					"http://api.bitly.com/v3/shorten?callback=?",
@@ -1041,7 +1037,7 @@ require([
 				var urlParams = esri.urlToObject(url).query || {};
 				var targetUrl = url;
 
-				var jqxhr = $.getJSON(
+				$.getJSON(
 						bitlyUrl,
 						{
 							"format":"json",
@@ -1052,21 +1048,18 @@ require([
 						function (response) {
 							if (!response || !response || !response.data.url)
 								return;
-							console.log(response.data.url);
 							$("#bitlyLoad").fadeOut();
 							$("#bitlyInput").fadeIn();
 							$("#bitlyInput").val(response.data.url);
 							$("#bitlyInput").select();
 						}
 				).complete(function (data) {
-							console.log(data.responseJSON.data.url);
 							var options = 'text=' + encodeURIComponent($('#title').text()) +
 									'&url=' + encodeURIComponent(data.responseJSON.data.url) +
 									'&related=' + Config.SHARING_RELATED +
 									'&hashtags=' + Config.SHARING_HASHTAG;
 							window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
 						});
-				//window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
 			}
 
 			function requestBitly() {
