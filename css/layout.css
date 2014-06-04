@@ -22,13 +22,10 @@ body {
 .header {
 	height: 70px;
 	margin: 0;
-	background-color: rgb(8, 68, 0);
-	color: white;
 	overflow: hidden;
 }
 
 .header-title {
-	font-size: 1.6em;
 	padding-top: 10px;
 	padding-left: 10px;
 }
@@ -192,4 +189,12 @@ body {
 
 .dijitSliderH {
 	/*opacity: 0.25;*/
+}
+
+.filterClassOn {
+	opacity: 0.3;
+}
+
+.filterClassOff {
+	opacity: 1.0;
 }
