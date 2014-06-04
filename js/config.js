@@ -76,5 +76,7 @@ var Config = {
 	"EXTENT_EXPAND": 0.60,
 
 	"SHARING_RELATED": "",
-	"SHARING_HASHTAG": "USGS"
+	"SHARING_HASHTAG": "USGS",
+
+	"MAP_CLICK_HANDLER_ON": false
 };

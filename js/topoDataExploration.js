@@ -115,7 +115,13 @@ require([
 				initUrlParamData(urlQueryObject);
 
 				on(map, "load", mapLoadedHandler);
-				on(map, "extent-change", extentChangeHandler);
+
+				if (Config.MAP_CLICK_HANDLER_ON) {
+					on(map, "click", mapClickHandler);
+				} else {
+					on(map, "extent-change", extentChangeHandler);
+				}
+
 				on(map, "update-start", showLoadingIndicator);
 				on(map, "update-end", hideLoadingIndicator);
 				on(query(".share_facebook")[0], "click", shareFacebook);
@@ -131,38 +137,38 @@ require([
 
 				columns = [
 					{
-						label: " ",
-						field: "objID",
-						hidden: true
+						label:" ",
+						field:"objID",
+						hidden:true
 					},
 					{
-						label: " ",
-						field: "name",
-						renderCell: thumbnailRenderCell
+						label:" ",
+						field:"name",
+						renderCell:thumbnailRenderCell
 					},
 					editor({
-						label: " ",
-						field: "transparency",
-						editorArgs: {
-							value: 1.0,
-							minimum: 0,
-							maximum: 1.0,
-							intermediateChanges: true
+						label:" ",
+						field:"transparency",
+						editorArgs:{
+							value:1.0,
+							minimum:0,
+							maximum:1.0,
+							intermediateChanges:true
 						}
 					}, HorizontalSlider)
 				];
 
 				grid = new (declare([Grid, Selection, DnD, Keyboard]))({
-					store: store = createOrderedStore(storeData, {
-						idProperty: "objID"
+					store:store = createOrderedStore(storeData, {
+						idProperty:"objID"
 					}),
-					columns: columns,
-					showHeader: false,
-					selectionMode: "single",
-					dndParams: {
-						singular: true
+					columns:columns,
+					showHeader:false,
+					selectionMode:"single",
+					dndParams:{
+						singular:true
 					},
-					getObjectDndType: function (item) {
+					getObjectDndType:function (item) {
 						return [item.type ? item.type : this.dndSourceType];
 					}
 				}, "grid");
@@ -173,19 +179,19 @@ require([
 
 				// timeline options
 				timelineOptions = {
-					"width": "100%",
-					"height": Config.TIMELINE_HEIGHT + "px",
-					"style": Config.TIMELINE_STYLE,
-					"showNavigation": Config.TIMELINE_SHOW_NAVIGATION,
-					"max": new Date(Config.TIMELINE_MAX_DATE, 0, 0),
-					"min": new Date(Config.TIMELINE_MIN_DATE, 0, 0),
-					"scale": links.Timeline.StepDate.SCALE.YEAR,
-					"step": Config.TIMELINE_STEP,
-					"stackEvents": true,
-					"zoomMax": Config.TIMELINE_ZOOM_MAX,
-					"zoomMin": Config.TIMELINE_ZOOM_MIN,
-					"cluster": Config.TIMELINE_CLUSTER,
-					"animate": Config.TIMELINE_ANIMATE
+					"width":"100%",
+					"height":Config.TIMELINE_HEIGHT + "px",
+					"style":Config.TIMELINE_STYLE,
+					"showNavigation":Config.TIMELINE_SHOW_NAVIGATION,
+					"max":new Date(Config.TIMELINE_MAX_DATE, 0, 0),
+					"min":new Date(Config.TIMELINE_MIN_DATE, 0, 0),
+					"scale":links.Timeline.StepDate.SCALE.YEAR,
+					"step":Config.TIMELINE_STEP,
+					"stackEvents":true,
+					"zoomMax":Config.TIMELINE_ZOOM_MAX,
+					"zoomMin":Config.TIMELINE_ZOOM_MIN,
+					"cluster":Config.TIMELINE_CLUSTER,
+					"animate":Config.TIMELINE_ANIMATE
 				};
 
 				var legendNode = query(".topo-legend")[0];
@@ -286,35 +292,34 @@ require([
 									dateCurrent = "unknown";
 								var scale = feature.attributes.Map_Scale;
 								scale = number.format(scale, {
-									places: 0
+									places:0
 								});
 
 								var mosaicRule = new MosaicRule({
-									"method": MosaicRule.METHOD_CENTER,
-									"ascending": true,
-									"operation": MosaicRule.OPERATION_FIRST,
-									"where": "OBJECTID = " + objID
+									"method":MosaicRule.METHOD_CENTER,
+									"ascending":true,
+									"operation":MosaicRule.OPERATION_FIRST,
+									"where":"OBJECTID = " + objID
 								});
 
 								params = new ImageServiceParameters();
 								params.noData = 0;
 								params.mosaicRule = mosaicRule;
 								imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-									imageServiceParameters: params,
-									opacity: 1.0
+									imageServiceParameters:params,
+									opacity:1.0
 								});
-								//map.addLayer(imageServiceLayer, index);
 								layers.push(imageServiceLayer);
 
 								store.put({
-									id: "1",
-									objID: objID,
-									layer: imageServiceLayer,
-									name: mapName,
-									imprintYear: dateCurrent,
-									scale: scale,
-									downloadLink: DOWNLOAD_PATH + downloadIds[index],
-									extent: extent
+									id:"1",
+									objID:objID,
+									layer:imageServiceLayer,
+									name:mapName,
+									imprintYear:dateCurrent,
+									scale:scale,
+									downloadLink:DOWNLOAD_PATH + downloadIds[index],
+									extent:extent
 								});
 							});// End forEach
 							return layers.reverse();
@@ -361,7 +366,7 @@ require([
 						"&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() +
 						"&oids=" + objectIDs +
 						"&dlids=" + downloadIDs;
-				//window.open(sharingUrl);
+				console.log(sharingUrl);
 				return sharingUrl;
 			}
 
@@ -421,6 +426,96 @@ require([
 					exclude = false;
 				});
 				return filteredData;
+			}
+
+			function mapClickHandler(evt) {
+				var mp = evt.mapPoint;
+				var currentMapExtent = map.extent;
+				var lod = map.getLevel();
+				if (lod > Config.ZOOM_LEVEL_THRESHHOLD) {
+					domStyle.set("timeline", "opacity", "1.0");
+					domStyle.set("timelineDisableMessageContainer", "display", "none");
+					var qt = new QueryTask(Config.TOPO_INDEX);
+					var q = new Query();
+					q.returnGeometry = true;
+					q.outFields = OUTFIELDS;
+					q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
+					q.where = "IsDefault = 1";
+					q.geometry = currentMapExtent.expand(Config.EXTENT_EXPAND);
+
+					var deferred = qt.execute(q).addCallback(function (response) {
+						$(".feature-count").empty().append("(" + response.features.length + ")");
+						timelineData = [];
+						array.forEach(response.features, function (feature) {
+							var ext = feature.geometry.getExtent();
+							var xmin = ext.xmin;
+							var xmax = ext.xmax;
+							var ymin = ext.ymin;
+							var ymax = ext.ymax;
+
+							var objID = feature.attributes.SvcOID;
+							var mapName = feature.attributes.Map_Name;
+							var scale = feature.attributes.Map_Scale;
+							var dateCurrent = feature.attributes.DateCurren;
+							var imprintYear = feature.attributes.Imprint_Ye;
+							var downloadLink = feature.attributes.Download_G;
+							var citation = feature.attributes.Citation;
+
+							// TODO Hard-coded for now
+							var className = "";
+							if (scale <= TOPO_MAP_SCALES[4].value) {
+								className = "one";
+							} else if (scale > TOPO_MAP_SCALES[4].value && scale <= TOPO_MAP_SCALES[3].value) {
+								className = "two";
+							} else if (scale > TOPO_MAP_SCALES[3].value && scale <= TOPO_MAP_SCALES[2].value) {
+								className = "three";
+							} else if (scale > TOPO_MAP_SCALES[2].value && scale <= TOPO_MAP_SCALES[1].value) {
+								className = "four";
+							} else if (scale >= TOPO_MAP_SCALES[0].value) {
+								className = "five";
+							}
+
+							/*array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem, index) {
+							 if (scale <= legendItem.value && scale >= Config.TIMELINE_LEGEND_VALUES[index + 1].value) {
+							 className = legendItem.className;
+							 }
+							 });*/
+
+							var tooltipContent = "",
+									timelineItemContent = "";
+							if (lod >= Config.THUMBNAIL_VISIBLE_THRESHHOLD) {
+								tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
+										"<div class='tooltipContainer'>" +
+										"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+										"<div class='tooltipContent'>" + citation + "</div></div>";
+
+								timelineItemContent = '<div class="timelineItemTooltip withThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
+										'<span class="thumbnailLabel">' + mapName + '</span><br >' +
+										'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>';
+							} else {
+								tooltipContent = "<div class='tooltipContainer'>" +
+										"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+										"<div class='tooltipContent'>" + citation + "</div></div>";
+								timelineItemContent = '<div class="timelineItemTooltip noThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
+										'<span class="thumbnailLabel">' + mapName + '</span>';
+							}
+
+							timelineData.push({
+								"start":new Date(dateCurrent, 0, 0),
+								"content":timelineItemContent,
+								"objID":objID,
+								"downloadLink":downloadLink,
+								"scale":scale,
+								"className":className
+							});
+						}); // END forEach
+
+						drawTimeline(timelineData);
+					}); // END QUERY
+				} else {
+					domStyle.set("timeline", "opacity", "0.65");
+					domStyle.set("timelineDisableMessageContainer", "display", "block");
+				}
 			}
 
 			function extentChangeHandler(evt) {
@@ -495,12 +590,12 @@ require([
 							}
 
 							timelineData.push({
-								"start": new Date(dateCurrent, 0, 0),
-								"content": timelineItemContent,
-								"objID": objID,
-								"downloadLink": downloadLink,
-								"scale": scale,
-								"className": className
+								"start":new Date(dateCurrent, 0, 0),
+								"content":timelineItemContent,
+								"objID":objID,
+								"downloadLink":downloadLink,
+								"scale":scale,
+								"className":className
 							});
 						}); // END forEach
 
@@ -535,16 +630,16 @@ require([
 				var tooltipContent = "<span class='tooltipContainer'>" + mapName + "</span>";
 
 				var node = domConstruct.create("div", {
-					"class": "renderedCell",
-					"innerHTML": "<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
+					"class":"renderedCell",
+					"innerHTML":"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
 							"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
 							"<div class='thumbnailMapName'>" + mapName + "</div>" +
 							"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
 							"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
-					onclick: function (evt) {
+					onclick:function (evt) {
 						var objID = evt.target.getAttribute("data-objectid");
 						var storeObj = store.query({
-							objID: objID
+							objID:objID
 						});
 
 						map.removeLayer(storeObj[0].layer);
@@ -601,10 +696,10 @@ require([
 				}
 
 				$(".timelineItemTooltip").tooltipster({
-					theme: "tooltipster-shadow",
-					contentAsHTML: true,
-					position: "right",
-					offsetY: 20
+					theme:"tooltipster-shadow",
+					contentAsHTML:true,
+					position:"right",
+					offsetY:20
 				});
 
 				$(".timeline-event").mouseenter(function (evt) {
@@ -615,7 +710,7 @@ require([
 						xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
 						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
 						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
-						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid: 102100 }));
+						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
 						sfs = createMouseOverGraphic(new Color([0, 0, 255, Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
@@ -623,7 +718,7 @@ require([
 					// TODO
 					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 					if (data) {
-						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
+						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
 						sfs = createMouseOverGraphic(new Color([0, 0, 255, Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
@@ -641,7 +736,7 @@ require([
 						var objID = timelineData[row].objID;
 						// check to see if the timeline item is currently selected
 						var objIDs = store.query({
-							objID: objID
+							objID:objID
 						});
 
 						if (objIDs.length < 1) {
@@ -661,21 +756,21 @@ require([
 									dateCurrent = "unknown";
 								var scale = rs.features[0].attributes.Map_Scale;
 								scale = number.format(scale, {
-									places: 0
+									places:0
 								});
 
 								var mosaicRule = new MosaicRule({
-									"method": MosaicRule.METHOD_CENTER,
-									"ascending": true,
-									"operation": MosaicRule.OPERATION_FIRST,
-									"where": whereClause
+									"method":MosaicRule.METHOD_CENTER,
+									"ascending":true,
+									"operation":MosaicRule.OPERATION_FIRST,
+									"where":whereClause
 								});
 								params = new ImageServiceParameters();
 								params.noData = 0;
 								params.mosaicRule = mosaicRule;
 								imageServiceLayer = new ArcGISImageServiceLayer(IMAGE_SERVICE_URL, {
-									imageServiceParameters: params,
-									opacity: 1.0
+									imageServiceParameters:params,
+									opacity:1.0
 								});
 								map.addLayer(imageServiceLayer);
 
@@ -685,20 +780,20 @@ require([
 									_firstRow = rowId.split("-")[2];
 								}
 								var firstRowObj = store.query({
-									objID: _firstRow
+									objID:_firstRow
 								});
 
 								store.put({
-									id: "1",
-									objID: objID,
-									layer: imageServiceLayer,
-									name: mapName,
-									imprintYear: dateCurrent,
-									scale: scale,
-									downloadLink: downloadLink,
-									extent: extent
+									id:"1",
+									objID:objID,
+									layer:imageServiceLayer,
+									name:mapName,
+									imprintYear:dateCurrent,
+									scale:scale,
+									downloadLink:downloadLink,
+									extent:extent
 								}, {
-									before: firstRowObj[0]
+									before:firstRowObj[0]
 								});
 							}); // END execute
 							showGrid();
@@ -719,14 +814,14 @@ require([
 
 			function createOrderedStore(data, options) {
 				// Instantiate a Memory store modified to support ordering.
-				return Observable(new Memory(lang.mixin({data: data,
-					idProperty: "id",
-					put: function (object, options) {
+				return Observable(new Memory(lang.mixin({data:data,
+					idProperty:"id",
+					put:function (object, options) {
 						object.id = calculateOrder(this, object, options && options.before);
 						return Memory.prototype.put.call(this, object, options);
 					},
 					// Memory's add does not need to be augmented since it calls put
-					copy: function (object, options) {
+					copy:function (object, options) {
 						// summary:
 						//		Given an item already in the store, creates a copy of it.
 						//		(i.e., shallow-clones the item sans id, then calls add)
@@ -747,10 +842,10 @@ require([
 						}
 						this.add(obj, options);
 					},
-					query: function (query, options) {
+					query:function (query, options) {
 						options = options || {};
 						options.sort = [
-							{attribute: "id"}
+							{attribute:"id"}
 						];
 						return Memory.prototype.query.call(this, query, options);
 					}
@@ -800,18 +895,18 @@ require([
 					_lod = Config.MAP_INIT_ZOOM;
 				}
 				map = new Map("map", {
-					basemap: "topo",
-					center: [_lng, _lat],
-					zoom: _lod
+					basemap:"topo",
+					center:[_lng, _lat],
+					zoom:_lod
 				});
 			}
 
 			function initGeocoderDijit(srcRef) {
 				geocoder = new Geocoder({
-					map: map,
-					autoComplete: true,
-					showResults: true,
-					placeholder: "Find a Place"
+					map:map,
+					autoComplete:true,
+					showResults:true,
+					placeholder:"Find a Place"
 				}, srcRef);
 				geocoder.startup();
 			}
@@ -880,25 +975,52 @@ require([
 						+ '&p[url]=' + encodeURIComponent(url)
 						+ '&p[images][0]=' + encodeURIComponent($("meta[property='og:image']").attr("content"));
 
-				window.open(
-						'http://www.facebook.com/sharer.php?s=100' + options,
-						'Facebook sharing',
-						'toolbar=0,status=0,width=626,height=436'
+				window.open('http://www.facebook.com/sharer.php?s=100' + options, 'Facebook sharing', 'toolbar=0,status=0,width=626,height=436'
 				);
 			}
 
 			function shareTwitter() {
 				var url = getSharingUrl();
-				var options = 'text=' + encodeURIComponent($('#title').text())
-						+ '&url=' + encodeURIComponent(url)
-						+ '&related=' + Config.SHARING_RELATED
-						+ '&hashtags=' + Config.SHARING_HASHTAG;
+				/*var options = 'text=' + encodeURIComponent($('#title').text()) +
+						'&url=' + encodeURIComponent(url) +
+						'&related=' + Config.SHARING_RELATED +
+						'&hashtags=' + Config.SHARING_HASHTAG;*/
 
-				window.open(
-						'https://twitter.com/intent/tweet?' + options,
-						'Tweet',
-						'toolbar=0,status=0,width=626,height=436'
-				);
+				var bitlyUrls = [
+					"http://api.bitly.com/v3/shorten?callback=?",
+					"https://api-ssl.bitly.com/v3/shorten?callback=?"
+				];
+				var bitlyUrl = location.protocol == 'http:' ? bitlyUrls[0] : bitlyUrls[1];
+
+				var urlParams = esri.urlToObject(url).query || {};
+				var targetUrl = url;
+
+				var jqxhr = $.getJSON(
+						bitlyUrl,
+						{
+							"format":"json",
+							"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
+							"login":"esristorymaps",
+							"longUrl":targetUrl
+						},
+						function (response) {
+							if (!response || !response || !response.data.url)
+								return;
+							console.log(response.data.url);
+							$("#bitlyLoad").fadeOut();
+							$("#bitlyInput").fadeIn();
+							$("#bitlyInput").val(response.data.url);
+							$("#bitlyInput").select();
+						}
+				).complete(function (data) {
+							console.log(data.responseJSON.data.url);
+							var options = 'text=' + encodeURIComponent($('#title').text()) +
+									'&url=' + encodeURIComponent(data.responseJSON.data.url) +
+									'&related=' + Config.SHARING_RELATED +
+									'&hashtags=' + Config.SHARING_HASHTAG;
+							window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
+						});
+				//window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
 			}
 
 			function requestBitly() {
@@ -915,15 +1037,15 @@ require([
 				$.getJSON(
 						bitlyUrl,
 						{
-							"format": "json",
-							"apiKey": "R_14fc9f92e48f7c78c21db32bd01f7014",
-							"login": "esristorymaps",
-							"longUrl": targetUrl
+							"format":"json",
+							"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
+							"login":"esristorymaps",
+							"longUrl":targetUrl
 						},
 						function (response) {
 							if (!response || !response || !response.data.url)
 								return;
-
+							console.log(response.data.url);
 							$("#bitlyLoad").fadeOut();
 							$("#bitlyInput").fadeIn();
 							$("#bitlyInput").val(response.data.url);
