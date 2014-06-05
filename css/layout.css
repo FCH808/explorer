@@ -23,12 +23,14 @@ body {
 	height: 70px;
 	margin: 0;
 	overflow: hidden;
+	background-color: rgb(8, 68, 0);
 }
 
 .header-title {
 	padding-top: 10px;
 	padding-left: 10px;
 	font-size: 1.6em;
+	color: white;
 }
 
 .subheader-title {

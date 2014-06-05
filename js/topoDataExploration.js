@@ -140,6 +140,7 @@ require([
 				on(document, ".share_facebook:click", shareFacebook);
 				on(document, ".share_twitter:click", shareTwitter);
 				on(document, ".share_bitly:click", requestBitly);
+				on(document, "click", documentClickHandler);
 
 				on(geocoder, "find-results", function (results) {
 					//console.log(results);
@@ -211,13 +212,13 @@ require([
 				array.forEach(Config.TIMELINE_LEGEND_VALUES, buildLegend);
 
 				watchSplitters(registry.byId("main-window"));
+			});
 
-				$(document).click(function (e) {
-					if (!$("#bitlyIcon").is(e.target) && !$("#bitlyInput").is(e.target) && !$(".popover-content").is(e.target)) {
+			function documentClickHandler(e) {
+				if (!$("#bitlyIcon").is(e.target) && !$("#bitlyInput").is(e.target) && !$(".popover-content").is(e.target)) {
 						$(".popover").hide();
 					}
-				});
-			});
+			}
 
 			function buildLegend(legendItem) {
 				var node = domConstruct.toDom('<label data-scale="' + legendItem.value + '" data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
