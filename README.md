@@ -1,2 +1,2 @@
-USGS Historical Map Explorer
+USGS Archival Topographic Map Explorer
 ===========
