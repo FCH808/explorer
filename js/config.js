@@ -68,7 +68,7 @@ var Config = {
 		}
 	],
 
-	/* Timeline disabled message */
+	/* Timeline disabled message (Msg displayed when user zooms too far out) */
 	"TIMELINE_DISABLED_MESSAGE":"Zoom closer on the map to enable the timeline",
 	"TIMELINE_DISABLED_BACKGROUND_COLOR":"#7C7C7C",
 	"TIMELINE_DISABLED_COLOR":"white",
@@ -85,7 +85,7 @@ var Config = {
 	"IMAGE_SERVER":"http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer/",
 	"MAP_SERVER":"http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps_Index/MapServer", // + "?self?culture=en&f=json&token=" + "IkxAypOD2nEVLGKrHr-SNYiFhlUs96IGpIaH2E1xXAB-JwIqiy--IotPbsr7nWVUoR3SzCiCtxCZTTZZfKvuEGEiX6idPZ_h4oc5-A71gJs9Z5yL_AVlUpmRtCn6BtmAYTb7cLTxerg0UEuhYwDtYk54RAE1AULhOjSY8ysOP-8MMRZIocFauQxB3eVUTHJS"
 
-	/* Basemap properties */
+	/* Basemap initialization properties */
 	"BASEMAP_STYLE": "topo",
 	"BASEMAP_INIT_LAT":29.939833,
 	"BASEMAP_INIT_LNG":-90.076046,

@@ -971,14 +971,14 @@ require([
 
 			function hideGrid() {
 				$(".stepOne").css("display", "block");
-				$("#timelineMessage").css("opacity", "1.0");
+				$(".timelineMessage").css("opacity", "1.0");
 				$(".stepTwo").css("display", "none");
 				$(".gridContainer").css("display", "none");
 			}
 
 			function showGrid() {
 				$(".stepOne").css("display", "none");
-				$("#timelineMessage").css("opacity", "0.0");
+				$(".timelineMessage").css("opacity", "0.0");
 				$(".stepTwo").css("display", "block");
 				$(".gridContainer").css("display", "block");
 			}
