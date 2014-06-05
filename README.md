@@ -1,2 +1,2 @@
-explorer_us
+USGS Historical Map Explorer
 ===========
