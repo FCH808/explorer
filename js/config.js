@@ -4,6 +4,7 @@ var Config = {
 
 	/******** Application header/banner ********/
 	/* Header/Banner background color (rgb or hex) */
+	"HEADER_HEIGHT": "70px",
 	"APP_HEADER_BACKGROUND_COLOR":"rgb(8, 68, 0)",
 	/* Header text color */
 	"APP_HEADER_TEXT_COLOR":"white",
@@ -25,9 +26,9 @@ var Config = {
 	"STEP_TWO_MESSAGE":"<span style='font-weight: bold'>Slide</span> transparency on map to compare, or drag/drop to re-order maps.",
 	"STEP_TWO_HALF_CIRCLE_MSG":"2",
 
-	"HALF_CIRCLE_BACKGROUND_COLOR" : "#086B00",
+	"HALF_CIRCLE_BACKGROUND_COLOR" : "rgb(193, 194, 193)",
 	"HALF_CIRCLE_COLOR" : "white",
-	"HALF_CIRCLE_OPACITY" : "0.5",
+	"HALF_CIRCLE_OPACITY" : "1.0",
 
 	/* Timeline Container */
 	"TIMELINE_CONTAINER_BACKGROUND_COLOR": "rgb(242, 252, 242)",
@@ -107,7 +108,7 @@ var Config = {
 	"TIMELINE_CLUSTER":false,
 	"TIMELINE_SHOW_NAVIGATION":false,
 	"TIMELINE_MIN_DATE":'1850',
-	"TIMELINE_MAX_DATE":'2020',
+	"TIMELINE_MAX_DATE":'2015',
 	"TIMELINE_STEP":5,
 	"TIMELINE_ANIMATE":true,
 
