@@ -361,7 +361,7 @@ require([
 						"&minDate=" + minDate.getFullYear() + "&maxDate=" + maxDate.getFullYear() +
 						"&oids=" + objectIDs +
 						"&dlids=" + downloadIDs;
-				//window.open(sharingUrl);
+				console.log(sharingUrl);
 				return sharingUrl;
 			}
 
@@ -893,11 +893,7 @@ require([
 						+ '&url=' + encodeURIComponent(url)
 						+ '&related=' + Config.SHARING_RELATED
 						+ '&hashtags=' + Config.SHARING_HASHTAG;
-
-				window.open(
-						'https://twitter.com/intent/tweet?' + options,
-						'Tweet',
-						'toolbar=0,status=0,width=626,height=436'
+				window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436'
 				);
 			}
 
