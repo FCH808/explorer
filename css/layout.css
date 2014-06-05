@@ -12,13 +12,13 @@ body {
 	overflow: hidden;
 }
 
-	/* ------ main window ------ */
+/* ------ main window ------ */
 #main-window {
 	height: 100%;
 	width: 100%;
 }
 
-	/* ------ header ------ */
+/* ------ header/banner ------ */
 .header {
 	height: 70px;
 	margin: 0;
@@ -36,7 +36,7 @@ body {
 	font-size: 0.9em;
 }
 
-	/* ------ side bar ------*/
+/* ------ side bar ------*/
 .sidebar {
 	height: 100% !important;
 	width: 270px;
@@ -44,7 +44,7 @@ body {
 	overflow: hidden;
 }
 
-	/* ------ map container ------ */
+/* ------ map container ------ */
 #map {
 	margin: 0;
 }
@@ -53,13 +53,14 @@ body {
 	opacity: 0.75 !important;
 }
 
-	/* ------ timeline container ------*/
+/* ------ timeline container ------*/
 #timeline-container {
 	height: 310px;
 	margin-left: 270px;
 	overflow: hidden;
 }
 
+/* Message displayed when user is zoomed to far out */
 .timelineDisableMessageContainer {
 	display: none;
 	right: 0;
@@ -77,12 +78,13 @@ body {
 	line-height: 200px;
 }
 
-.timelineMessage {
+/* Message / Instructions displayed to user */
+.timeline-message {
 	font-size: 0.9em;
 	color: rgb(148, 137, 137);
 }
 
-	/* timeline legend */
+/* timeline legend */
 .timeline-legend-container {
 	float: left;
 	color: #666;
@@ -99,7 +101,7 @@ body {
 	font-size: 0.85em !important;
 }
 
-	/* timeline */
+/* timeline */
 #timeline {
 	margin-left: 200px;
 	padding-right: 5px;
@@ -126,7 +128,7 @@ body {
 	width: 150px;
 }
 
-	/* ------ geocoder ------  */
+/* ------ geocoder ------  */
 .esriSimpleSliderTL {
 	top: 10px !important;
 	left: 10px !important;
@@ -146,7 +148,7 @@ body {
 	border: 1px solid #CFCFCF !important;
 }
 
-	/* ------ MISC ------  */
+/* ------ MISC ------  */
 .dijitSplitter {
 	margin-left: 270px !important;
 }
@@ -180,7 +182,7 @@ body {
 }
 
 .dijitSliderH {
-	/*opacity: 0.25;*/
+	opacity: 0.85;
 }
 
 .filterClassOn {
