@@ -56,7 +56,6 @@ require([
 		function (array, declare, fx, lang, win, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, ready, topic, Observable, Memory, win, DnD, Grid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, Color, Query, QueryTask, urlUtils) {
 
 			var map,
-					currentMapExtent,
 
 					OUTFIELDS,
 					TOKEN,
@@ -216,8 +215,8 @@ require([
 
 			function documentClickHandler(e) {
 				if (!$("#bitlyIcon").is(e.target) && !$("#bitlyInput").is(e.target) && !$(".popover-content").is(e.target)) {
-						$(".popover").hide();
-					}
+					$(".popover").hide();
+				}
 			}
 
 			function buildLegend(legendItem) {
@@ -496,96 +495,22 @@ require([
 			}
 
 			function mapClickHandler(evt) {
-				var mp = evt.mapPoint;
 				var currentMapExtent = map.extent;
 				var lod = map.getLevel();
-				if (lod > Config.ZOOM_LEVEL_THRESHHOLD) {
-					domStyle.set("timeline", "opacity", "1.0");
-					query(".timelineDisableMessageContainer").style("display", "none");
-
-					var qt = new QueryTask(Config.TOPO_INDEX);
-					var q = new Query();
-					q.returnGeometry = true;
-					q.outFields = OUTFIELDS;
-					q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
-					q.where = "IsDefault = 1";
-					q.geometry = currentMapExtent.expand(Config.EXTENT_EXPAND);
-
-					var deferred = qt.execute(q).addCallback(function (response) {
-						$(".feature-count").empty().append("(" + response.features.length + ")");
-						timelineData = [];
-						array.forEach(response.features, function (feature) {
-							var ext = feature.geometry.getExtent();
-							var xmin = ext.xmin;
-							var xmax = ext.xmax;
-							var ymin = ext.ymin;
-							var ymax = ext.ymax;
-
-							var objID = feature.attributes.SvcOID;
-							var mapName = feature.attributes.Map_Name;
-							var scale = feature.attributes.Map_Scale;
-							var dateCurrent = feature.attributes.DateCurren;
-							var imprintYear = feature.attributes.Imprint_Ye;
-							var downloadLink = feature.attributes.Download_G;
-							var citation = feature.attributes.Citation;
-
-							// TODO Hard-coded for now
-							var className = "";
-							if (scale <= TOPO_MAP_SCALES[4].value) {
-								className = "one";
-							} else if (scale > TOPO_MAP_SCALES[4].value && scale <= TOPO_MAP_SCALES[3].value) {
-								className = "two";
-							} else if (scale > TOPO_MAP_SCALES[3].value && scale <= TOPO_MAP_SCALES[2].value) {
-								className = "three";
-							} else if (scale > TOPO_MAP_SCALES[2].value && scale <= TOPO_MAP_SCALES[1].value) {
-								className = "four";
-							} else if (scale >= TOPO_MAP_SCALES[0].value) {
-								className = "five";
-							}
-
-							var tooltipContent = "",
-									timelineItemContent = "";
-							if (lod >= Config.THUMBNAIL_VISIBLE_THRESHHOLD) {
-								tooltipContent = "<img class='tooltipThumbnail' src='" + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + "'>" +
-										"<div class='tooltipContainer'>" +
-										"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
-										"<div class='tooltipContent'>" + citation + "</div></div>";
-
-								timelineItemContent = '<div class="timelineItemTooltip withThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
-										'<span class="thumbnailLabel">' + mapName + '</span><br >' +
-										'<img class="timeline-content-image" data-tooltip="' + mapName + '" data-scale="' + scale + '" data-dateCurrent="' + dateCurrent + '" data-imprintYear="' + imprintYear + '" src="' + Config.IMAGE_SERVER + objID + Config.INFO_THUMBNAIL + Config.INFO_THUMBNAIL_TOKEN + '"></div>';
-							} else {
-								tooltipContent = "<div class='tooltipContainer'>" +
-										"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
-										"<div class='tooltipContent'>" + citation + "</div></div>";
-								timelineItemContent = '<div class="timelineItemTooltip noThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
-										'<span class="thumbnailLabel">' + mapName + '</span>';
-							}
-
-							timelineData.push({
-								"start":new Date(dateCurrent, 0, 0),
-								"content":timelineItemContent,
-								"objID":objID,
-								"downloadLink":downloadLink,
-								"scale":scale,
-								"className":className
-							});
-						}); // END forEach
-
-						drawTimeline(timelineData);
-					}); // END QUERY
-				} else {
-					domStyle.set("timeline", "opacity", "0.65");
-					query(".timelineDisableMessageContainer").style("display", "block");
-				}
+				runQuery(currentMapExtent, lod);
 			}
 
 			function extentChangeHandler(evt) {
+				var currentMapExtent = evt.extent;
 				var lod = evt.lod.level;
+				runQuery(currentMapExtent, lod);
+			}
+
+			function runQuery(currentMapExtent, lod) {
 				if (lod > Config.ZOOM_LEVEL_THRESHHOLD) {
 					domStyle.set("timeline", "opacity", "1.0");
 					query(".timelineDisableMessageContainer").style("display", "none");
-					currentMapExtent = evt.extent;
+
 					var qt = new QueryTask(Config.TOPO_INDEX);
 					var q = new Query();
 					q.returnGeometry = true;
@@ -626,12 +551,6 @@ require([
 								} else if (scale >= TOPO_MAP_SCALES[0].value) {
 									className = "five";
 								}
-
-								/*array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem, index) {
-								 if (scale <= legendItem.value && scale >= Config.TIMELINE_LEGEND_VALUES[index + 1].value) {
-								 className = legendItem.className;
-								 }
-								 });*/
 
 								var tooltipContent = "",
 										timelineItemContent = "";

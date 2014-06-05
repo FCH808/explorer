@@ -104,10 +104,9 @@
 .popover {
 	position: absolute;
 	top: 0;
-	right: 47px;
 	z-index: 1010;
 	display: none;
-	max-width: 276px;
+	max-width: 190px;
 	padding: 1px;
 	text-align: left;
 	background-color: #ffffff;
