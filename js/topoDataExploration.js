@@ -59,7 +59,6 @@ require([
 					currentMapExtent,
 
 					OUTFIELDS,
-					PARAMS = "?self?culture=en&f=json&token=",
 					TOKEN,
 					IMAGE_SERVICE_URL,
 					imageServiceLayer,
@@ -110,7 +109,6 @@ require([
 				setAppHeaderStyle(Config.APP_HEADER_TEXT_COLOR, Config.APP_HEADER_BACKGROUND_COLOR);
 				setAppHeaderTitle(Config.APP_HEADER_TEXT);
 				setAppHeaderSubtitle(Config.APP_SUBHEADER_TEXT);
-
 				setAppMessage(".step-one-message", Config.STEP_ONE_MESSAGE);
 				setAppMessage(".step-one-half-circle-msg", Config.STEP_ONE_HALF_CIRCLE_MSG);
 				setAppMessage(".step-two-message", Config.STEP_TWO_MESSAGE);
@@ -129,7 +127,7 @@ require([
 				initUrlParamData(urlQueryObject);
 
 				on(map, "load", mapLoadedHandler);
-
+				// TODO Temporary until a decision is made
 				if (Config.MAP_CLICK_HANDLER_ON) {
 					on(map, "click", mapClickHandler);
 				} else {
@@ -757,14 +755,21 @@ require([
 
 				$(".timeline-event").mouseenter(function (evt) {
 					// TODO IE / What a mess!
-					var xmin, ymin, xmax, ymax, extent, sfs;
+					var xmin,
+							ymin,
+							xmax,
+							ymax,
+							extent,
+							sfs;
 					if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
 						xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
 						xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
 						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
 						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
 						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid: 102100 }));
-						sfs = createMouseOverGraphic(new Color([0, 0, 255, Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
+						sfs = createMouseOverGraphic(
+								new Color([Config.IMAGE_BORDER_COLOR_R, Config.IMAGE_BORDER_COLOR_G, Config.IMAGE_BORDER_COLOR_B, Config.IMAGE_BORDER_OPACITY]),
+								new Color([Config.IMAGE_FILL_COLOR_R, Config.IMAGE_FILL_COLOR_G, Config.IMAGE_FILL_COLOR_B, Config.IMAGE_FILL_OPACITY]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
 					}
@@ -772,7 +777,9 @@ require([
 					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 					if (data) {
 						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid: 102100 }));
-						sfs = createMouseOverGraphic(new Color([0, 0, 255, Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
+						sfs = createMouseOverGraphic(
+								new Color([Config.IMAGE_BORDER_COLOR_R, Config.IMAGE_BORDER_COLOR_G, Config.IMAGE_BORDER_COLOR_B, Config.IMAGE_BORDER_OPACITY]),
+								new Color([Config.IMAGE_FILL_COLOR_R, Config.IMAGE_FILL_COLOR_G, Config.IMAGE_FILL_COLOR_B, Config.IMAGE_FILL_OPACITY]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
 					}
@@ -993,7 +1000,9 @@ require([
 					map.graphics.remove(mouseOverGraphic);
 				var row = grid.row(evt);
 				var extent = row.data.extent;
-				var sfs = createMouseOverGraphic(new Color([0, 0, 255, , Config.IMAGE_BORDER_OPACITY]), new Color([255, 255, 0, Config.IMAGE_FILL_OPACITY]));
+				var sfs = createMouseOverGraphic(
+								new Color([Config.IMAGE_BORDER_COLOR_R, Config.IMAGE_BORDER_COLOR_G, Config.IMAGE_BORDER_COLOR_B, Config.IMAGE_BORDER_OPACITY]),
+								new Color([Config.IMAGE_FILL_COLOR_R, Config.IMAGE_FILL_COLOR_G, Config.IMAGE_FILL_COLOR_B, Config.IMAGE_FILL_OPACITY]));
 				mouseOverGraphic = new Graphic(extent, sfs);
 				map.graphics.add(mouseOverGraphic);
 				//var slider = query(".dijitSliderH")[0];

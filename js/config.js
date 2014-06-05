@@ -118,9 +118,16 @@ var Config = {
 	// TMP
 	"DOWNLOAD_PATH":"http://ims.er.usgs.gov/gda_services/download?item_id=",
 
+	/* Mouseover/Mouseout graphic styles (FILL and BORDER) */
+	"IMAGE_FILL_COLOR_R": 255,
+	"IMAGE_FILL_COLOR_G": 255,
+	"IMAGE_FILL_COLOR_B": 0,
 	"IMAGE_FILL_OPACITY":0.0,
+	"IMAGE_BORDER_COLOR_R": 0,
+	"IMAGE_BORDER_COLOR_G": 0,
+	"IMAGE_BORDER_COLOR_B": 255,
 	"IMAGE_BORDER_OPACITY":1.0,
-	"IMAGE_BORDER_WIDTH":2.0,
+	"IMAGE_BORDER_WIDTH":1.75,
 
 	"EXTENT_EXPAND":0.60,
 
