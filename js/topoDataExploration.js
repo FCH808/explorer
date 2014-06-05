@@ -92,7 +92,9 @@ require([
 			// timeline container dimensions
 					timelineContainerGeometry,
 
-					filterSelection = [];
+					filterSelection = [],
+
+					legendNode;
 
 			ready(function () {
 				parser.parse();
@@ -133,12 +135,11 @@ require([
 				} else {
 					on(map, "extent-change", extentChangeHandler);
 				}
-
 				on(map, "update-start", showLoadingIndicator);
 				on(map, "update-end", hideLoadingIndicator);
-				on(query(".share_facebook")[0], "click", shareFacebook);
-				on(query(".share_twitter")[0], "click", shareTwitter);
-				on(query(".share_bitly")[0], "click", requestBitly);
+				on(document, ".share_facebook:click", shareFacebook);
+				on(document, ".share_twitter:click", shareTwitter);
+				on(document, ".share_bitly:click", requestBitly);
 
 				on(geocoder, "find-results", function (results) {
 					//console.log(results);
@@ -206,57 +207,10 @@ require([
 					"animate":Config.TIMELINE_ANIMATE
 				};
 
-				var legendNode = query(".topo-legend")[0];
-				array.forEach(Config.TIMELINE_LEGEND_VALUES, function (legendItem) {
-
-					var node = domConstruct.toDom('<label data-scale="' + legendItem.value + '" data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
-							'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
-							'</label>');
-
-					if (urlQueryObject) {
-						var _tmpFilters = urlQueryObject.f.split("|");
-						var num = number.format(legendItem.value, {
-							places:0,
-							pattern:'#'
-						});
-						var i = _tmpFilters.indexOf(num);
-						if (_tmpFilters[i] !== undefined) {
-							domClass.toggle(node, "sel");
-							domStyle.set(node, "opacity", "0.3");
-							filter.push(_tmpFilters[i]);
-						} else {
-							//
-						}
-					}
-
-					on(node, "click", function (evt) {
-						var selectedScale = evt.target.getAttribute("data-scale");
-						domClass.toggle(this, "sel");
-						if (domClass.contains(this, "sel")) {
-							var j = filter.indexOf(selectedScale);
-							if (j === -1) {
-								filter.push(selectedScale);
-							}
-							domStyle.set(this, "opacity", "0.3");
-							filterSelection.push(selectedScale);
-						} else {
-							var k = filter.indexOf(selectedScale);
-							if (k !== -1) {
-								filter.splice(k, 1);
-							}
-							domStyle.set(this, "opacity", "1.0");
-							var i = filterSelection.indexOf(selectedScale);
-							if (i != -1) {
-								filterSelection.splice(i, 1);
-							}
-						}
-						drawTimeline(timelineData);
-					});
-					domConstruct.place(node, legendNode);
-				});
+				legendNode = query(".topo-legend")[0];
+				array.forEach(Config.TIMELINE_LEGEND_VALUES, buildLegend);
 
 				watchSplitters(registry.byId("main-window"));
-
 
 				$(document).click(function (e) {
 					if (!$("#bitlyIcon").is(e.target) && !$("#bitlyInput").is(e.target) && !$(".popover-content").is(e.target)) {
@@ -264,6 +218,53 @@ require([
 					}
 				});
 			});
+
+			function buildLegend(legendItem) {
+				var node = domConstruct.toDom('<label data-scale="' + legendItem.value + '" data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
+						'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
+						'</label>');
+
+				if (urlQueryObject) {
+					var _tmpFilters = urlQueryObject.f.split("|");
+					var num = number.format(legendItem.value, {
+						places:0,
+						pattern:'#'
+					});
+					var i = _tmpFilters.indexOf(num);
+					if (_tmpFilters[i] !== undefined) {
+						domClass.toggle(node, "sel");
+						domStyle.set(node, "opacity", "0.3");
+						filter.push(_tmpFilters[i]);
+					} else {
+						//
+					}
+				}
+
+				on(node, "click", function (evt) {
+					var selectedScale = evt.target.getAttribute("data-scale");
+					domClass.toggle(this, "sel");
+					if (domClass.contains(this, "sel")) {
+						var j = filter.indexOf(selectedScale);
+						if (j === -1) {
+							filter.push(selectedScale);
+						}
+						domStyle.set(this, "opacity", "0.3");
+						filterSelection.push(selectedScale);
+					} else {
+						var k = filter.indexOf(selectedScale);
+						if (k !== -1) {
+							filter.splice(k, 1);
+						}
+						domStyle.set(this, "opacity", "1.0");
+						var i = filterSelection.indexOf(selectedScale);
+						if (i != -1) {
+							filterSelection.splice(i, 1);
+						}
+					}
+					drawTimeline(timelineData);
+				});
+				domConstruct.place(node, legendNode);
+			}
 
 			function watchSplitters(bc) {
 				var moveConnects = {};
