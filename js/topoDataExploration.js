@@ -93,7 +93,9 @@ require([
 
 					filterSelection = [],
 
-					legendNode;
+					legendNode,
+
+					showFill;
 
 			ready(function () {
 				parser.parse();
@@ -211,6 +213,18 @@ require([
 				array.forEach(Config.TIMELINE_LEGEND_VALUES, buildLegend);
 
 				watchSplitters(registry.byId("main-window"));
+
+				showFill = 0.0;
+				var showFillBool = false;
+				on(query(".header-title")[0], "click", function(evt) {
+					if (showFillBool) {
+						showFillBool = false;
+						showFill = 0.0;
+					} else {
+						showFillBool = true;
+						showFill = 0.05;
+					}
+				});
 			});
 
 			function documentClickHandler(e) {
@@ -691,7 +705,7 @@ require([
 						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
 						sfs = createMouseOverGraphic(
 								new Color([Config.IMAGE_BORDER_COLOR_R, Config.IMAGE_BORDER_COLOR_G, Config.IMAGE_BORDER_COLOR_B, Config.IMAGE_BORDER_OPACITY]),
-								new Color([Config.IMAGE_FILL_COLOR_R, Config.IMAGE_FILL_COLOR_G, Config.IMAGE_FILL_COLOR_B, Config.IMAGE_FILL_OPACITY]));
+								new Color([Config.IMAGE_FILL_COLOR_R, Config.IMAGE_FILL_COLOR_G, Config.IMAGE_FILL_COLOR_B, showFill]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
 					}
@@ -701,7 +715,7 @@ require([
 						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
 						sfs = createMouseOverGraphic(
 								new Color([Config.IMAGE_BORDER_COLOR_R, Config.IMAGE_BORDER_COLOR_G, Config.IMAGE_BORDER_COLOR_B, Config.IMAGE_BORDER_OPACITY]),
-								new Color([Config.IMAGE_FILL_COLOR_R, Config.IMAGE_FILL_COLOR_G, Config.IMAGE_FILL_COLOR_B, Config.IMAGE_FILL_OPACITY]));
+								new Color([Config.IMAGE_FILL_COLOR_R, Config.IMAGE_FILL_COLOR_G, Config.IMAGE_FILL_COLOR_B, showFill]));
 						mouseOverGraphic = new Graphic(extent, sfs);
 						map.graphics.add(mouseOverGraphic);
 					}
