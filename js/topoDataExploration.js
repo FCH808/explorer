@@ -450,7 +450,7 @@ require([
 				return sharingUrl;
 			}
 
-			function filterData(dataToFilter, filter) {
+			/*function filterData(dataToFilter, filter) {
 				var filteredData = [];
 				var exclude = false;
 				array.forEach(dataToFilter, function (item) {
@@ -506,6 +506,74 @@ require([
 					exclude = false;
 				});
 				return filteredData;
+			}*/
+			function filterData(dataToFilter, filter) {
+				var filteredData = [];
+				var exclude = false;
+				var nFilters = filter.length;
+
+				if (nFilters > 0) {
+					array.forEach(dataToFilter, function (item) {
+						// loop through each filter
+						for (var i = 0; i < nFilters; i++) {
+							var _filterScale = number.parse(filter[i]);
+							var _mapScale = item.scale;
+							var _pos = array.indexOf(scales, _filterScale);
+							var _lowerBoundScale;
+							var _upperBoundScale;
+							var current;
+
+							if (_pos !== -1) {
+								if (TOPO_MAP_SCALES[_pos + 1] !== undefined) {
+									_lowerBoundScale = TOPO_MAP_SCALES[(_pos + 1)].value;
+								} else {
+									_lowerBoundScale = "";
+								}
+
+								if (TOPO_MAP_SCALES[_pos].value) {
+									current = TOPO_MAP_SCALES[_pos].value;
+								}
+
+								if (TOPO_MAP_SCALES[(_pos - 1)] !== undefined) {
+									_upperBoundScale = TOPO_MAP_SCALES[(_pos)].value;
+								} else {
+									_upperBoundScale = "";
+								}
+							}
+
+							if (_lowerBoundScale === "") {
+								if (_mapScale <= _filterScale) {
+									console.log("MINIMUM SCALE: " + _mapScale);
+									exclude = true;
+									break;
+								}
+							}
+
+							if (_upperBoundScale === "") {
+								if (_mapScale >= _filterScale) {
+									console.log("MAXIMUM SCALE: " + _mapScale);
+									exclude = true;
+									break;
+								}
+							}
+
+							if (_lowerBoundScale !== "" && _upperBoundScale !== "") {
+								if (_mapScale > _lowerBoundScale && _mapScale <= _upperBoundScale) {
+									exclude = true;
+									break;
+								}
+							}
+						}
+
+						if (!exclude) {
+							filteredData.push(item);
+						}
+						exclude = false;
+					});
+					return filteredData;
+				} else {
+					return dataToFilter;
+				}
 			}
 
 			function mapClickHandler(evt) {
