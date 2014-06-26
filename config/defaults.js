@@ -91,16 +91,13 @@ define({
 	"ESRI_ICON_PATH": "images/esri.png",
 	"NON_ESRI_ICON_PATH": "images/usgswhite.green.jpg",
 
-<<<<<<< HEAD:application_boilerplate/config/defaults.js
 	/******** Step Messages ********/
-=======
 	/**************************************************************************
 	 *
 	 * Step Messages (1, 2, 3)
 	 *
 	 **************************************************************************/
 	/* Step 1 */
->>>>>>> 04e53a542ed5172d6efaab4be676092258bc5e15:config/defaults.js
 	"STEP_ONE_MESSAGE": "<span style='font-weight: bold'>Go</span> to a location to the location you want to explore, then <br/><span style='font-weight: bold'>Click</span> on a place to see its historical maps.",
 	"STEP_ONE_HALF_CIRCLE_MSG": "1",
 	/* Step 2 */
