@@ -72,53 +72,53 @@ define([
 ], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, TimelineLegendUtils) {
 	return declare(null, {
 
-		OUTFIELDS:"",
-		TOKEN:"",
-		IMAGE_SERVICE_URL:"",
-		imageServiceLayer:"",
-		DOWNLOAD_PATH:"",
-		TOPO_MAP_SCALES:"",
-		mapScaleValues:[],
+		OUTFIELDS: "",
+		IMAGE_SERVICE_URL: "",
+		imageServiceLayer: "",
+		DOWNLOAD_PATH: "",
+		TOPO_MAP_SCALES: "",
+		mapScaleValues: [],
 
-		nScales:"",
-		maxScaleValue:"",
-		minScaleValue:"",
+		nScales: "",
+		maxScaleValue: "",
+		minScaleValue: "",
 
-		_loading:"",
-		urlQueryObject:"",
+		_loading: "",
+		urlQueryObject: "",
 
-		currentLOD:"",
-		currentMapClickPoint:"",
-		currentMapExtent:"",
+		currentLOD: "",
+		currentMapClickPoint: "",
+		currentMapExtent: "",
 
-		crosshairGraphic:"",
-		crosshairSymbol:"",
+		crosshairGraphic: "",
+		crosshairSymbol: "",
 
-		data:"",
-		grid:"",
-		store:"",
-		storeData:[],
+		data: "",
+		grid: "",
+		store: "",
+		storeData: [],
 
-		timelineContainerNode:"",
-		timeline:"",
-		timelineOptions:"",
-		timelineContainerNodeGeom:"",
-		timelineContainerGeometry:"",
-		timelineData:[],
+		timelineContainerNode: "",
+		timeline: "",
+		timelineOptions: "",
+		timelineContainerNodeGeom: "",
+		timelineContainerGeometry: "",
+		timelineData: [],
 
-		mouseOverGraphic:"",
-		filterSelection:[],
-		filter:[],
-		filteredData:"",
+		mouseOverGraphic: "",
+		filterSelection: [],
+		filter: [],
+		filteredData: "",
 
-		userInterfaceUtils:{},
-		sharingUrl:"",
+		userInterfaceUtils: {},
+		timelineLegendUtils: {},
+		sharingUrl: "",
 
-		minimumId:"",
+		minimumId: "",
 
-		config:{},
+		config: {},
 
-		startup:function (config) {
+		startup: function (config) {
 			// config will contain application and user defined info for the template such as i18n strings, the web map id
 			// and application id
 			// any url parameters and any application specific configuration information.
@@ -128,16 +128,14 @@ define([
 				ready(lang.hitch(this, function () {
 
 					this.userInterfaceUtils = new UserInterfaceUtils(this.config);
-					var timelineLegendUtils = new TimelineLegendUtils(this.config);
+					this.timelineLegendUtils = new TimelineLegendUtils(this.config);
 
 					//supply either the webmap id or, if available, the item info
 					var itemInfo = this.config.itemInfo || this.config.webmap;
 					this._createWebMap(itemInfo);
 
-					document.title = this.config.APP_TITLE;
 					this.OUTFIELDS = this.config.OUTFIELDS;
-					this.TOKEN = this.config.TOKEN;
-					this.IMAGE_SERVICE_URL = this.config.IMAGE_SERVER + this.config.IMAGE_SERVER_JSON + this.TOKEN;
+					this.IMAGE_SERVICE_URL = this.config.IMAGE_SERVER;
 					this.TOPO_MAP_SCALES = this.config.TIMELINE_LEGEND_VALUES;
 					this.DOWNLOAD_PATH = this.config.DOWNLOAD_PATH;
 
@@ -147,9 +145,9 @@ define([
 
 					this.crosshairSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CROSS, this.config.CROSSHAIR_SIZE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color(this.config.CROSSHAIR_FILL_COLOR), this.config.CROSSHAIR_OPACITY));
 
-					this.nScales = timelineLegendUtils.getNumberOfScales(this.TOPO_MAP_SCALES);
-					this.maxScaleValue = timelineLegendUtils.getMaxScaleValue(this.TOPO_MAP_SCALES);
-					this.minScaleValue = timelineLegendUtils.getMinScaleValue(this.TOPO_MAP_SCALES);
+					this.nScales = this.timelineLegendUtils.getNumberOfScales(this.TOPO_MAP_SCALES);
+					this.maxScaleValue = this.timelineLegendUtils.getMaxScaleValue(this.TOPO_MAP_SCALES);
+					this.minScaleValue = this.timelineLegendUtils.getMinScaleValue(this.TOPO_MAP_SCALES);
 
 					this.userInterfaceUtils.loadAppStyles();
 
@@ -166,7 +164,7 @@ define([
 						{
 							label:" ",
 							field:"name",
-							renderCell:lang.hitch(this, "thumbnailRenderCell")
+							renderCell:lang.hitch(this, "_thumbnailRenderCell")
 						},
 						editor({
 							label:" ",
@@ -181,7 +179,7 @@ define([
 					];
 
 					this.grid = new (declare([OnDemandGrid, Selection, DnD, Keyboard]))({
-						store:this.store = this.createOrderedStore(this.storeData, {
+						store:this.store = this._createOrderedStore(this.storeData, {
 							idProperty:"objID"
 						}),
 						idProperty:"objID",
@@ -217,7 +215,7 @@ define([
 						"cluster":this.config.TIMELINE_CLUSTER,
 						"animate":this.config.TIMELINE_ANIMATE
 					};
-					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, "buildLegend"));
+					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, "_buildLegend"));
 
 					this.watchSplitters(registry.byId("main-window"));
 
@@ -299,7 +297,7 @@ define([
 			if (this.urlQueryObject !== null) {
 				var _mp = new Point([this.urlQueryObject.clickLat, this.urlQueryObject.clickLng], new SpatialReference({ wkid:102100 }));
 				// add crosshair
-				this.addCrosshair(_mp);
+				this._addCrosshair(_mp);
 			}
 
 			//// external logic ////
@@ -368,7 +366,7 @@ define([
 		gridLeaveCellHandler:function (evt) {
 			this.map.graphics.remove(this.mouseOverGraphic);
 			this.map.graphics.clear();
-			this.addCrosshair(this.currentMapClickPoint);
+			this._addCrosshair(this.currentMapClickPoint);
 		},
 
 		createMouseOverGraphic:function (borderColor, fillColor) {
@@ -439,7 +437,7 @@ define([
 			geocoder.startup();
 		},
 
-		buildLegend:function (legendItem) {
+		_buildLegend:function (legendItem) {
 			var node = domConstruct.toDom('<label data-scale="' + legendItem.value + '" data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
 					'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
 					'</label>');
@@ -484,12 +482,12 @@ define([
 			domConstruct.place(node, query(".topo-legend")[0]);
 		},
 
-		thumbnailRenderCell:function (object, data, td, options) {
+		_thumbnailRenderCell:function (object, data, td, options) {
 			var objID = object.objID;
 			var mapName = object.name;
 			var imprintYear = object.imprintYear;
 			var downloadLink = object.downloadLink;
-			var imgSrc = this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + this.config.INFO_THUMBNAIL_TOKEN;
+			var imgSrc = this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL;
 
 			var node = domConstruct.create("div", {
 				"class":"renderedCell",
@@ -512,7 +510,7 @@ define([
 						// no remaining items in the grid/store
 						this.map.graphics.remove(this.mouseOverGraphic);
 						this.map.graphics.clear();
-						this.addCrosshair(this.currentMapClickPoint);
+						this._addCrosshair(this.currentMapClickPoint);
 						this.hideLoadingIndicator();
 						this.userInterfaceUtils.hideStep(".stepThree", ".step-three-message");
 						this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
@@ -522,7 +520,7 @@ define([
 			return node;
 		},
 
-		addCrosshair:function (mp) {
+		_addCrosshair:function (mp) {
 			if (this.crosshairGraphic) {
 				this.map.graphics.remove(this.crosshairGraphic);
 			}
@@ -531,7 +529,7 @@ define([
 		},
 
 		// dojo src
-		createOrderedStore:function (data, options) {
+		_createOrderedStore:function (data, options) {
 			var opts = options;
 			// Instantiate a Memory store modified to support ordering.
 			return Observable(new Memory(lang.mixin({
@@ -540,7 +538,7 @@ define([
 				put:lang.hitch(this, function (object, opts) {
 					var storeRef = this.store;
 					var _calc = lang.hitch(this, function () {
-						return this.calculateOrder(storeRef, object, opts && opts.before);
+						return this._calculateOrder(storeRef, object, opts && opts.before);
 					});
 					object.id = _calc();
 					return Memory.prototype.put.call(storeRef, object, opts);
@@ -579,8 +577,8 @@ define([
 			}, options)));
 		},
 
-		//calculateOrder:function (store, object, options) {
-		calculateOrder:function (store, object, before, orderField) {
+		// dojo src
+		_calculateOrder:function (store, object, before, orderField) {
 			// Calculates proper value of order for an item to be placed before another
 			var afterOrder,
 					beforeOrder = 0;
@@ -617,7 +615,7 @@ define([
 			}
 		},
 
-		filterData:function (dataToFilter, filter) {
+		_filterData:function (dataToFilter, filter) {
 			var _filteredData = [];
 			var exclude = false;
 			var nFilters = filter.length;
@@ -684,47 +682,8 @@ define([
 			}
 		},
 
-		setClassname:function (scale) {
-			var className;
-			if (scale <= this.TOPO_MAP_SCALES[4].value) {
-				className = "one";	// 0 - 12000
-			} else if (scale > this.TOPO_MAP_SCALES[4].value && scale <= this.TOPO_MAP_SCALES[3].value) {
-				className = "two";	// 12001 - 24000
-			} else if (scale > this.TOPO_MAP_SCALES[3].value && scale <= this.TOPO_MAP_SCALES[2].value) {
-				className = "three";// 24001 - 63360
-			} else if (scale > this.TOPO_MAP_SCALES[2].value && scale <= this.TOPO_MAP_SCALES[1].value) {
-				className = "four";	// 63361 - 125000
-			} else if (scale > this.TOPO_MAP_SCALES[1].value) {
-				className = "five";	// 125001 - 250000
-			}
-			return className;
-		},
-
-		setLodThreshold:function (scale) {
-			var _lodThreshold;
-			var i = this.nScales;
-			while (i > 0) {
-				if (scale <= this.minScaleValue) {
-					_lodThreshold = this.TOPO_MAP_SCALES[this.TOPO_MAP_SCALES.length - 1].lodThreshold;
-					break;
-				}
-
-				if (scale > this.TOPO_MAP_SCALES[i].value && scale <= this.TOPO_MAP_SCALES[i - 1].value) {
-					_lodThreshold = this.TOPO_MAP_SCALES[i - 1].lodThreshold;
-					break;
-				}
-
-				if (scale > this.maxScaleValue) {
-					_lodThreshold = this.TOPO_MAP_SCALES[0].lodThreshold;
-					break;
-				}
-				i--;
-			}
-			return _lodThreshold;
-		},
-
 		drawTimeline:function (data) {
-			this.filteredData = this.filterData(data, this.filter);
+			this.filteredData = this._filterData(data, this.filter);
 			topic.subscribe("/dnd/drop", lang.hitch(this, function (source, nodes, copy, target) {
 				var layers = [];
 				//query(".grid-map").forEach(domConstruct.destroy);
@@ -820,7 +779,7 @@ define([
 			query(".timeline-event").on(mouse.leave, lang.hitch(this, function (evt) {
 				this.map.graphics.remove(this.mouseOverGraphic);
 				this.map.graphics.clear();
-				this.addCrosshair(this.currentMapClickPoint);
+				this._addCrosshair(this.currentMapClickPoint);
 			}));
 
 			this.hideLoadingIndicator();
@@ -990,8 +949,8 @@ define([
 						var downloadLink = feature.attributes[this.config.ATTRIBUTE_DOWNLOAD_LINK];
 						var citation = feature.attributes[this.config.ATTRIBUTE_CITATION];
 
-						var className = this.setClassname(scale);
-						var lodThreshold = this.setLodThreshold(scale);
+						var className = this.timelineLegendUtils.setClassname(scale, this.TOPO_MAP_SCALES);
+						var lodThreshold = this.timelineLegendUtils.setLodThreshold(scale, this.TOPO_MAP_SCALES, this.nScales, this.minScaleValue, this.maxScaleValue);
 
 						var tooltipContent = "<img class='tooltipThumbnail' src='" + this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + "'>" +
 								"<div class='tooltipContainer'>" +

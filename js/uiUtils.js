@@ -29,7 +29,8 @@ define([
 			this.config = templateConfig;
 		},
 
-		loadAppStyles:function () {
+		loadAppStyles: function () {
+			document.title = this.config.APP_TITLE;
 			this._setAppHeaderStyle(this.config.APP_HEADER_TEXT_COLOR, this.config.APP_HEADER_BACKGROUND_COLOR);
 			this._setAppHeaderTitle(this.config.APP_HEADER_TEXT);
 			this._setAppHeaderSubtitle(this.config.APP_SUBHEADER_TEXT);

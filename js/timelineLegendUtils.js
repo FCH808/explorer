@@ -20,21 +20,60 @@ define([
 ], function (declare) {
 	return declare(null, {
 
-		constructor: function (templateConfig) {
+		constructor:function (templateConfig) {
 			//console.debug("TimelineLegendUtils", templateConfig);
 		},
 
-		getNumberOfScales: function (scales) {
+		getNumberOfScales:function (scales) {
 			return scales.length - 1;
 		},
 
-		getMinScaleValue: function (scales) {
+		getMinScaleValue:function (scales) {
 			var nScales = this.getNumberOfScales(scales);
 			return scales[nScales].value;
 		},
 
-		getMaxScaleValue: function (scales) {
+		getMaxScaleValue:function (scales) {
 			return scales[0].value;
-		}
+		},
+
+		setClassname: function (currentScale, scales) {
+			var className;
+			if (currentScale <= scales[4].value) {
+				className = "one";	// 0 - 12000
+			} else if (currentScale > scales[4].value && currentScale <= scales[3].value) {
+				className = "two";	// 12001 - 24000
+			} else if (currentScale > scales[3].value && currentScale <= scales[2].value) {
+				className = "three";// 24001 - 63360
+			} else if (currentScale > scales[2].value && currentScale <= scales[1].value) {
+				className = "four";	// 63361 - 125000
+			} else if (currentScale > scales[1].value) {
+				className = "five";	// 125001 - 250000
+			}
+			return className;
+		},
+
+		setLodThreshold: function (currentScale, scales, nScales, minScaleValue, maxScaleValue) {
+			var _lodThreshold,
+				i = nScales;
+			while (i > 0) {
+				if (currentScale <= minScaleValue) {
+					_lodThreshold = scales[scales.length - 1].lodThreshold;
+					break;
+				}
+
+				if (currentScale > scales[i].value && currentScale <= scales[i - 1].value) {
+					_lodThreshold = scales[i - 1].lodThreshold;
+					break;
+				}
+
+				if (currentScale > maxScaleValue) {
+					_lodThreshold = scales[0].lodThreshold;
+					break;
+				}
+				i--;
+			}
+			return _lodThreshold;
+		},
 	});
 });

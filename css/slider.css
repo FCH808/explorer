@@ -24,6 +24,7 @@
 	-moz-user-select: none;
 	user-select: none;
 	background-color: transparent;
+	opacity: 0.75;
 }
 
 .esriSimpleSlider div {

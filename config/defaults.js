@@ -62,7 +62,7 @@ define({
 	 * Browser window title (text that will show up in the browser bookmarks)
 	 *
 	 ***************************************************************************/
-	"APP_TITLE": "USGS Archival Topographic Map Explorer",
+	"APP_TITLE": "USGS Historical Topographic Map Explorer",
 
 	/**************************************************************************
 	 *
@@ -192,12 +192,6 @@ define({
 			"lodThreshold": 13
 		}
 	],
-	/* Timeline disabled message (Msg displayed when user zooms too far out) */
-	"TIMELINE_DISABLED_MESSAGE": "Zoom closer on the map to enable the timeline",
-	"TIMELINE_DISABLED_BACKGROUND_COLOR": "#7C7C7C",
-	"TIMELINE_DISABLED_COLOR": "white",
-	"TIMELINE_DISABLED_BACKGROUND_OPACITY": "0.65",
-	"TIMELINE_DISABLED_BACKGROUND_FONT_SIZE": "1.7em",
 
 	/**************************************************************************
 	 *
@@ -234,16 +228,8 @@ define({
 	 * REST endpoints and URL params
 	 *
 	 **************************************************************************/
-	/* temporary token being used for testing */
-	"TOKEN": "QzzXsTgBx7VQWeMw6x6J2IVJSZTM2Yw_UzCaSl4tHTlAvet-S2Y-lh75DXng8sZ5R4JRmWb52VMNBljeeJgDzIrc_YjracTeaetxMOPxj83J9N0HPCdHyKjheb6Mf12M1cBgm-nITIH5V56h1-BtBR02ue3FUAj1YRLpeQ0BMIS3e0HRPw3ji30MLcfZYzeY",
-	/* TODO to be removed */
-	"INFO_THUMBNAIL_TOKEN": "?token=" + "QzzXsTgBx7VQWeMw6x6J2IVJSZTM2Yw_UzCaSl4tHTlAvet-S2Y-lh75DXng8sZ5R4JRmWb52VMNBljeeJgDzIrc_YjracTeaetxMOPxj83J9N0HPCdHyKjheb6Mf12M1cBgm-nITIH5V56h1-BtBR02ue3FUAj1YRLpeQ0BMIS3e0HRPw3ji30MLcfZYzeY",
-
 	/* path to thumbnails on Image Service */
 	"INFO_THUMBNAIL": "/info/thumbnail",
-	/* TODO Change name/description */
-	"IMAGE_SERVER_JSON": "?culture=en&f=json&token=",
-
 	/* Image service */
 	"IMAGE_SERVER": "http://utility.arcgis.com/usrsvcs/servers/f0ccaa1db1e5457397d22847d66f7de1/rest/services/USA_Historical_Topo_Maps/ImageServer",
 	/* outfields */
@@ -262,9 +248,6 @@ define({
 
 	/* USGS (temporary) */
 	"DOWNLOAD_PATH": "http://ims.er.usgs.gov/gda_services/download?item_id=",
-
-	/* TODO Map Service / Used for footprints (will be removed in production */
-	//"MAP_SERVER": "http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps_Index/MapServer", // + "?self?culture=en&f=json&token=" + "IkxAypOD2nEVLGKrHr-SNYiFhlUs96IGpIaH2E1xXAB-JwIqiy--IotPbsr7nWVUoR3SzCiCtxCZTTZZfKvuEGEiX6idPZ_h4oc5-A71gJs9Z5yL_AVlUpmRtCn6BtmAYTb7cLTxerg0UEuhYwDtYk54RAE1AULhOjSY8ysOP-8MMRZIocFauQxB3eVUTHJS"
 
 	/* Attribute Fields */
 	/* OBJECTID -- DO NOT modify this field --- */
