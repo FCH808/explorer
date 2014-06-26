@@ -4,7 +4,7 @@
 
 <a href="https://github.com/ChrisMahlke/explorer/raw/gh-pages/explorer_documentation.pdf" target="_blank">Configuration options</a>
 
-## Demo
+### Demo
 
 <a href="http://chrismahlke.github.io/explorer/" target="_blank">Demo</a>
 
