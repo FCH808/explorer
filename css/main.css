@@ -244,4 +244,9 @@ body {
 /* Applied to selected maps in the dGrid that are outside the LOD */
 .outside-lod {
 	opacity: 0.3;
-}}
+}
+
+.bitlyInputContainer {
+	width:150px;
+	height:30px;
+}
