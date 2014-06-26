@@ -2,7 +2,7 @@
 
 ## Instructions
 
-<a href="https://github.com/ChrisMahlke/explorer/blob/gh-pages/explorer_documentation.pdf" target="_blank">Configuration options</a>
+<a href="https://github.com/ChrisMahlke/explorer/raw/gh-pages/explorer_documentation.pdf" target="_blank">Configuration options</a>
 
 ## Issues
 
