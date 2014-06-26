@@ -16,9 +16,10 @@
 define([
 	"dojo/_base/declare",
 	"dojo/dom",
+	"dojo/dom-attr",
 	"dojo/dom-style",
 	"dojo/query"
-], function (declare, dom, domStyle, query) {
+], function (declare, dom, domAttr, domStyle, query) {
 	return declare(null, {
 
 		config:{},
@@ -32,6 +33,8 @@ define([
 			this._setAppHeaderStyle(this.config.APP_HEADER_TEXT_COLOR, this.config.APP_HEADER_BACKGROUND_COLOR);
 			this._setAppHeaderTitle(this.config.APP_HEADER_TEXT);
 			this._setAppHeaderSubtitle(this.config.APP_SUBHEADER_TEXT);
+			domAttr.set("esri-logo", "src", this.config.ESRI_ICON_PATH);
+			domAttr.set("non-esri-logo", "src", this.config.NON_ESRI_ICON_PATH);
 			this._setAppMessage(".step-one-message", this.config.STEP_ONE_MESSAGE);
 			this._setAppMessage(".step-one-half-circle-msg", this.config.STEP_ONE_HALF_CIRCLE_MSG);
 			this._setAppMessage(".step-two-message", this.config.STEP_TWO_MESSAGE);

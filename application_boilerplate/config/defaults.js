@@ -79,6 +79,10 @@ define({
 	/* Subheader text */
 	"APP_SUBHEADER_TEXT": "",
 
+	/* Header icons */
+	"ESRI_ICON_PATH": "images/esri.png",
+	"NON_ESRI_ICON_PATH": "images/usgswhite.green.jpg",
+
 	/******** Step Messages ********/
 	"STEP_ONE_MESSAGE": "<span style='font-weight: bold'>Go</span> to a location to the location you want to explore, then <br/><span style='font-weight: bold'>Click</span> on a place to see its historical maps.",
 	"STEP_ONE_HALF_CIRCLE_MSG": "1",
