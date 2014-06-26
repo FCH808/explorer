@@ -1,12 +1,12 @@
-## USGS Historical Topographic Map Explorer template
+### USGS Historical Topographic Map Explorer template
 
-### Instructions
+#### Instructions
 
 <a href="https://github.com/ChrisMahlke/explorer/raw/gh-pages/explorer_documentation.pdf" target="_blank">Configuration options</a>
 
-### Demo
+#### Demo
 
-<a href="http://chrismahlke.github.io/explorer/" target="_blank">Demo</a>
+<a href="http://chrismahlke.github.io/explorer_dev/" target="_blank">Demo</a>
 
 ### Issues
 
