@@ -68,8 +68,9 @@ define([
 	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"application/uiUtils",
+	"application/gridUtils",
 	"application/timelineLegendUtils"
-], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, TimelineLegendUtils) {
+], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils) {
 	return declare(null, {
 
 		OUTFIELDS: "",
@@ -111,6 +112,7 @@ define([
 		filteredData: "",
 
 		userInterfaceUtils: {},
+		gridUtils: {},
 		timelineLegendUtils: {},
 		sharingUrl: "",
 
@@ -128,6 +130,7 @@ define([
 				ready(lang.hitch(this, function () {
 
 					this.userInterfaceUtils = new UserInterfaceUtils(this.config);
+					this.gridUtils = new GridUtils(this.config);
 					this.timelineLegendUtils = new TimelineLegendUtils(this.config);
 
 					//supply either the webmap id or, if available, the item info
@@ -152,7 +155,7 @@ define([
 					this.userInterfaceUtils.loadAppStyles();
 
 					this._loading = dom.byId("loadingImg");
-					this.urlQueryObject = this.getUrlParameters();
+					this.urlQueryObject = this._getUrlParameters();
 					//initBaseMap(urlQueryObject);
 
 					var columns = [
@@ -194,10 +197,10 @@ define([
 						}
 					}, "grid");
 
-					this.grid.on("dgrid-datachange", lang.hitch(this, "gridDataChangeHandler"));
-					this.grid.on("dgrid-refresh-complete", lang.hitch(this, "gridRefreshHandler"));
-					this.grid.on(mouseUtil.enterCell, lang.hitch(this, "gridEnterCellHandler"));
-					this.grid.on(mouseUtil.leaveCell, lang.hitch(this, "gridLeaveCellHandler"));
+					this.grid.on("dgrid-datachange", this.gridUtils.gridDataChangeHandler);
+					this.grid.on("dgrid-refresh-complete", this.gridUtils.gridRefreshHandler);
+					this.grid.on(mouseUtil.enterCell, this.gridUtils.gridEnterCellHandler);
+					this.grid.on(mouseUtil.leaveCell, lang.hitch(this, "_gridLeaveCellHandler"));
 
 					// timeline options
 					this.timelineOptions = {
@@ -314,9 +317,73 @@ define([
 			on(document, "click", lang.hitch(this, "documentClickHandler"));
 		},
 
-		getUrlParameters:function () {
+		_getUrlParameters:function () {
 			var urlObject = urlUtils.urlToObject(window.location.href);
 			return urlObject.query;
+		},
+
+		_setSharingUrl:function () {
+			var mapClickX,
+					mapClickY,
+					timelineDateRange = "",
+					minDate = "",
+					maxDate = "",
+					objectIDs = "",
+					downloadIDs = "",
+					filters = "";
+			if (!this.currentMapClickPoint) {
+				// User is sharing the app but never even clicked on the map
+				// Leave these params empty
+				mapClickX = "";
+				mapClickY = "";
+			} else {
+				mapClickX = this.currentMapClickPoint.x;
+				mapClickY = this.currentMapClickPoint.y;
+			}
+
+			var lat = this.map.extent.getCenter().getLatitude();
+			var lng = this.map.extent.getCenter().getLongitude();
+			var zoomLevel = this.map.getLevel();
+
+			if (this.timeline) {
+				timelineDateRange = this.timeline.getVisibleChartRange();
+				minDate = new Date(timelineDateRange.start).getFullYear();
+				maxDate = new Date(timelineDateRange.end).getFullYear();
+			}
+
+			query(".dgrid-row", grid.domNode).forEach(function (node) {
+				var row = this.grid.row(node);
+				objectIDs += row.data.objID + "|";
+				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
+			});
+			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
+			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
+
+			array.forEach(this.filterSelection, function (filter) {
+				filters += filter + "|";
+			});
+			filters = filters.substr(0, filters.length - 1);
+
+			var protocol = window.location.protocol;
+			var host = window.location.host;
+			var pathName = window.location.pathname;
+			var fileName = "";
+			var pathArray = window.location.pathname.split("/");
+			if (pathArray[pathArray.length - 1] !== "index.html") {
+				fileName = "index.html";
+			} else {
+				fileName = "";
+			}
+
+			this.sharingUrl = protocol + "//" + host + pathName + fileName +
+					"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
+					"&minDate=" + minDate + "&maxDate=" + maxDate +
+					"&oids=" + objectIDs +
+					"&dlids=" + downloadIDs +
+					"&f=" + filters +
+					"&clickLat=" + mapClickX +
+					"&clickLng=" + mapClickY;
+			return this.sharingUrl;
 		},
 
 		watchSplitters:function (bc) {
@@ -336,34 +403,7 @@ define([
 			});
 		},
 
-		gridRefreshHandler:function (evt) {
-			array.forEach(evt.grid.store.data, lang.hitch(this, function (node) {
-				var row = this.grid.row(node);
-				var lodThreshold = row.data.lodThreshold;
-				var maskId = "grid-row-" + row.data.objID + "-mask";
-				if (this.currentLOD <= lodThreshold) {
-					domConstruct.create("div", {
-						id:"" + maskId,
-						"class":"grid-map",
-						innerHTML:"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
-					}, row.element, "first");
-				}
-			}));
-		},
-
-		gridEnterCellHandler:function (evt) {
-			if (this.mouseOverGraphic)
-				this.map.graphics.remove(this.mouseOverGraphic);
-			var row = this.grid.row(evt);
-			var extent = row.data.extent;
-			var sfs = this.createMouseOverGraphic(
-					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_BORDER),
-					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_FILL));
-			this.mouseOverGraphic = new Graphic(extent, sfs);
-			this.map.graphics.add(this.mouseOverGraphic);
-		},
-
-		gridLeaveCellHandler:function (evt) {
+		_gridLeaveCellHandler:function (evt) {
 			this.map.graphics.remove(this.mouseOverGraphic);
 			this.map.graphics.clear();
 			this._addCrosshair(this.currentMapClickPoint);
@@ -373,11 +413,6 @@ define([
 			var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
 					new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, this.config.IMAGE_BORDER_WIDTH), fillColor);
 			return sfs;
-		},
-
-		gridDataChangeHandler:function (evt) {
-			var diff = 1 - evt.value;
-			evt.cell.row.data.layer.setOpacity(diff);
 		},
 
 		_mapClickHandler:function (evt) {
@@ -1032,70 +1067,6 @@ define([
 			}, "timeline", "first");
 		},
 
-		setSharingUrl:function () {
-			var mapClickX,
-					mapClickY,
-					timelineDateRange = "",
-					minDate = "",
-					maxDate = "",
-					objectIDs = "",
-					downloadIDs = "",
-					filters = "";
-			if (!this.currentMapClickPoint) {
-				// User is sharing the app but never even clicked on the map
-				// Leave these params empty
-				mapClickX = "";
-				mapClickY = "";
-			} else {
-				mapClickX = this.currentMapClickPoint.x;
-				mapClickY = this.currentMapClickPoint.y;
-			}
-
-			var lat = this.map.extent.getCenter().getLatitude();
-			var lng = this.map.extent.getCenter().getLongitude();
-			var zoomLevel = this.map.getLevel();
-
-			if (this.timeline) {
-				timelineDateRange = this.timeline.getVisibleChartRange();
-				minDate = new Date(timelineDateRange.start).getFullYear();
-				maxDate = new Date(timelineDateRange.end).getFullYear();
-			}
-
-			query(".dgrid-row", grid.domNode).forEach(function (node) {
-				var row = this.grid.row(node);
-				objectIDs += row.data.objID + "|";
-				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
-			});
-			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
-			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
-
-			array.forEach(this.filterSelection, function (filter) {
-				filters += filter + "|";
-			});
-			filters = filters.substr(0, filters.length - 1);
-
-			var protocol = window.location.protocol;
-			var host = window.location.host;
-			var pathName = window.location.pathname;
-			var fileName = "";
-			var pathArray = window.location.pathname.split("/");
-			if (pathArray[pathArray.length - 1] !== "index.html") {
-				fileName = "index.html";
-			} else {
-				fileName = "";
-			}
-
-			this.sharingUrl = protocol + "//" + host + pathName + fileName +
-					"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
-					"&minDate=" + minDate + "&maxDate=" + maxDate +
-					"&oids=" + objectIDs +
-					"&dlids=" + downloadIDs +
-					"&f=" + filters +
-					"&clickLat=" + mapClickX +
-					"&clickLng=" + mapClickY;
-			return this.sharingUrl;
-		},
-
 		documentClickHandler:function (evt) {
 			if (!$("#bitlyIcon").is(evt.target) && !$("#bitlyInput").is(evt.target) && !$(".popover-content").is(evt.target)) {
 				$(".popover").hide();
@@ -1103,7 +1074,7 @@ define([
 		},
 
 		shareFacebook:function () {
-			var url = this.setSharingUrl();
+			var url = this._setSharingUrl();
 			var options = '&p[title]=' + encodeURIComponent($('#title').text())
 					+ '&p[summary]=' + encodeURIComponent($('#subtitle').text())
 					+ '&p[url]=' + encodeURIComponent(url)
@@ -1114,7 +1085,7 @@ define([
 		},
 
 		shareTwitter:function () {
-			var url = this.setSharingUrl();
+			var url = this._setSharingUrl();
 
 			var bitlyUrls = [
 				"http://api.bitly.com/v3/shorten?callback=?",
@@ -1148,7 +1119,7 @@ define([
 		},
 
 		requestBitly:function () {
-			var url = this.setSharingUrl();
+			var url = this._setSharingUrl();
 			var bitlyUrls = [
 				"http://api.bitly.com/v3/shorten?callback=?",
 				"https://api-ssl.bitly.com/v3/shorten?callback=?"
