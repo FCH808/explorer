@@ -4,6 +4,10 @@
 
 <a href="https://github.com/ChrisMahlke/explorer/raw/gh-pages/explorer_documentation.pdf" target="_blank">Configuration options</a>
 
+## Demo
+
+<a href="http://chrismahlke.github.io/explorer/" target="_blank">demo</a>
+
 ## Issues
 
 Find a bug or want to request a new feature?  Please let us know by submitting an issue.
