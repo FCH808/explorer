@@ -3,18 +3,6 @@
 ## Instructions
 
 
-## Requirements
-
-* Text or HTML editor.
-* A little background with JavaScript.
-* Experience with the [ArcGIS JavaScript API](http://www.esri.com/) would help.
-
-## Resources
-
-* [Community](https://developers.arcgis.com/en/javascript/jshelp/community.html)
-* [ArcGIS for JavaScript API Resource Center](http://help.arcgis.com/en/webapi/javascript/arcgis/index.html)
-* [ArcGIS Blog](http://blogs.esri.com/esri/arcgis/)
-* [twitter@esri](http://twitter.com/esri)
 
 ## Issues
 
