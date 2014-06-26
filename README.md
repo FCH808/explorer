@@ -6,7 +6,7 @@
 
 ### Demo
 
-<a href="http://chrismahlke.github.io/explorer/" target="_blank">Demo</a>
+<a href="http://chrismahlke.github.io/explorer_dev/" target="_blank">Demo</a>
 
 ### Issues
 
