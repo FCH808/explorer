@@ -8,15 +8,15 @@
 
 <a href="http://chrismahlke.github.io/explorer_dev/" target="_blank">Demo</a>
 
-### Issues
+#### Issues
 
 Find a bug or want to request a new feature?  Please let us know by submitting an issue.
 
-### Contributing
+#### Contributing
 
 Esri welcomes contributions from anyone and everyone. Please see our [guidelines for contributing](https://github.com/esri/contributing).
 
-### Licensing
+#### Licensing
 Copyright 2014 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License");
