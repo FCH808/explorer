@@ -111,7 +111,7 @@ define([
 		filter:[],
 		filteredData:"",
 
-		userInterfaceUtils: {},
+		userInterfaceUtils:{},
 		sharingUrl:"",
 
 		minimumId:"",
@@ -735,21 +735,21 @@ define([
 						layers.push(row.data.layer);
 						this.map.removeLayer(row.data.layer);
 
-						/*var lodThreshold = row.data.lodThreshold;
-						 var maskId = domAttr.get(node, "id") + "-mask";
-						 if (this.currentLOD <= lodThreshold) {
-						 // disable row
-						 if (dom.byId("" + maskId) === null) {
-						 domConstruct.create("div", {
-						 "id":"" + maskId,
-						 "class":"grid-map",
-						 "innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
-						 }, node, "first");
-						 }
-						 } else {
-						 // enable row
-						 domConstruct.destroy("" + maskId);
-						 }*/
+						var lodThreshold = row.data.lodThreshold;
+						var maskId = domAttr.get(node, "id") + "-mask";
+						if (this.currentLOD <= lodThreshold) {
+							// disable row
+							if (dom.byId("" + maskId) === null) {
+								domConstruct.create("div", {
+									"id":"" + maskId,
+									"class":"grid-map",
+									"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
+								}, node, "first");
+							}
+						} else {
+							// enable row
+							domConstruct.destroy("" + maskId);
+						}
 					}
 				}));
 
@@ -766,6 +766,7 @@ define([
 					this.timelineOptions.end = new Date(this.urlQueryObject.maxDate, 0, 0);
 				}
 				this.timeline = new links.Timeline(dom.byId("timeline"));
+				console.log(this.filteredData);
 				this.timeline.draw(this.filteredData, this.timelineOptions);
 				links.events.addListener(this.timeline, "ready", this.onTimelineReady);
 				links.events.addListener(this.timeline, "select", lang.hitch(this, "onSelect"));
@@ -790,27 +791,29 @@ define([
 
 			query(".timeline-event").on(mouse.enter, lang.hitch(this, function (evt) {
 				var xmin, ymin, xmax, ymax, extent, sfs;
-				if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
-					xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
-					xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
-					ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
-					ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
-					extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-					sfs = this.createMouseOverGraphic(
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
-					this.mouseOverGraphic = new Graphic(extent, sfs);
-					this.map.graphics.add(this.mouseOverGraphic);
-				}
-				// TODO
-				var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
-				if (data) {
-					extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-					sfs = this.createMouseOverGraphic(
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
-					this.mouseOverGraphic = new Graphic(extent, sfs);
-					this.map.graphics.add(this.mouseOverGraphic);
+				if (evt.target.children[0] !== undefined && evt.target.children[0].children[0] !== undefined) {
+					if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
+						xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
+						xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
+						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
+						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
+						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
+						sfs = this.createMouseOverGraphic(
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
+						this.mouseOverGraphic = new Graphic(extent, sfs);
+						this.map.graphics.add(this.mouseOverGraphic);
+					}
+					// TODO
+					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+					if (data) {
+						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+						sfs = this.createMouseOverGraphic(
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
+						this.mouseOverGraphic = new Graphic(extent, sfs);
+						this.map.graphics.add(this.mouseOverGraphic);
+					}
 				}
 			}));
 
@@ -924,13 +927,15 @@ define([
 		},
 
 		runQuery:function (mapExtent, mp, lod) {
-			var queryTask = new QueryTask(this.config.TOPO_INDEX);
+			var queryTask = new QueryTask(this.config.QUERY_TASK_URL);
 			var q = new Query();
 			q.returnGeometry = true;
-			q.outFields = this.config.TOPO_INDEX_OUTFIELDS;
+			q.outFields = this.config.QUERY_TASK_OUTFIELDS;
 			q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 			// TODO confirm with CF/SB where clause is correct
-			q.where = this.config.TOPO_INDEX_WHERE;
+			if (this.config.QUERY_WHERE !== "") {
+				q.where = this.config.QUERY_WHERE;
+			}
 			if (this.config.QUERY_GEOMETRY === "MAP_POINT") {
 				q.geometry = mp;
 			} else {
@@ -953,7 +958,7 @@ define([
 							duration:1000,
 							properties:{
 								height:{
-									end:250
+									end:parseInt(this.config.TIMELINE_HEIGHT) + 20
 								}
 							},
 							onEnd:function () {
@@ -969,26 +974,35 @@ define([
 						var ymin = ext.ymin;
 						var ymax = ext.ymax;
 
-						var objID = feature.attributes.SvcOID;
-						var mapName = feature.attributes.Map_Name;
-						var scale = feature.attributes.Map_Scale;
-						var dateCurrent = feature.attributes.DateCurren;
-						var downloadLink = feature.attributes.Download_G;
-						var citation = feature.attributes.Citation;
+						var objID = feature.attributes[this.config.ATTRIBUTE_OBJECTID];
+						var mapName = feature.attributes[this.config.ATTRIBUTE_MAP_NAME];
+						var scale = feature.attributes[this.config.ATTRIBUTE_SCALE];
+						var dateCurrent = new Date(feature.attributes[this.config.ATTRIBUTE_DATE]);
+						if (dateCurrent === null)
+							dateCurrent = this.config.MSG_UNKNOWN;
+						var day = this.formatDay(dateCurrent);
+						var month = this.formatMonth(dateCurrent);
+						var year = this.formatYear(dateCurrent);
+						var formattedDate = month + "/" + day + "/" + year;
+
+						var startDate = new Date(dateCurrent, month, day);
+
+						var downloadLink = feature.attributes[this.config.ATTRIBUTE_DOWNLOAD_LINK];
+						var citation = feature.attributes[this.config.ATTRIBUTE_CITATION];
 
 						var className = this.setClassname(scale);
 						var lodThreshold = this.setLodThreshold(scale);
 
-						var tooltipContent = "<img class='tooltipThumbnail' src='" + this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + this.config.INFO_THUMBNAIL_TOKEN + "'>" +
+						var tooltipContent = "<img class='tooltipThumbnail' src='" + this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + "'>" +
 								"<div class='tooltipContainer'>" +
-								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+								"<div class='tooltipHeader'>" + mapName + " (" + formattedDate + ")</div>" +
 								"<div class='tooltipContent'>" + citation + "</div></div>";
 
 						var timelineItemContent = '<div class="timelineItemTooltip noThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
 								'<span class="thumbnailLabel">' + mapName + '</span>';
 
 						this.timelineData.push({
-							"start":new Date(dateCurrent, 0, 0),
+							"start":startDate,
 							"content":timelineItemContent,
 							"objID":objID,
 							"downloadLink":downloadLink,
@@ -1004,10 +1018,58 @@ define([
 			})); // END Deferred
 		},
 
+		formatDay:function (date) {
+			if (date instanceof Date)
+				return date.getDate();
+			else
+				return "";
+		},
+
+		formatMonth:function (date) {
+			if (date instanceof Date) {
+				var month = date.getMonth();
+				if (month === 0) {
+					return "01";
+				} else if (month === 1) {
+					return "02";
+				} else if (month === 2) {
+					return "03";
+				} else if (month === 3) {
+					return "04";
+				} else if (month === 4) {
+					return "05";
+				} else if (month === 5) {
+					return "06";
+				} else if (month === 6) {
+					return "07";
+				} else if (month === 7) {
+					return "08";
+				} else if (month === 8) {
+					return "09";
+				} else if (month === 9) {
+					return "10";
+				} else if (month === 10) {
+					return "11";
+				} else if (month === 11) {
+					return "12";
+				}
+			} else {
+				return "";
+			}
+		},
+
+		formatYear:function (date) {
+			if (date instanceof Date) {
+				return date.getFullYear();
+			} else {
+				return "";
+			}
+		},
+
 		addNoResultsMask:function () {
 			domConstruct.create("div", {
 				"class":"timeline-mask",
-				"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.NO_MAPS_MESSAGE + "</p>"
+				"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.MSG_NO_MAPS + "</p>"
 			}, "timeline", "first");
 		},
 

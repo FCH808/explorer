@@ -91,7 +91,6 @@ define({
 	"ESRI_ICON_PATH": "images/esri.png",
 	"NON_ESRI_ICON_PATH": "images/usgswhite.green.jpg",
 
-	/******** Step Messages ********/
 	/**************************************************************************
 	 *
 	 * Step Messages (1, 2, 3)
@@ -235,7 +234,7 @@ define({
 	 * REST endpoints and URL params
 	 *
 	 **************************************************************************/
-	/* temporary token being used for testing per request of project lead / WILL BE REMOVED before deployment /  */
+	/* temporary token being used for testing */
 	"TOKEN": "QzzXsTgBx7VQWeMw6x6J2IVJSZTM2Yw_UzCaSl4tHTlAvet-S2Y-lh75DXng8sZ5R4JRmWb52VMNBljeeJgDzIrc_YjracTeaetxMOPxj83J9N0HPCdHyKjheb6Mf12M1cBgm-nITIH5V56h1-BtBR02ue3FUAj1YRLpeQ0BMIS3e0HRPw3ji30MLcfZYzeY",
 	/* TODO to be removed */
 	"INFO_THUMBNAIL_TOKEN": "?token=" + "QzzXsTgBx7VQWeMw6x6J2IVJSZTM2Yw_UzCaSl4tHTlAvet-S2Y-lh75DXng8sZ5R4JRmWb52VMNBljeeJgDzIrc_YjracTeaetxMOPxj83J9N0HPCdHyKjheb6Mf12M1cBgm-nITIH5V56h1-BtBR02ue3FUAj1YRLpeQ0BMIS3e0HRPw3ji30MLcfZYzeY",
@@ -246,7 +245,7 @@ define({
 	"IMAGE_SERVER_JSON": "?culture=en&f=json&token=",
 
 	/* Image service */
-	"IMAGE_SERVER": "http://historical1.arcgis.com/arcgis/rest/services/USA_Historical_Topo_Maps/ImageServer",
+	"IMAGE_SERVER": "http://utility.arcgis.com/usrsvcs/servers/f0ccaa1db1e5457397d22847d66f7de1/rest/services/USA_Historical_Topo_Maps/ImageServer",
 	/* outfields */
 	"OUTFIELDS": ['*'],
 	/* WHERE clause */
