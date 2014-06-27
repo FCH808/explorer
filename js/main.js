@@ -69,8 +69,9 @@ define([
 	"esri/urlUtils",
 	"application/uiUtils",
 	"application/gridUtils",
-	"application/timelineLegendUtils"
-], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils) {
+	"application/timelineLegendUtils",
+	"application/sharingUtils"
+], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils) {
 	return declare(null, {
 
 		OUTFIELDS: "",
@@ -114,6 +115,8 @@ define([
 		userInterfaceUtils: {},
 		gridUtils: {},
 		timelineLegendUtils: {},
+		sharingUtils: {},
+
 		sharingUrl: "",
 
 		minimumId: "",
@@ -132,6 +135,7 @@ define([
 					this.userInterfaceUtils = new UserInterfaceUtils(this.config);
 					this.gridUtils = new GridUtils(this.config);
 					this.timelineLegendUtils = new TimelineLegendUtils(this.config);
+					this.sharingUtils = new SharingUtils(this.config);
 
 					//supply either the webmap id or, if available, the item info
 					var itemInfo = this.config.itemInfo || this.config.webmap;
@@ -199,8 +203,8 @@ define([
 
 					this.grid.on("dgrid-datachange", this.gridUtils.gridDataChangeHandler);
 					this.grid.on("dgrid-refresh-complete", this.gridUtils.gridRefreshHandler);
-					this.grid.on(mouseUtil.enterCell, this.gridUtils.gridEnterCellHandler);
-					this.grid.on(mouseUtil.leaveCell, lang.hitch(this, "_gridLeaveCellHandler"));
+					this.grid.on(mouseUtil.enterCell, lang.hitch(this, this.gridUtils.gridEnterCellHandler));
+					this.grid.on(mouseUtil.leaveCell, lang.hitch(this, this.gridUtils.gridLeaveCellHandler));
 
 					// timeline options
 					this.timelineOptions = {
@@ -311,10 +315,10 @@ define([
 			on(this.map, "extent-change", lang.hitch(this, "_mapExtentChangeHandler"));
 			on(this.map, "update-start", lang.hitch(this, "_updateStartHandler"));
 			on(this.map, "update-end", lang.hitch(this, "_updateEndHandler"));
-			on(document, ".share_facebook:click", lang.hitch(this, "shareFacebook"));
-			on(document, ".share_twitter:click", lang.hitch(this, "shareTwitter"));
-			on(document, ".share_bitly:click", lang.hitch(this, "requestBitly"));
-			on(document, "click", lang.hitch(this, "documentClickHandler"));
+			on(document, ".share_facebook:click", lang.hitch(this, this.sharingUtils.shareFacebook));
+			on(document, ".share_twitter:click", lang.hitch(this, this.sharingUtils.shareTwitter));
+			on(document, ".share_bitly:click", lang.hitch(this, this.sharingUtils.requestBitly));
+			on(document, "click", lang.hitch(this, this.sharingUtils.documentClickHandler));
 		},
 
 		_getUrlParameters:function () {
@@ -351,11 +355,11 @@ define([
 				maxDate = new Date(timelineDateRange.end).getFullYear();
 			}
 
-			query(".dgrid-row", grid.domNode).forEach(function (node) {
+			query(".dgrid-row", this.grid.domNode).forEach(lang.hitch(this, function (node) {
 				var row = this.grid.row(node);
 				objectIDs += row.data.objID + "|";
 				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
-			});
+			}));
 			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
 			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
 
@@ -401,12 +405,6 @@ define([
 					this.drawTimeline(this.timelineData);
 				});
 			});
-		},
-
-		_gridLeaveCellHandler:function (evt) {
-			this.map.graphics.remove(this.mouseOverGraphic);
-			this.map.graphics.clear();
-			this._addCrosshair(this.currentMapClickPoint);
 		},
 
 		createMouseOverGraphic:function (borderColor, fillColor) {
@@ -1065,88 +1063,6 @@ define([
 				"class":"timeline-mask",
 				"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.MSG_NO_MAPS + "</p>"
 			}, "timeline", "first");
-		},
-
-		documentClickHandler:function (evt) {
-			if (!$("#bitlyIcon").is(evt.target) && !$("#bitlyInput").is(evt.target) && !$(".popover-content").is(evt.target)) {
-				$(".popover").hide();
-			}
-		},
-
-		shareFacebook:function () {
-			var url = this._setSharingUrl();
-			var options = '&p[title]=' + encodeURIComponent($('#title').text())
-					+ '&p[summary]=' + encodeURIComponent($('#subtitle').text())
-					+ '&p[url]=' + encodeURIComponent(url)
-					+ '&p[images][0]=' + encodeURIComponent($("meta[property='og:image']").attr("content"));
-
-			window.open('http://www.facebook.com/sharer.php?s=100' + options, 'Facebook sharing', 'toolbar=0,status=0,width=626,height=436'
-			);
-		},
-
-		shareTwitter:function () {
-			var url = this._setSharingUrl();
-
-			var bitlyUrls = [
-				"http://api.bitly.com/v3/shorten?callback=?",
-				"https://api-ssl.bitly.com/v3/shorten?callback=?"
-			];
-			var bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1];
-
-			var urlParams = esri.urlToObject(url).query || {};
-			var targetUrl = url;
-
-			$.getJSON(
-					bitlyUrl,
-					{
-						"format":"json",
-						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
-						"login":"esristorymaps",
-						"longUrl":targetUrl
-					},
-					function (response) {
-						if (!response || !response || !response.data.url)
-							return;
-					}
-			).complete(function (response) {
-						options = 'text=' + encodeURIComponent($('#title').text()) +
-								'&url=' + encodeURIComponent(response.responseJSON.data.url) +
-								'&related=' + this.config.SHARING_RELATED +
-								'&hashtags=' + this.config.SHARING_HASHTAG;
-						window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
-					});
-			window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
-		},
-
-		requestBitly:function () {
-			var url = this._setSharingUrl();
-			var bitlyUrls = [
-				"http://api.bitly.com/v3/shorten?callback=?",
-				"https://api-ssl.bitly.com/v3/shorten?callback=?"
-			];
-			var bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1];
-
-			var urlParams = esri.urlToObject(url).query || {};
-			var targetUrl = url;
-
-			$.getJSON(
-					bitlyUrl,
-					{
-						"format":"json",
-						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
-						"login":"esristorymaps",
-						"longUrl":targetUrl
-					},
-					function (response) {
-						if (!response || !response || !response.data.url)
-							return;
-						$("#bitlyLoad").fadeOut();
-						$("#bitlyInput").fadeIn();
-						$("#bitlyInput").val(response.data.url);
-						$("#bitlyInput").select();
-					}
-			);
-			$(".popover").show();
 		}
 	});
 })

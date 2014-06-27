@@ -50,11 +50,10 @@ define([
 		},
 
 		gridEnterCellHandler: function (evt) {
-			console.log(evt);
 			if (this.mouseOverGraphic) {
 				this.map.graphics.remove(this.mouseOverGraphic);
 			}
-			var row = evt.grid.row(evt),
+			var row = this.grid.row(evt),
 				extent = row.data.extent,
 				sfs = this.createMouseOverGraphic(
 					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_BORDER),
@@ -62,6 +61,12 @@ define([
 				);
 			this.mouseOverGraphic = new Graphic(extent, sfs);
 			this.map.graphics.add(this.mouseOverGraphic);
+		},
+
+		gridLeaveCellHandler: function (evt) {
+			this.map.graphics.remove(this.mouseOverGraphic);
+			this.map.graphics.clear();
+			this._addCrosshair(this.currentMapClickPoint);
 		}
 	});
 });

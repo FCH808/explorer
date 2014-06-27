@@ -90,6 +90,6 @@ define([
 				query("" + stepName).style("display", "block");
 			if (stepMessage)
 				query("" + stepMessage).style("display", "block");
-		},
+		}
 	});
 });
