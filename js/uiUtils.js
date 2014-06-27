@@ -47,49 +47,54 @@ define([
 			this._setTimelineContainerStyle(this.config.TIMELINE_CONTAINER_BACKGROUND_COLOR);
 		},
 
-		_setAppHeaderStyle:function (txtColor, backgroundColor) {
+		_setAppHeaderStyle: function (txtColor, backgroundColor) {
 			query(".header").style("color", txtColor);
 			query(".header").style("background-color", backgroundColor);
 		},
 
-		_setAppHeaderTitle:function (str) {
+		_setAppHeaderTitle: function (str) {
 			query(".header-title")[0].innerHTML = str;
 		},
 
-		_setAppHeaderSubtitle:function (str) {
+		_setAppHeaderSubtitle: function (str) {
 			query(".subheader-title")[0].innerHTML = str;
 		},
 
-		_setAppMessage:function (node, str) {
+		_setAppMessage: function (node, str) {
 			query(node)[0].innerHTML = str;
 		},
 
-		_setTimelineLegendHeaderTitle:function (str) {
+		_setTimelineLegendHeaderTitle: function (str) {
 			query(".timeline-legend-header")[0].innerHTML = str;
 		},
 
-		_setHalfCircleStyle:function (backgroundColor, color, opacity) {
+		_setHalfCircleStyle: function (backgroundColor, color, opacity) {
 			query(".halfCircleRight").style("backgroundColor", backgroundColor);
 			query(".halfCircleRight").style("color", color);
 			query(".halfCircleRight").style("opacity", opacity);
 		},
 
-		_setTimelineContainerStyle:function (backgroundColor) {
+		_setTimelineContainerStyle: function (backgroundColor) {
 			domStyle.set(dom.byId("timeline-container"), "backgroundColor", backgroundColor);
 		},
 
 		hideStep: function (stepName, stepMessage) {
 			if (stepName)
-				query("" + stepName).style("display", "none");
+				query(stepName).style("display", "none");
 			if (stepMessage)
-				query("" + stepMessage).style("display", "none");
+				query(stepMessage).style("display", "none");
 		},
 
 		showStep: function (stepName, stepMessage) {
 			if (stepName)
-				query("" + stepName).style("display", "block");
+				query(stepName).style("display", "block");
 			if (stepMessage)
-				query("" + stepMessage).style("display", "block");
+				query(stepMessage).style("display", "block");
+		},
+
+		showGrid: function () {
+			query(".gridContainer").style("display", "block");
+			this.hideStep(".stepTwo", ".step-two-message");
 		}
 	});
 });

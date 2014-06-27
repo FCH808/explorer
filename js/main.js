@@ -174,7 +174,7 @@ define([
 						{
 							label:" ",
 							field:"name",
-							renderCell:lang.hitch(this, "_thumbnailRenderCell")
+							renderCell:lang.hitch(this, this.gridUtils.thumbnailRenderCell)
 						},
 						editor({
 							label:" ",
@@ -472,44 +472,6 @@ define([
 				this.drawTimeline(this.timelineData);
 			}));
 			domConstruct.place(node, query(".topo-legend")[0]);
-		},
-
-		_thumbnailRenderCell:function (object, data, td, options) {
-			var objID = object.objID;
-			var mapName = object.name;
-			var imprintYear = object.imprintYear;
-			var downloadLink = object.downloadLink;
-			var imgSrc = this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL;
-
-			var node = domConstruct.create("div", {
-				"class":"renderedCell",
-				"innerHTML":"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
-						"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
-						"<div class='thumbnailMapName'>" + mapName + "</div>" +
-						"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
-						"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
-				onclick:lang.hitch(this, function (evt) {
-					var objID = evt.target.getAttribute("data-objectid");
-					var storeObj = this.store.query({
-						objID:objID
-					});
-					// remove the layer
-					this.map.removeLayer(storeObj[0].layer);
-					// update the store
-					this.store.remove(parseInt(objID));
-					// update the UI
-					if (this.store.data.length < 1) {
-						// no remaining items in the grid/store
-						this.map.graphics.remove(this.mouseOverGraphic);
-						this.map.graphics.clear();
-						this._addCrosshair(this.currentMapClickPoint);
-						this.hideLoadingIndicator();
-						this.userInterfaceUtils.hideStep(".stepThree", ".step-three-message");
-						this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
-					}
-				})
-			});
-			return node;
 		},
 
 		_addCrosshair:function (mp) {
@@ -848,21 +810,11 @@ define([
 					})).then(lang.hitch(this, function (evt) {
 						this.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
 						this.userInterfaceUtils.showStep(".stepThree", ".step-three-message");
-						this.showGrid();
+						this.userInterfaceUtils.showGrid();
 						this.grid.refresh();
 					}));
 				}
 			}
-		},
-
-		showGrid:function () {
-			query(".gridContainer").style("display", "block");
-			this.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
-		},
-
-		hideLoadingIndicator:function () {
-			esri.hide(this._loading);
-			this.map.enableMapNavigation();
 		},
 
 		onTimelineReady:function () {
@@ -875,6 +827,11 @@ define([
 		showLoadingIndicator:function () {
 			esri.show(this._loading);
 			this.map.disableMapNavigation();
+		},
+
+		hideLoadingIndicator:function () {
+			esri.hide(this._loading);
+			this.map.enableMapNavigation();
 		},
 
 		runQuery:function (mapExtent, mp, lod) {
@@ -1024,5 +981,4 @@ define([
 			}, "timeline", "first");
 		}
 	});
-})
-;
+});

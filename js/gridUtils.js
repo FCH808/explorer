@@ -67,6 +67,43 @@ define([
 			this.map.graphics.remove(this.mouseOverGraphic);
 			this.map.graphics.clear();
 			this._addCrosshair(this.currentMapClickPoint);
+		},
+
+		thumbnailRenderCell: function (object, data, td, options) {
+			var objID = object.objID,
+				mapName = object.name,
+				imprintYear = object.imprintYear,
+				downloadLink = object.downloadLink,
+				imgSrc = this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL,
+				node = domConstruct.create("div", {
+					"class": "renderedCell",
+					"innerHTML": "<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
+						"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
+						"<div class='thumbnailMapName'>" + mapName + "</div>" +
+						"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
+						"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
+					onclick: lang.hitch(this, function (evt) {
+						var objID = evt.target.getAttribute("data-objectid"),
+							storeObj = this.store.query({
+								objID: objID
+							});
+						// remove the layer
+						this.map.removeLayer(storeObj[0].layer);
+						// update the store
+						this.store.remove(parseInt(objID));
+						// update the UI
+						if (this.store.data.length < 1) {
+							// no remaining items in the grid/store
+							this.map.graphics.remove(this.mouseOverGraphic);
+							this.map.graphics.clear();
+							this._addCrosshair(this.currentMapClickPoint);
+							this.hideLoadingIndicator();
+							this.userInterfaceUtils.hideStep(".stepThree", ".step-three-message");
+							this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
+						}
+					})
+				});
+			return node;
 		}
 	});
 });
