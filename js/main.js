@@ -71,8 +71,9 @@ define([
 	"application/gridUtils",
 	"application/timelineLegendUtils",
 	"application/sharingUtils",
-	"application/mapUtils"
-], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils, MappingUtils) {
+	"application/mapUtils",
+	"application/timelineUtils"
+], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils, MappingUtils, TimelineUtils) {
 	return declare(null, {
 
 		OUTFIELDS: "",
@@ -118,6 +119,7 @@ define([
 		timelineLegendUtils: {},
 		sharingUtils: {},
 		mapUtils: {},
+		timelineUtils: {},
 
 		sharingUrl: "",
 
@@ -137,6 +139,7 @@ define([
 					this.userInterfaceUtils = new UserInterfaceUtils(this.config);
 					this.gridUtils = new GridUtils(this.config);
 					this.timelineLegendUtils = new TimelineLegendUtils(this.config);
+					this.timelineUtils = new TimelineUtils(this.config);
 					this.sharingUtils = new SharingUtils(this.config);
 					this.mapUtils = new MappingUtils(this.config);
 
@@ -225,9 +228,9 @@ define([
 						"cluster":this.config.TIMELINE_CLUSTER,
 						"animate":this.config.TIMELINE_ANIMATE
 					};
-					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, "_buildLegend"));
+					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, this.timelineUtils.buildLegend));
 
-					this.watchSplitters(registry.byId("main-window"));
+					this._watchSplitters(registry.byId("main-window"));
 
 					this.timelineContainerNode = dom.byId("timeline-container");
 					//initUrlParamData(urlQueryObject);
@@ -393,7 +396,7 @@ define([
 			return this.sharingUrl;
 		},
 
-		watchSplitters:function (bc) {
+		_watchSplitters:function (bc) {
 			array.forEach(["bottom"], function (region) {
 				var spl = bc.getSplitter(region);
 				aspect.after(spl, "_startDrag", function () {
@@ -405,12 +408,12 @@ define([
 					var node = dom.byId("timeline-container");
 					this.timelineContainerNodeGeom = domStyle.getComputedStyle(this.timelineContainerNode);
 					this.timelineContainerGeometry = domGeom.getContentBox(node, this.timelineContainerNodeGeom);
-					this.drawTimeline(this.timelineData);
+					this._drawTimeline(this.timelineData);
 				});
 			});
 		},
 
-		createMouseOverGraphic:function (borderColor, fillColor) {
+		_createMouseOverGraphic:function (borderColor, fillColor) {
 			var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
 					new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, this.config.IMAGE_BORDER_WIDTH), fillColor);
 			return sfs;
@@ -427,51 +430,6 @@ define([
 				}
 			}, srcRef);
 			geocoder.startup();
-		},
-
-		_buildLegend:function (legendItem) {
-			var node = domConstruct.toDom('<label data-scale="' + legendItem.value + '" data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
-					'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
-					'</label>');
-
-			if (this.urlQueryObject) {
-				var _tmpFilters = this.urlQueryObject.f.split("|");
-				var num = number.format(legendItem.value, {
-					places:0,
-					pattern:"#"
-				});
-				var i = _tmpFilters.indexOf(num);
-				if (_tmpFilters[i] !== undefined) {
-					domClass.toggle(node, "sel");
-					domStyle.set(node, "opacity", "0.3");
-					this.filter.push(_tmpFilters[i]);
-				}
-			}
-
-			on(node, "click", lang.hitch(this, function (evt) {
-				var selectedScale = evt.target.getAttribute("data-scale");
-				domClass.toggle(node, "sel");
-				if (domClass.contains(node, "sel")) {
-					var j = this.filter.indexOf(selectedScale);
-					if (j === -1) {
-						this.filter.push(selectedScale);
-					}
-					domStyle.set(node, "opacity", "0.3");
-					this.filterSelection.push(selectedScale);
-				} else {
-					var k = this.filter.indexOf(selectedScale);
-					if (k !== -1) {
-						this.filter.splice(k, 1);
-					}
-					domStyle.set(node, "opacity", "1.0");
-					var i = this.filterSelection.indexOf(selectedScale);
-					if (i !== -1) {
-						this.filterSelection.splice(i, 1);
-					}
-				}
-				this.drawTimeline(this.timelineData);
-			}));
-			domConstruct.place(node, query(".topo-legend")[0]);
 		},
 
 		_addCrosshair:function (mp) {
@@ -636,7 +594,7 @@ define([
 			}
 		},
 
-		drawTimeline:function (data) {
+		_drawTimeline:function (data) {
 			this.filteredData = this._filterData(data, this.filter);
 			topic.subscribe("/dnd/drop", lang.hitch(this, function (source, nodes, copy, target) {
 				var layers = [];
@@ -681,8 +639,8 @@ define([
 				this.timeline = new links.Timeline(dom.byId("timeline"));
 				console.log(this.filteredData);
 				this.timeline.draw(this.filteredData, this.timelineOptions);
-				links.events.addListener(this.timeline, "ready", this.onTimelineReady);
-				links.events.addListener(this.timeline, "select", lang.hitch(this, "onSelect"));
+				links.events.addListener(this.timeline, "ready", this._onTimelineReady);
+				links.events.addListener(this.timeline, "select", lang.hitch(this, "_onSelect"));
 				//links.events.addListener(timeline, "rangechanged", timelineRangeChanged);
 				this.userInterfaceUtils.hideStep(".stepOne", "");
 				this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
@@ -711,7 +669,7 @@ define([
 						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
 						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
 						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-						sfs = this.createMouseOverGraphic(
+						sfs = this._createMouseOverGraphic(
 								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
 								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
 						this.mouseOverGraphic = new Graphic(extent, sfs);
@@ -721,7 +679,7 @@ define([
 					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
 					if (data) {
 						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-						sfs = this.createMouseOverGraphic(
+						sfs = this._createMouseOverGraphic(
 								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
 								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
 						this.mouseOverGraphic = new Graphic(extent, sfs);
@@ -735,11 +693,9 @@ define([
 				this.map.graphics.clear();
 				this._addCrosshair(this.currentMapClickPoint);
 			}));
-
-			this.hideLoadingIndicator();
 		},
 
-		onSelect:function () {
+		_onSelect:function () {
 			var sel = this.timeline.getSelection();
 			var _timelineData = this.timeline.getData();
 			if (sel.length) {
@@ -817,21 +773,11 @@ define([
 			}
 		},
 
-		onTimelineReady:function () {
+		_onTimelineReady:function () {
 			// if the grid is visible, step 3 is visible, so hide step 2
 			if (domStyle.get(query(".gridContainer")[0], "display") === "block") {
 				this.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
 			}
-		},
-
-		showLoadingIndicator:function () {
-			esri.show(this._loading);
-			this.map.disableMapNavigation();
-		},
-
-		hideLoadingIndicator:function () {
-			esri.hide(this._loading);
-			this.map.enableMapNavigation();
 		},
 
 		runQuery:function (mapExtent, mp, lod) {
@@ -850,7 +796,6 @@ define([
 				q.geometry = mapExtent.expand(this.config.EXTENT_EXPAND);
 			}
 
-			this.showLoadingIndicator();
 			var deferred = queryTask.execute(q).addCallback(lang.hitch(this, function (response) {
 				this.timelineData = [];
 				var nFeatures = response.features.length;
@@ -888,9 +833,9 @@ define([
 						var dateCurrent = new Date(feature.attributes[this.config.ATTRIBUTE_DATE]);
 						if (dateCurrent === null)
 							dateCurrent = this.config.MSG_UNKNOWN;
-						var day = this.formatDay(dateCurrent);
-						var month = this.formatMonth(dateCurrent);
-						var year = this.formatYear(dateCurrent);
+						var day = this._formatDay(dateCurrent);
+						var month = this._formatMonth(dateCurrent);
+						var year = this._formatYear(dateCurrent);
 						var formattedDate = month + "/" + day + "/" + year;
 
 						var startDate = new Date(dateCurrent, month, day);
@@ -920,20 +865,20 @@ define([
 						});
 					})); // END forEach
 				} else {
-					this.addNoResultsMask();
+					this._addNoResultsMask();
 				} // END QUERY
-				this.drawTimeline(this.timelineData);
+				this._drawTimeline(this.timelineData);
 			})); // END Deferred
 		},
 
-		formatDay:function (date) {
+		_formatDay:function (date) {
 			if (date instanceof Date)
 				return date.getDate();
 			else
 				return "";
 		},
 
-		formatMonth:function (date) {
+		_formatMonth:function (date) {
 			if (date instanceof Date) {
 				var month = date.getMonth();
 				if (month === 0) {
@@ -966,7 +911,7 @@ define([
 			}
 		},
 
-		formatYear:function (date) {
+		_formatYear:function (date) {
 			if (date instanceof Date) {
 				return date.getFullYear();
 			} else {
@@ -974,7 +919,7 @@ define([
 			}
 		},
 
-		addNoResultsMask:function () {
+		_addNoResultsMask:function () {
 			domConstruct.create("div", {
 				"class":"timeline-mask",
 				"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.MSG_NO_MAPS + "</p>"

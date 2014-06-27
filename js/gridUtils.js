@@ -29,6 +29,11 @@ define([
 			this.config = templateConfig;
 		},
 
+		/**
+		 * Fires any time a refresh call completes successfully.
+		 *
+		 * @param evt
+		 */
 		gridRefreshHandler: function (evt) {
 			array.forEach(evt.grid.store.data, function (node) {
 				var row = evt.grid.row(node),
@@ -44,18 +49,28 @@ define([
 			});
 		},
 
+		/**
+		 * Editor module when an editor field loses focus after being changed (handle the HSlider)
+		 *
+		 * @param evt
+		 */
 		gridDataChangeHandler: function (evt) {
 			var diff = 1 - evt.value;
 			evt.cell.row.data.layer.setOpacity(diff);
 		},
 
+		/**
+		 * Fires when the mouse moves into a cell within the body of a grid.
+		 *
+		 * @param evt
+		 */
 		gridEnterCellHandler: function (evt) {
 			if (this.mouseOverGraphic) {
 				this.map.graphics.remove(this.mouseOverGraphic);
 			}
 			var row = this.grid.row(evt),
 				extent = row.data.extent,
-				sfs = this.createMouseOverGraphic(
+				sfs = this._createMouseOverGraphic(
 					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_BORDER),
 					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_FILL)
 				);
@@ -63,6 +78,11 @@ define([
 			this.map.graphics.add(this.mouseOverGraphic);
 		},
 
+		/**
+		 * Fires when the mouse moves out of a cell within the body of a grid.
+		 *
+		 * @param evt
+		 */
 		gridLeaveCellHandler: function (evt) {
 			this.map.graphics.remove(this.mouseOverGraphic);
 			this.map.graphics.clear();

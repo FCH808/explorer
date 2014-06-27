@@ -22,13 +22,16 @@ define([
 ], function (declare, dom, domAttr, domStyle, query) {
 	return declare(null, {
 
-		config:{},
+		config: {},
 
-		constructor:function (templateConfig) {
+		constructor: function (templateConfig) {
 			//console.debug("uiUtils", templateConfig);
 			this.config = templateConfig;
 		},
 
+		/**
+		 * Load the app's styles
+		 */
 		loadAppStyles: function () {
 			document.title = this.config.APP_TITLE;
 			this._setAppHeaderStyle(this.config.APP_HEADER_TEXT_COLOR, this.config.APP_HEADER_BACKGROUND_COLOR);

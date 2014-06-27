@@ -21,8 +21,9 @@ define([
 	"dojo/dom-construct",
 	"dojo/dom-style",
 	"dojo/query",
+	"esri/dijit/Geocoder",
 	"esri/graphic"
-], function (declare, lang, dom, domAttr, domConstruct, domStyle, query, Graphic) {
+], function (declare, lang, dom, domAttr, domConstruct, domStyle, query, Geocoder, Graphic) {
 	return declare(null, {
 
 		config: {},
@@ -31,6 +32,11 @@ define([
 			this.config = templateConfig;
 		},
 
+		/**
+		 * Map click handler
+		 *
+		 * @param evt
+		 */
 		mapClickHandler: function (evt) {
 			this.currentMapClickPoint = evt.mapPoint;
 			this.currentLOD = this.map.getLevel();
@@ -42,6 +48,11 @@ define([
 			this.runQuery(this.currentMapExtent, this.currentMapClickPoint, this.currentLOD);
 		},
 
+		/**
+		 * Map extent change handler
+		 *
+		 * @param evt
+		 */
 		mapExtentChangeHandler: function (evt) {
 			this.currentMapExtent = evt.extent;
 			this.currentLOD = evt.lod.level;
@@ -65,11 +76,17 @@ define([
 			}));
 		},
 
+		/**
+		 * Update started handler
+		 */
 		updateStartHandler: function () {
 			esri.show(this._loading);
 			this.map.disableMapNavigation();
 		},
 
+		/**
+		 * Updated ended handler
+		 */
 		updateEndHandler: function () {
 			esri.hide(this._loading);
 			this.map.enableMapNavigation();
