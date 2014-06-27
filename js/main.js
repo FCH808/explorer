@@ -70,8 +70,9 @@ define([
 	"application/uiUtils",
 	"application/gridUtils",
 	"application/timelineLegendUtils",
-	"application/sharingUtils"
-], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils) {
+	"application/sharingUtils",
+	"application/mapUtils"
+], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils, MappingUtils) {
 	return declare(null, {
 
 		OUTFIELDS: "",
@@ -116,6 +117,7 @@ define([
 		gridUtils: {},
 		timelineLegendUtils: {},
 		sharingUtils: {},
+		mapUtils: {},
 
 		sharingUrl: "",
 
@@ -136,6 +138,7 @@ define([
 					this.gridUtils = new GridUtils(this.config);
 					this.timelineLegendUtils = new TimelineLegendUtils(this.config);
 					this.sharingUtils = new SharingUtils(this.config);
+					this.mapUtils = new MappingUtils(this.config);
 
 					//supply either the webmap id or, if available, the item info
 					var itemInfo = this.config.itemInfo || this.config.webmap;
@@ -311,10 +314,10 @@ define([
 			// Load the Geocoder Dijit
 			this._initGeocoderDijit("geocoder");
 
-			on(this.map, "click", lang.hitch(this, "_mapClickHandler"));
-			on(this.map, "extent-change", lang.hitch(this, "_mapExtentChangeHandler"));
-			on(this.map, "update-start", lang.hitch(this, "_updateStartHandler"));
-			on(this.map, "update-end", lang.hitch(this, "_updateEndHandler"));
+			on(this.map, "click", lang.hitch(this, this.mapUtils.mapClickHandler));
+			on(this.map, "extent-change", lang.hitch(this, this.mapUtils.mapExtentChangeHandler));
+			on(this.map, "update-start", lang.hitch(this, this.mapUtils.updateStartHandler));
+			on(this.map, "update-end", lang.hitch(this, this.mapUtils.updateEndHandler));
 			on(document, ".share_facebook:click", lang.hitch(this, this.sharingUtils.shareFacebook));
 			on(document, ".share_twitter:click", lang.hitch(this, this.sharingUtils.shareTwitter));
 			on(document, ".share_bitly:click", lang.hitch(this, this.sharingUtils.requestBitly));
@@ -411,50 +414,6 @@ define([
 			var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
 					new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, this.config.IMAGE_BORDER_WIDTH), fillColor);
 			return sfs;
-		},
-
-		_mapClickHandler:function (evt) {
-			this.currentMapClickPoint = evt.mapPoint;
-			this.currentLOD = this.map.getLevel();
-			if (this.crosshairGraphic) {
-				this.map.graphics.remove(this.crosshairGraphic);
-			}
-			this.crosshairGraphic = new Graphic(this.currentMapClickPoint, this.crosshairSymbol);
-			this.map.graphics.add(this.crosshairGraphic);
-			this.runQuery(this.currentMapExtent, this.currentMapClickPoint, this.currentLOD);
-		},
-
-		_mapExtentChangeHandler:function (evt) {
-			this.currentMapExtent = evt.extent;
-			this.currentLOD = evt.lod.level;
-			query(".dgrid-row").forEach(lang.hitch(this, function (node) {
-				var row = this.grid.row(node);
-				var lodThreshold = row.data.lodThreshold;
-				var maskId = domAttr.get(node, "id") + "-mask";
-				if (this.currentLOD <= lodThreshold) {
-					// disable row
-					if (dom.byId("" + maskId) === null) {
-						domConstruct.create("div", {
-							id:"" + maskId,
-							"class":"grid-map",
-							innerHTML:"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
-						}, node, "first");
-					}
-				} else {
-					// enable row
-					domConstruct.destroy("" + maskId);
-				}
-			}));
-		},
-
-		_updateStartHandler:function () {
-			esri.show(this._loading);
-			this.map.disableMapNavigation();
-		},
-
-		_updateEndHandler:function () {
-			esri.hide(this._loading);
-			this.map.enableMapNavigation();
 		},
 
 		_initGeocoderDijit:function (srcRef) {
