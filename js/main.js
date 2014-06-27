@@ -228,7 +228,7 @@ define([
 						"cluster":this.config.TIMELINE_CLUSTER,
 						"animate":this.config.TIMELINE_ANIMATE
 					};
-					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, this.timelineUtils.buildLegend));
+					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, this.timelineLegendUtils.buildLegend));
 
 					this._watchSplitters(registry.byId("main-window"));
 
