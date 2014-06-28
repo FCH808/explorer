@@ -9,6 +9,8 @@
 
 <a href="http://chrismahlke.github.io/explorer_dev/" target="_blank">Demo</a>
 
+<img src="https://raw.githubusercontent.com/ChrisMahlke/explorer/master/header.png" width="50%">
+
 #### Issues
 
 Find a bug or want to request a new feature?  Please let us know by submitting an issue.
