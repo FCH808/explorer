@@ -22,6 +22,55 @@ define([
 
 		constructor: function (templateConfig) {
 			this.config = templateConfig;
+		},
+
+		formatDay:function (date) {
+			if (date instanceof Date) {
+				return date.getDate();
+			} else {
+				return "";
+			}
+		},
+
+		formatMonth:function (date) {
+			if (date instanceof Date) {
+				var month = date.getMonth();
+				if (month === 0) {
+					return "01";
+				} else if (month === 1) {
+					return "02";
+				} else if (month === 2) {
+					return "03";
+				} else if (month === 3) {
+					return "04";
+				} else if (month === 4) {
+					return "05";
+				} else if (month === 5) {
+					return "06";
+				} else if (month === 6) {
+					return "07";
+				} else if (month === 7) {
+					return "08";
+				} else if (month === 8) {
+					return "09";
+				} else if (month === 9) {
+					return "10";
+				} else if (month === 10) {
+					return "11";
+				} else if (month === 11) {
+					return "12";
+				}
+			} else {
+				return "";
+			}
+		},
+
+		formatYear:function (date) {
+			if (date instanceof Date) {
+				return date.getFullYear();
+			} else {
+				return "";
+			}
 		}
 	});
 });

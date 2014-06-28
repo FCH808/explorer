@@ -833,9 +833,9 @@ define([
 						var dateCurrent = new Date(feature.attributes[this.config.ATTRIBUTE_DATE]);
 						if (dateCurrent === null)
 							dateCurrent = this.config.MSG_UNKNOWN;
-						var day = this._formatDay(dateCurrent);
-						var month = this._formatMonth(dateCurrent);
-						var year = this._formatYear(dateCurrent);
+						var day = this.timelineUtils.formatDay(dateCurrent);
+						var month = this.timelineUtils.formatMonth(dateCurrent);
+						var year = this.timelineUtils.formatYear(dateCurrent);
 						var formattedDate = month + "/" + day + "/" + year;
 
 						var startDate = new Date(dateCurrent, month, day);
@@ -869,54 +869,6 @@ define([
 				} // END QUERY
 				this._drawTimeline(this.timelineData);
 			})); // END Deferred
-		},
-
-		_formatDay:function (date) {
-			if (date instanceof Date)
-				return date.getDate();
-			else
-				return "";
-		},
-
-		_formatMonth:function (date) {
-			if (date instanceof Date) {
-				var month = date.getMonth();
-				if (month === 0) {
-					return "01";
-				} else if (month === 1) {
-					return "02";
-				} else if (month === 2) {
-					return "03";
-				} else if (month === 3) {
-					return "04";
-				} else if (month === 4) {
-					return "05";
-				} else if (month === 5) {
-					return "06";
-				} else if (month === 6) {
-					return "07";
-				} else if (month === 7) {
-					return "08";
-				} else if (month === 8) {
-					return "09";
-				} else if (month === 9) {
-					return "10";
-				} else if (month === 10) {
-					return "11";
-				} else if (month === 11) {
-					return "12";
-				}
-			} else {
-				return "";
-			}
-		},
-
-		_formatYear:function (date) {
-			if (date instanceof Date) {
-				return date.getFullYear();
-			} else {
-				return "";
-			}
 		},
 
 		_addNoResultsMask:function () {
