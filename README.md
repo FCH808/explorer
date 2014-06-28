@@ -9,7 +9,7 @@
 
 <a href="http://chrismahlke.github.io/explorer_dev/" target="_blank">Demo</a>
 
-<img src="https://raw.githubusercontent.com/ChrisMahlke/explorer/master/header.png" width="80%">
+<img src="https://raw.githubusercontent.com/ChrisMahlke/explorer/master/header.png" width="100%">
 
 #### Issues
 
