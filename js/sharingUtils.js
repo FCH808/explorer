@@ -14,13 +14,16 @@
  | limitations under the License.
  */
 define([
+	"dojo/_base/array",
 	"dojo/_base/declare",
 	"dojo/_base/lang",
-	"dojo/query"
-], function (declare, lang, query) {
+	"dojo/query",
+	"esri/urlUtils"
+], function (array, declare, lang, query, urlUtils) {
 	return declare(null, {
 
-		config:{},
+		config: {},
+		sharingUrl: "",
 
 		constructor:function (templateConfig) {
 			this.config = templateConfig;
@@ -33,13 +36,13 @@ define([
 		},
 
 		requestBitly: function () {
-			var url = this._setSharingUrl(),
+			var url = this.sharingUtils._setSharingUrl(this),
 				bitlyUrls = [
 					"http://api.bitly.com/v3/shorten?callback=?",
 					"https://api-ssl.bitly.com/v3/shorten?callback=?"
 				],
 				bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1],
-				urlParams = esri.urlToObject(url).query || {},
+				urlParams = urlUtils.urlToObject(url).query || {},
 				targetUrl = url;
 
 			$.getJSON(
@@ -63,7 +66,7 @@ define([
 		},
 
 		shareFacebook: function () {
-			var url = this._setSharingUrl(),
+			var url = this.sharingUtils._setSharingUrl(this),
 				options = '&p[title]=' + encodeURIComponent($('#title').text())
 					+ '&p[summary]=' + encodeURIComponent($('#subtitle').text())
 					+ '&p[url]=' + encodeURIComponent(url)
@@ -73,14 +76,15 @@ define([
 		},
 
 		shareTwitter: function () {
-			var url = this._setSharingUrl(),
+			var url = this.sharingUtils._setSharingUrl(this),
 				bitlyUrls = [
 					"http://api.bitly.com/v3/shorten?callback=?",
 					"https://api-ssl.bitly.com/v3/shorten?callback=?"
 				],
 				bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1],
-				urlParams = esri.urlToObject(url).query || {},
-				targetUrl = url;
+				urlParams = urlUtils.urlToObject(url).query || {},
+				targetUrl = url,
+				options;
 
 			$.getJSON(
 					bitlyUrl,
@@ -91,17 +95,82 @@ define([
 						"longUrl":targetUrl
 					},
 					function (response) {
-						if (!response || !response || !response.data.url)
+						if (!response || !response || !response.data.url) {
 							return;
+						}
 					}
 			).complete(function (response) {
-						options = 'text=' + encodeURIComponent($('#title').text()) +
-								'&url=' + encodeURIComponent(response.responseJSON.data.url) +
-								'&related=' + this.config.SHARING_RELATED +
-								'&hashtags=' + this.config.SHARING_HASHTAG;
-						window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
-					});
-			window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
+				options = 'text=' + encodeURIComponent($('#title').text()) +
+						'&url=' + encodeURIComponent(response.responseJSON.data.url) +
+						'&related=' + this.config.SHARING_RELATED +
+						'&hashtags=' + this.config.SHARING_HASHTAG;
+				window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
+			});
+			//window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
+		},
+
+		_setSharingUrl: function (_self) {
+			var mapClickX,
+				mapClickY,
+				timelineDateRange = "",
+				minDate = "",
+				maxDate = "",
+				objectIDs = "",
+				downloadIDs = "",
+				filters = "";
+			if (!_self.currentMapClickPoint) {
+				// User is sharing the app but never even clicked on the map
+				// Leave these params empty
+				mapClickX = "";
+				mapClickY = "";
+			} else {
+				mapClickX = _self.currentMapClickPoint.x;
+				mapClickY = _self.currentMapClickPoint.y;
+			}
+
+			var lat = _self.map.extent.getCenter().getLatitude();
+			var lng = _self.map.extent.getCenter().getLongitude();
+			var zoomLevel = _self.map.getLevel();
+
+			if (_self.timeline) {
+				timelineDateRange = _self.timeline.getVisibleChartRange();
+				minDate = new Date(timelineDateRange.start).getFullYear();
+				maxDate = new Date(timelineDateRange.end).getFullYear();
+			}
+
+			query(".dgrid-row", _self.grid.domNode).forEach(lang.hitch(_self, function (node) {
+				var row = _self.grid.row(node);
+				objectIDs += row.data.objID + "|";
+				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
+			}));
+			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
+			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
+
+			array.forEach(_self.filterSelection, function (filter) {
+				filters += filter + "|";
+			});
+			filters = filters.substr(0, filters.length - 1);
+
+			var protocol = window.location.protocol;
+			var host = window.location.host;
+			var pathName = window.location.pathname;
+			var fileName = "";
+			var pathArray = window.location.pathname.split("/");
+			if (pathArray[pathArray.length - 1] !== "index.html") {
+				fileName = "index.html";
+			} else {
+				fileName = "";
+			}
+
+			this.sharingUrl = protocol + "//" + host + pathName + fileName +
+					"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
+					"&minDate=" + minDate + "&maxDate=" + maxDate +
+					"&oids=" + objectIDs +
+					"&dlids=" + downloadIDs +
+					"&f=" + filters +
+					"&clickLat=" + mapClickX +
+					"&clickLng=" + mapClickY;
+			return this.sharingUrl;
 		}
 	});
 });

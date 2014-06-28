@@ -121,8 +121,6 @@ define([
 		mapUtils: {},
 		timelineUtils: {},
 
-		sharingUrl: "",
-
 		minimumId: "",
 
 		config: {},
@@ -330,70 +328,6 @@ define([
 		_getUrlParameters:function () {
 			var urlObject = urlUtils.urlToObject(window.location.href);
 			return urlObject.query;
-		},
-
-		_setSharingUrl:function () {
-			var mapClickX,
-					mapClickY,
-					timelineDateRange = "",
-					minDate = "",
-					maxDate = "",
-					objectIDs = "",
-					downloadIDs = "",
-					filters = "";
-			if (!this.currentMapClickPoint) {
-				// User is sharing the app but never even clicked on the map
-				// Leave these params empty
-				mapClickX = "";
-				mapClickY = "";
-			} else {
-				mapClickX = this.currentMapClickPoint.x;
-				mapClickY = this.currentMapClickPoint.y;
-			}
-
-			var lat = this.map.extent.getCenter().getLatitude();
-			var lng = this.map.extent.getCenter().getLongitude();
-			var zoomLevel = this.map.getLevel();
-
-			if (this.timeline) {
-				timelineDateRange = this.timeline.getVisibleChartRange();
-				minDate = new Date(timelineDateRange.start).getFullYear();
-				maxDate = new Date(timelineDateRange.end).getFullYear();
-			}
-
-			query(".dgrid-row", this.grid.domNode).forEach(lang.hitch(this, function (node) {
-				var row = this.grid.row(node);
-				objectIDs += row.data.objID + "|";
-				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
-			}));
-			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
-			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
-
-			array.forEach(this.filterSelection, function (filter) {
-				filters += filter + "|";
-			});
-			filters = filters.substr(0, filters.length - 1);
-
-			var protocol = window.location.protocol;
-			var host = window.location.host;
-			var pathName = window.location.pathname;
-			var fileName = "";
-			var pathArray = window.location.pathname.split("/");
-			if (pathArray[pathArray.length - 1] !== "index.html") {
-				fileName = "index.html";
-			} else {
-				fileName = "";
-			}
-
-			this.sharingUrl = protocol + "//" + host + pathName + fileName +
-					"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
-					"&minDate=" + minDate + "&maxDate=" + maxDate +
-					"&oids=" + objectIDs +
-					"&dlids=" + downloadIDs +
-					"&f=" + filters +
-					"&clickLat=" + mapClickX +
-					"&clickLng=" + mapClickY;
-			return this.sharingUrl;
 		},
 
 		_watchSplitters:function (bc) {
