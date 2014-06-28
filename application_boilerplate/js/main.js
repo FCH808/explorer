@@ -68,57 +68,64 @@ define([
 	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"application/uiUtils",
-	"application/timelineLegendUtils"
-], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, TimelineLegendUtils) {
+	"application/gridUtils",
+	"application/timelineLegendUtils",
+	"application/sharingUtils",
+	"application/mapUtils",
+	"application/timelineUtils"
+], function (ready, array, declare, fx, lang, Deferred, aspect, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, mouse, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Extent, Point, SpatialReference, Graphic, ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ImageServiceParameters, MosaicRule, Map, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils, MappingUtils, TimelineUtils) {
 	return declare(null, {
 
-		OUTFIELDS:"",
-		TOKEN:"",
-		IMAGE_SERVICE_URL:"",
-		imageServiceLayer:"",
-		DOWNLOAD_PATH:"",
-		TOPO_MAP_SCALES:"",
-		mapScaleValues:[],
+		OUTFIELDS: "",
+		IMAGE_SERVICE_URL: "",
+		imageServiceLayer: "",
+		DOWNLOAD_PATH: "",
+		TOPO_MAP_SCALES: "",
+		mapScaleValues: [],
 
-		nScales:"",
-		maxScaleValue:"",
-		minScaleValue:"",
+		nScales: "",
+		maxScaleValue: "",
+		minScaleValue: "",
 
-		_loading:"",
-		urlQueryObject:"",
+		_loading: "",
+		urlQueryObject: "",
 
-		currentLOD:"",
-		currentMapClickPoint:"",
-		currentMapExtent:"",
+		currentLOD: "",
+		currentMapClickPoint: "",
+		currentMapExtent: "",
 
-		crosshairGraphic:"",
-		crosshairSymbol:"",
+		crosshairGraphic: "",
+		crosshairSymbol: "",
 
-		data:"",
-		grid:"",
-		store:"",
-		storeData:[],
+		data: "",
+		grid: "",
+		store: "",
+		storeData: [],
 
-		timelineContainerNode:"",
-		timeline:"",
-		timelineOptions:"",
-		timelineContainerNodeGeom:"",
-		timelineContainerGeometry:"",
-		timelineData:[],
+		timelineContainerNode: "",
+		timeline: "",
+		timelineOptions: "",
+		timelineContainerNodeGeom: "",
+		timelineContainerGeometry: "",
+		timelineData: [],
 
-		mouseOverGraphic:"",
-		filterSelection:[],
-		filter:[],
-		filteredData:"",
+		mouseOverGraphic: "",
+		filterSelection: [],
+		filter: [],
+		filteredData: "",
 
 		userInterfaceUtils: {},
-		sharingUrl:"",
+		gridUtils: {},
+		timelineLegendUtils: {},
+		sharingUtils: {},
+		mapUtils: {},
+		timelineUtils: {},
 
-		minimumId:"",
+		minimumId: "",
 
-		config:{},
+		config: {},
 
-		startup:function (config) {
+		startup: function (config) {
 			// config will contain application and user defined info for the template such as i18n strings, the web map id
 			// and application id
 			// any url parameters and any application specific configuration information.
@@ -128,16 +135,18 @@ define([
 				ready(lang.hitch(this, function () {
 
 					this.userInterfaceUtils = new UserInterfaceUtils(this.config);
-					var timelineLegendUtils = new TimelineLegendUtils(this.config);
+					this.gridUtils = new GridUtils(this.config);
+					this.timelineLegendUtils = new TimelineLegendUtils(this.config);
+					this.timelineUtils = new TimelineUtils(this.config);
+					this.sharingUtils = new SharingUtils(this.config);
+					this.mapUtils = new MappingUtils(this.config);
 
 					//supply either the webmap id or, if available, the item info
 					var itemInfo = this.config.itemInfo || this.config.webmap;
 					this._createWebMap(itemInfo);
 
-					document.title = this.config.APP_TITLE;
 					this.OUTFIELDS = this.config.OUTFIELDS;
-					this.TOKEN = this.config.TOKEN;
-					this.IMAGE_SERVICE_URL = this.config.IMAGE_SERVER + this.config.IMAGE_SERVER_JSON + this.TOKEN;
+					this.IMAGE_SERVICE_URL = this.config.IMAGE_SERVER;
 					this.TOPO_MAP_SCALES = this.config.TIMELINE_LEGEND_VALUES;
 					this.DOWNLOAD_PATH = this.config.DOWNLOAD_PATH;
 
@@ -147,14 +156,14 @@ define([
 
 					this.crosshairSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CROSS, this.config.CROSSHAIR_SIZE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color(this.config.CROSSHAIR_FILL_COLOR), this.config.CROSSHAIR_OPACITY));
 
-					this.nScales = timelineLegendUtils.getNumberOfScales(this.TOPO_MAP_SCALES);
-					this.maxScaleValue = timelineLegendUtils.getMaxScaleValue(this.TOPO_MAP_SCALES);
-					this.minScaleValue = timelineLegendUtils.getMinScaleValue(this.TOPO_MAP_SCALES);
+					this.nScales = this.timelineLegendUtils.getNumberOfScales(this.TOPO_MAP_SCALES);
+					this.maxScaleValue = this.timelineLegendUtils.getMaxScaleValue(this.TOPO_MAP_SCALES);
+					this.minScaleValue = this.timelineLegendUtils.getMinScaleValue(this.TOPO_MAP_SCALES);
 
 					this.userInterfaceUtils.loadAppStyles();
 
 					this._loading = dom.byId("loadingImg");
-					this.urlQueryObject = this.getUrlParameters();
+					this.urlQueryObject = this._getUrlParameters();
 					//initBaseMap(urlQueryObject);
 
 					var columns = [
@@ -166,7 +175,7 @@ define([
 						{
 							label:" ",
 							field:"name",
-							renderCell:lang.hitch(this, "thumbnailRenderCell")
+							renderCell:lang.hitch(this, this.gridUtils.thumbnailRenderCell)
 						},
 						editor({
 							label:" ",
@@ -181,7 +190,7 @@ define([
 					];
 
 					this.grid = new (declare([OnDemandGrid, Selection, DnD, Keyboard]))({
-						store:this.store = this.createOrderedStore(this.storeData, {
+						store:this.store = this._createOrderedStore(this.storeData, {
 							idProperty:"objID"
 						}),
 						idProperty:"objID",
@@ -196,10 +205,10 @@ define([
 						}
 					}, "grid");
 
-					this.grid.on("dgrid-datachange", lang.hitch(this, "gridDataChangeHandler"));
-					this.grid.on("dgrid-refresh-complete", lang.hitch(this, "gridRefreshHandler"));
-					this.grid.on(mouseUtil.enterCell, lang.hitch(this, "gridEnterCellHandler"));
-					this.grid.on(mouseUtil.leaveCell, lang.hitch(this, "gridLeaveCellHandler"));
+					this.grid.on("dgrid-datachange", this.gridUtils.gridDataChangeHandler);
+					this.grid.on("dgrid-refresh-complete", this.gridUtils.gridRefreshHandler);
+					this.grid.on(mouseUtil.enterCell, lang.hitch(this, this.gridUtils.gridEnterCellHandler));
+					this.grid.on(mouseUtil.leaveCell, lang.hitch(this, this.gridUtils.gridLeaveCellHandler));
 
 					// timeline options
 					this.timelineOptions = {
@@ -217,9 +226,9 @@ define([
 						"cluster":this.config.TIMELINE_CLUSTER,
 						"animate":this.config.TIMELINE_ANIMATE
 					};
-					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, "buildLegend"));
+					array.forEach(this.config.TIMELINE_LEGEND_VALUES, lang.hitch(this, this.timelineLegendUtils.buildLegend));
 
-					this.watchSplitters(registry.byId("main-window"));
+					this._watchSplitters(registry.byId("main-window"));
 
 					this.timelineContainerNode = dom.byId("timeline-container");
 					//initUrlParamData(urlQueryObject);
@@ -299,29 +308,29 @@ define([
 			if (this.urlQueryObject !== null) {
 				var _mp = new Point([this.urlQueryObject.clickLat, this.urlQueryObject.clickLng], new SpatialReference({ wkid:102100 }));
 				// add crosshair
-				this.addCrosshair(_mp);
+				this._addCrosshair(_mp);
 			}
 
 			//// external logic ////
 			// Load the Geocoder Dijit
 			this._initGeocoderDijit("geocoder");
 
-			on(this.map, "click", lang.hitch(this, "_mapClickHandler"));
-			on(this.map, "extent-change", lang.hitch(this, "_mapExtentChangeHandler"));
-			on(this.map, "update-start", lang.hitch(this, "_updateStartHandler"));
-			on(this.map, "update-end", lang.hitch(this, "_updateEndHandler"));
-			on(document, ".share_facebook:click", lang.hitch(this, "shareFacebook"));
-			on(document, ".share_twitter:click", lang.hitch(this, "shareTwitter"));
-			on(document, ".share_bitly:click", lang.hitch(this, "requestBitly"));
-			on(document, "click", lang.hitch(this, "documentClickHandler"));
+			on(this.map, "click", lang.hitch(this, this.mapUtils.mapClickHandler));
+			on(this.map, "extent-change", lang.hitch(this, this.mapUtils.mapExtentChangeHandler));
+			on(this.map, "update-start", lang.hitch(this, this.mapUtils.updateStartHandler));
+			on(this.map, "update-end", lang.hitch(this, this.mapUtils.updateEndHandler));
+			on(document, ".share_facebook:click", lang.hitch(this, this.sharingUtils.shareFacebook));
+			on(document, ".share_twitter:click", lang.hitch(this, this.sharingUtils.shareTwitter));
+			on(document, ".share_bitly:click", lang.hitch(this, this.sharingUtils.requestBitly));
+			on(document, "click", lang.hitch(this, this.sharingUtils.documentClickHandler));
 		},
 
-		getUrlParameters:function () {
+		_getUrlParameters:function () {
 			var urlObject = urlUtils.urlToObject(window.location.href);
 			return urlObject.query;
 		},
 
-		watchSplitters:function (bc) {
+		_watchSplitters:function (bc) {
 			array.forEach(["bottom"], function (region) {
 				var spl = bc.getSplitter(region);
 				aspect.after(spl, "_startDrag", function () {
@@ -333,97 +342,15 @@ define([
 					var node = dom.byId("timeline-container");
 					this.timelineContainerNodeGeom = domStyle.getComputedStyle(this.timelineContainerNode);
 					this.timelineContainerGeometry = domGeom.getContentBox(node, this.timelineContainerNodeGeom);
-					this.drawTimeline(this.timelineData);
+					this._drawTimeline(this.timelineData);
 				});
 			});
 		},
 
-		gridRefreshHandler:function (evt) {
-			array.forEach(evt.grid.store.data, lang.hitch(this, function (node) {
-				var row = this.grid.row(node);
-				var lodThreshold = row.data.lodThreshold;
-				var maskId = "grid-row-" + row.data.objID + "-mask";
-				if (this.currentLOD <= lodThreshold) {
-					domConstruct.create("div", {
-						id:"" + maskId,
-						"class":"grid-map",
-						innerHTML:"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
-					}, row.element, "first");
-				}
-			}));
-		},
-
-		gridEnterCellHandler:function (evt) {
-			if (this.mouseOverGraphic)
-				this.map.graphics.remove(this.mouseOverGraphic);
-			var row = this.grid.row(evt);
-			var extent = row.data.extent;
-			var sfs = this.createMouseOverGraphic(
-					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_BORDER),
-					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_FILL));
-			this.mouseOverGraphic = new Graphic(extent, sfs);
-			this.map.graphics.add(this.mouseOverGraphic);
-		},
-
-		gridLeaveCellHandler:function (evt) {
-			this.map.graphics.remove(this.mouseOverGraphic);
-			this.map.graphics.clear();
-			this.addCrosshair(this.currentMapClickPoint);
-		},
-
-		createMouseOverGraphic:function (borderColor, fillColor) {
+		_createMouseOverGraphic:function (borderColor, fillColor) {
 			var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
 					new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, this.config.IMAGE_BORDER_WIDTH), fillColor);
 			return sfs;
-		},
-
-		gridDataChangeHandler:function (evt) {
-			var diff = 1 - evt.value;
-			evt.cell.row.data.layer.setOpacity(diff);
-		},
-
-		_mapClickHandler:function (evt) {
-			this.currentMapClickPoint = evt.mapPoint;
-			this.currentLOD = this.map.getLevel();
-			if (this.crosshairGraphic) {
-				this.map.graphics.remove(this.crosshairGraphic);
-			}
-			this.crosshairGraphic = new Graphic(this.currentMapClickPoint, this.crosshairSymbol);
-			this.map.graphics.add(this.crosshairGraphic);
-			this.runQuery(this.currentMapExtent, this.currentMapClickPoint, this.currentLOD);
-		},
-
-		_mapExtentChangeHandler:function (evt) {
-			this.currentMapExtent = evt.extent;
-			this.currentLOD = evt.lod.level;
-			query(".dgrid-row").forEach(lang.hitch(this, function (node) {
-				var row = this.grid.row(node);
-				var lodThreshold = row.data.lodThreshold;
-				var maskId = domAttr.get(node, "id") + "-mask";
-				if (this.currentLOD <= lodThreshold) {
-					// disable row
-					if (dom.byId("" + maskId) === null) {
-						domConstruct.create("div", {
-							id:"" + maskId,
-							"class":"grid-map",
-							innerHTML:"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
-						}, node, "first");
-					}
-				} else {
-					// enable row
-					domConstruct.destroy("" + maskId);
-				}
-			}));
-		},
-
-		_updateStartHandler:function () {
-			esri.show(this._loading);
-			this.map.disableMapNavigation();
-		},
-
-		_updateEndHandler:function () {
-			esri.hide(this._loading);
-			this.map.enableMapNavigation();
 		},
 
 		_initGeocoderDijit:function (srcRef) {
@@ -439,90 +366,7 @@ define([
 			geocoder.startup();
 		},
 
-		buildLegend:function (legendItem) {
-			var node = domConstruct.toDom('<label data-scale="' + legendItem.value + '" data-placement="right" class="btn toggle-scale active" style="background-color: ' + legendItem.color + '">' +
-					'<input type="checkbox" name="options"><span data-scale="' + legendItem.value + '">' + legendItem.label + '</span>' +
-					'</label>');
-
-			if (this.urlQueryObject) {
-				var _tmpFilters = this.urlQueryObject.f.split("|");
-				var num = number.format(legendItem.value, {
-					places:0,
-					pattern:"#"
-				});
-				var i = _tmpFilters.indexOf(num);
-				if (_tmpFilters[i] !== undefined) {
-					domClass.toggle(node, "sel");
-					domStyle.set(node, "opacity", "0.3");
-					this.filter.push(_tmpFilters[i]);
-				}
-			}
-
-			on(node, "click", lang.hitch(this, function (evt) {
-				var selectedScale = evt.target.getAttribute("data-scale");
-				domClass.toggle(node, "sel");
-				if (domClass.contains(node, "sel")) {
-					var j = this.filter.indexOf(selectedScale);
-					if (j === -1) {
-						this.filter.push(selectedScale);
-					}
-					domStyle.set(node, "opacity", "0.3");
-					this.filterSelection.push(selectedScale);
-				} else {
-					var k = this.filter.indexOf(selectedScale);
-					if (k !== -1) {
-						this.filter.splice(k, 1);
-					}
-					domStyle.set(node, "opacity", "1.0");
-					var i = this.filterSelection.indexOf(selectedScale);
-					if (i !== -1) {
-						this.filterSelection.splice(i, 1);
-					}
-				}
-				this.drawTimeline(this.timelineData);
-			}));
-			domConstruct.place(node, query(".topo-legend")[0]);
-		},
-
-		thumbnailRenderCell:function (object, data, td, options) {
-			var objID = object.objID;
-			var mapName = object.name;
-			var imprintYear = object.imprintYear;
-			var downloadLink = object.downloadLink;
-			var imgSrc = this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + this.config.INFO_THUMBNAIL_TOKEN;
-
-			var node = domConstruct.create("div", {
-				"class":"renderedCell",
-				"innerHTML":"<button class='rm-layer-btn' data-objectid='" + objID + "'> X </button>" +
-						"<img class='rm-layer-icon' src='" + imgSrc + "'>" +
-						"<div class='thumbnailMapName'>" + mapName + "</div>" +
-						"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
-						"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
-				onclick:lang.hitch(this, function (evt) {
-					var objID = evt.target.getAttribute("data-objectid");
-					var storeObj = this.store.query({
-						objID:objID
-					});
-					// remove the layer
-					this.map.removeLayer(storeObj[0].layer);
-					// update the store
-					this.store.remove(parseInt(objID));
-					// update the UI
-					if (this.store.data.length < 1) {
-						// no remaining items in the grid/store
-						this.map.graphics.remove(this.mouseOverGraphic);
-						this.map.graphics.clear();
-						this.addCrosshair(this.currentMapClickPoint);
-						this.hideLoadingIndicator();
-						this.userInterfaceUtils.hideStep(".stepThree", ".step-three-message");
-						this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
-					}
-				})
-			});
-			return node;
-		},
-
-		addCrosshair:function (mp) {
+		_addCrosshair:function (mp) {
 			if (this.crosshairGraphic) {
 				this.map.graphics.remove(this.crosshairGraphic);
 			}
@@ -531,7 +375,7 @@ define([
 		},
 
 		// dojo src
-		createOrderedStore:function (data, options) {
+		_createOrderedStore:function (data, options) {
 			var opts = options;
 			// Instantiate a Memory store modified to support ordering.
 			return Observable(new Memory(lang.mixin({
@@ -540,7 +384,7 @@ define([
 				put:lang.hitch(this, function (object, opts) {
 					var storeRef = this.store;
 					var _calc = lang.hitch(this, function () {
-						return this.calculateOrder(storeRef, object, opts && opts.before);
+						return this._calculateOrder(storeRef, object, opts && opts.before);
 					});
 					object.id = _calc();
 					return Memory.prototype.put.call(storeRef, object, opts);
@@ -579,8 +423,8 @@ define([
 			}, options)));
 		},
 
-		//calculateOrder:function (store, object, options) {
-		calculateOrder:function (store, object, before, orderField) {
+		// dojo src
+		_calculateOrder:function (store, object, before, orderField) {
 			// Calculates proper value of order for an item to be placed before another
 			var afterOrder,
 					beforeOrder = 0;
@@ -617,7 +461,7 @@ define([
 			}
 		},
 
-		filterData:function (dataToFilter, filter) {
+		_filterData:function (dataToFilter, filter) {
 			var _filteredData = [];
 			var exclude = false;
 			var nFilters = filter.length;
@@ -684,47 +528,8 @@ define([
 			}
 		},
 
-		setClassname:function (scale) {
-			var className;
-			if (scale <= this.TOPO_MAP_SCALES[4].value) {
-				className = "one";	// 0 - 12000
-			} else if (scale > this.TOPO_MAP_SCALES[4].value && scale <= this.TOPO_MAP_SCALES[3].value) {
-				className = "two";	// 12001 - 24000
-			} else if (scale > this.TOPO_MAP_SCALES[3].value && scale <= this.TOPO_MAP_SCALES[2].value) {
-				className = "three";// 24001 - 63360
-			} else if (scale > this.TOPO_MAP_SCALES[2].value && scale <= this.TOPO_MAP_SCALES[1].value) {
-				className = "four";	// 63361 - 125000
-			} else if (scale > this.TOPO_MAP_SCALES[1].value) {
-				className = "five";	// 125001 - 250000
-			}
-			return className;
-		},
-
-		setLodThreshold:function (scale) {
-			var _lodThreshold;
-			var i = this.nScales;
-			while (i > 0) {
-				if (scale <= this.minScaleValue) {
-					_lodThreshold = this.TOPO_MAP_SCALES[this.TOPO_MAP_SCALES.length - 1].lodThreshold;
-					break;
-				}
-
-				if (scale > this.TOPO_MAP_SCALES[i].value && scale <= this.TOPO_MAP_SCALES[i - 1].value) {
-					_lodThreshold = this.TOPO_MAP_SCALES[i - 1].lodThreshold;
-					break;
-				}
-
-				if (scale > this.maxScaleValue) {
-					_lodThreshold = this.TOPO_MAP_SCALES[0].lodThreshold;
-					break;
-				}
-				i--;
-			}
-			return _lodThreshold;
-		},
-
-		drawTimeline:function (data) {
-			this.filteredData = this.filterData(data, this.filter);
+		_drawTimeline:function (data) {
+			this.filteredData = this._filterData(data, this.filter);
 			topic.subscribe("/dnd/drop", lang.hitch(this, function (source, nodes, copy, target) {
 				var layers = [];
 				//query(".grid-map").forEach(domConstruct.destroy);
@@ -735,21 +540,21 @@ define([
 						layers.push(row.data.layer);
 						this.map.removeLayer(row.data.layer);
 
-						/*var lodThreshold = row.data.lodThreshold;
-						 var maskId = domAttr.get(node, "id") + "-mask";
-						 if (this.currentLOD <= lodThreshold) {
-						 // disable row
-						 if (dom.byId("" + maskId) === null) {
-						 domConstruct.create("div", {
-						 "id":"" + maskId,
-						 "class":"grid-map",
-						 "innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
-						 }, node, "first");
-						 }
-						 } else {
-						 // enable row
-						 domConstruct.destroy("" + maskId);
-						 }*/
+						var lodThreshold = row.data.lodThreshold;
+						var maskId = domAttr.get(node, "id") + "-mask";
+						if (this.currentLOD <= lodThreshold) {
+							// disable row
+							if (dom.byId("" + maskId) === null) {
+								domConstruct.create("div", {
+									"id":"" + maskId,
+									"class":"grid-map",
+									"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.THUMBNAIL_VISIBLE_THRESHOLD_MSG + "</p>"
+								}, node, "first");
+							}
+						} else {
+							// enable row
+							domConstruct.destroy("" + maskId);
+						}
 					}
 				}));
 
@@ -766,9 +571,10 @@ define([
 					this.timelineOptions.end = new Date(this.urlQueryObject.maxDate, 0, 0);
 				}
 				this.timeline = new links.Timeline(dom.byId("timeline"));
+				console.log(this.filteredData);
 				this.timeline.draw(this.filteredData, this.timelineOptions);
-				links.events.addListener(this.timeline, "ready", this.onTimelineReady);
-				links.events.addListener(this.timeline, "select", lang.hitch(this, "onSelect"));
+				links.events.addListener(this.timeline, "ready", this._onTimelineReady);
+				links.events.addListener(this.timeline, "select", lang.hitch(this, "_onSelect"));
 				//links.events.addListener(timeline, "rangechanged", timelineRangeChanged);
 				this.userInterfaceUtils.hideStep(".stepOne", "");
 				this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
@@ -790,40 +596,40 @@ define([
 
 			query(".timeline-event").on(mouse.enter, lang.hitch(this, function (evt) {
 				var xmin, ymin, xmax, ymax, extent, sfs;
-				if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
-					xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
-					xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
-					ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
-					ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
-					extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
-					sfs = this.createMouseOverGraphic(
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
-					this.mouseOverGraphic = new Graphic(extent, sfs);
-					this.map.graphics.add(this.mouseOverGraphic);
-				}
-				// TODO
-				var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
-				if (data) {
-					extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
-					sfs = this.createMouseOverGraphic(
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
-							new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
-					this.mouseOverGraphic = new Graphic(extent, sfs);
-					this.map.graphics.add(this.mouseOverGraphic);
+				if (evt.target.children[0] !== undefined && evt.target.children[0].children[0] !== undefined) {
+					if (evt.target.children[0].children[0].getAttribute("data-xmin")) {
+						xmin = evt.target.children[0].children[0].getAttribute("data-xmin");
+						xmax = evt.target.children[0].children[0].getAttribute("data-xmax");
+						ymin = evt.target.children[0].children[0].getAttribute("data-ymin");
+						ymax = evt.target.children[0].children[0].getAttribute("data-ymax");
+						extent = new Extent(xmin, ymin, xmax, ymax, new SpatialReference({ wkid:102100 }));
+						sfs = this._createMouseOverGraphic(
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
+						this.mouseOverGraphic = new Graphic(extent, sfs);
+						this.map.graphics.add(this.mouseOverGraphic);
+					}
+					// TODO
+					var data = evt.currentTarget.childNodes[0].childNodes[0].dataset;
+					if (data) {
+						extent = new Extent(data.xmin, data.ymin, data.xmax, data.ymax, new SpatialReference({ wkid:102100 }));
+						sfs = this._createMouseOverGraphic(
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_BORDER),
+								new Color(this.config.TIMELINE_ITEM_MOUSEOVER_GR_FILL));
+						this.mouseOverGraphic = new Graphic(extent, sfs);
+						this.map.graphics.add(this.mouseOverGraphic);
+					}
 				}
 			}));
 
 			query(".timeline-event").on(mouse.leave, lang.hitch(this, function (evt) {
 				this.map.graphics.remove(this.mouseOverGraphic);
 				this.map.graphics.clear();
-				this.addCrosshair(this.currentMapClickPoint);
+				this._addCrosshair(this.currentMapClickPoint);
 			}));
-
-			this.hideLoadingIndicator();
 		},
 
-		onSelect:function () {
+		_onSelect:function () {
 			var sel = this.timeline.getSelection();
 			var _timelineData = this.timeline.getData();
 			if (sel.length) {
@@ -894,50 +700,36 @@ define([
 					})).then(lang.hitch(this, function (evt) {
 						this.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
 						this.userInterfaceUtils.showStep(".stepThree", ".step-three-message");
-						this.showGrid();
+						this.userInterfaceUtils.showGrid();
 						this.grid.refresh();
 					}));
 				}
 			}
 		},
 
-		showGrid:function () {
-			query(".gridContainer").style("display", "block");
-			this.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
-		},
-
-		hideLoadingIndicator:function () {
-			esri.hide(this._loading);
-			this.map.enableMapNavigation();
-		},
-
-		onTimelineReady:function () {
+		_onTimelineReady:function () {
 			// if the grid is visible, step 3 is visible, so hide step 2
 			if (domStyle.get(query(".gridContainer")[0], "display") === "block") {
 				this.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
 			}
 		},
 
-		showLoadingIndicator:function () {
-			esri.show(this._loading);
-			this.map.disableMapNavigation();
-		},
-
 		runQuery:function (mapExtent, mp, lod) {
-			var queryTask = new QueryTask(this.config.TOPO_INDEX);
+			var queryTask = new QueryTask(this.config.QUERY_TASK_URL);
 			var q = new Query();
 			q.returnGeometry = true;
-			q.outFields = this.config.TOPO_INDEX_OUTFIELDS;
+			q.outFields = this.config.QUERY_TASK_OUTFIELDS;
 			q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
 			// TODO confirm with CF/SB where clause is correct
-			q.where = this.config.TOPO_INDEX_WHERE;
+			if (this.config.QUERY_WHERE !== "") {
+				q.where = this.config.QUERY_WHERE;
+			}
 			if (this.config.QUERY_GEOMETRY === "MAP_POINT") {
 				q.geometry = mp;
 			} else {
 				q.geometry = mapExtent.expand(this.config.EXTENT_EXPAND);
 			}
 
-			this.showLoadingIndicator();
 			var deferred = queryTask.execute(q).addCallback(lang.hitch(this, function (response) {
 				this.timelineData = [];
 				var nFeatures = response.features.length;
@@ -953,7 +745,7 @@ define([
 							duration:1000,
 							properties:{
 								height:{
-									end:250
+									end:parseInt(this.config.TIMELINE_HEIGHT) + 20
 								}
 							},
 							onEnd:function () {
@@ -969,26 +761,35 @@ define([
 						var ymin = ext.ymin;
 						var ymax = ext.ymax;
 
-						var objID = feature.attributes.SvcOID;
-						var mapName = feature.attributes.Map_Name;
-						var scale = feature.attributes.Map_Scale;
-						var dateCurrent = feature.attributes.DateCurren;
-						var downloadLink = feature.attributes.Download_G;
-						var citation = feature.attributes.Citation;
+						var objID = feature.attributes[this.config.ATTRIBUTE_OBJECTID];
+						var mapName = feature.attributes[this.config.ATTRIBUTE_MAP_NAME];
+						var scale = feature.attributes[this.config.ATTRIBUTE_SCALE];
+						var dateCurrent = new Date(feature.attributes[this.config.ATTRIBUTE_DATE]);
+						if (dateCurrent === null)
+							dateCurrent = this.config.MSG_UNKNOWN;
+						var day = this.timelineUtils.formatDay(dateCurrent);
+						var month = this.timelineUtils.formatMonth(dateCurrent);
+						var year = this.timelineUtils.formatYear(dateCurrent);
+						var formattedDate = month + "/" + day + "/" + year;
 
-						var className = this.setClassname(scale);
-						var lodThreshold = this.setLodThreshold(scale);
+						var startDate = new Date(dateCurrent, month, day);
 
-						var tooltipContent = "<img class='tooltipThumbnail' src='" + this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + this.config.INFO_THUMBNAIL_TOKEN + "'>" +
+						var downloadLink = feature.attributes[this.config.ATTRIBUTE_DOWNLOAD_LINK];
+						var citation = feature.attributes[this.config.ATTRIBUTE_CITATION];
+
+						var className = this.timelineLegendUtils.setClassname(scale, this.TOPO_MAP_SCALES);
+						var lodThreshold = this.timelineLegendUtils.setLodThreshold(scale, this.TOPO_MAP_SCALES, this.nScales, this.minScaleValue, this.maxScaleValue);
+
+						var tooltipContent = "<img class='tooltipThumbnail' src='" + this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + "'>" +
 								"<div class='tooltipContainer'>" +
-								"<div class='tooltipHeader'>" + mapName + " (" + dateCurrent + ")</div>" +
+								"<div class='tooltipHeader'>" + mapName + " (" + formattedDate + ")</div>" +
 								"<div class='tooltipContent'>" + citation + "</div></div>";
 
 						var timelineItemContent = '<div class="timelineItemTooltip noThumbnail" title="' + tooltipContent + '" data-xmin="' + xmin + '" data-ymin="' + ymin + '" data-xmax="' + xmax + '" data-ymax="' + ymax + '">' +
 								'<span class="thumbnailLabel">' + mapName + '</span>';
 
 						this.timelineData.push({
-							"start":new Date(dateCurrent, 0, 0),
+							"start":startDate,
 							"content":timelineItemContent,
 							"objID":objID,
 							"downloadLink":downloadLink,
@@ -998,164 +799,17 @@ define([
 						});
 					})); // END forEach
 				} else {
-					this.addNoResultsMask();
+					this._addNoResultsMask();
 				} // END QUERY
-				this.drawTimeline(this.timelineData);
+				this._drawTimeline(this.timelineData);
 			})); // END Deferred
 		},
 
-		addNoResultsMask:function () {
+		_addNoResultsMask:function () {
 			domConstruct.create("div", {
 				"class":"timeline-mask",
-				"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.NO_MAPS_MESSAGE + "</p>"
+				"innerHTML":"<p style='text-align: center; margin-top: 20px'>" + this.config.MSG_NO_MAPS + "</p>"
 			}, "timeline", "first");
-		},
-
-		setSharingUrl:function () {
-			var mapClickX,
-					mapClickY,
-					timelineDateRange = "",
-					minDate = "",
-					maxDate = "",
-					objectIDs = "",
-					downloadIDs = "",
-					filters = "";
-			if (!this.currentMapClickPoint) {
-				// User is sharing the app but never even clicked on the map
-				// Leave these params empty
-				mapClickX = "";
-				mapClickY = "";
-			} else {
-				mapClickX = this.currentMapClickPoint.x;
-				mapClickY = this.currentMapClickPoint.y;
-			}
-
-			var lat = this.map.extent.getCenter().getLatitude();
-			var lng = this.map.extent.getCenter().getLongitude();
-			var zoomLevel = this.map.getLevel();
-
-			if (this.timeline) {
-				timelineDateRange = this.timeline.getVisibleChartRange();
-				minDate = new Date(timelineDateRange.start).getFullYear();
-				maxDate = new Date(timelineDateRange.end).getFullYear();
-			}
-
-			query(".dgrid-row", grid.domNode).forEach(function (node) {
-				var row = this.grid.row(node);
-				objectIDs += row.data.objID + "|";
-				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
-			});
-			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
-			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
-
-			array.forEach(this.filterSelection, function (filter) {
-				filters += filter + "|";
-			});
-			filters = filters.substr(0, filters.length - 1);
-
-			var protocol = window.location.protocol;
-			var host = window.location.host;
-			var pathName = window.location.pathname;
-			var fileName = "";
-			var pathArray = window.location.pathname.split("/");
-			if (pathArray[pathArray.length - 1] !== "index.html") {
-				fileName = "index.html";
-			} else {
-				fileName = "";
-			}
-
-			this.sharingUrl = protocol + "//" + host + pathName + fileName +
-					"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
-					"&minDate=" + minDate + "&maxDate=" + maxDate +
-					"&oids=" + objectIDs +
-					"&dlids=" + downloadIDs +
-					"&f=" + filters +
-					"&clickLat=" + mapClickX +
-					"&clickLng=" + mapClickY;
-			return this.sharingUrl;
-		},
-
-		documentClickHandler:function (evt) {
-			if (!$("#bitlyIcon").is(evt.target) && !$("#bitlyInput").is(evt.target) && !$(".popover-content").is(evt.target)) {
-				$(".popover").hide();
-			}
-		},
-
-		shareFacebook:function () {
-			var url = this.setSharingUrl();
-			var options = '&p[title]=' + encodeURIComponent($('#title').text())
-					+ '&p[summary]=' + encodeURIComponent($('#subtitle').text())
-					+ '&p[url]=' + encodeURIComponent(url)
-					+ '&p[images][0]=' + encodeURIComponent($("meta[property='og:image']").attr("content"));
-
-			window.open('http://www.facebook.com/sharer.php?s=100' + options, 'Facebook sharing', 'toolbar=0,status=0,width=626,height=436'
-			);
-		},
-
-		shareTwitter:function () {
-			var url = this.setSharingUrl();
-
-			var bitlyUrls = [
-				"http://api.bitly.com/v3/shorten?callback=?",
-				"https://api-ssl.bitly.com/v3/shorten?callback=?"
-			];
-			var bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1];
-
-			var urlParams = esri.urlToObject(url).query || {};
-			var targetUrl = url;
-
-			$.getJSON(
-					bitlyUrl,
-					{
-						"format":"json",
-						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
-						"login":"esristorymaps",
-						"longUrl":targetUrl
-					},
-					function (response) {
-						if (!response || !response || !response.data.url)
-							return;
-					}
-			).complete(function (response) {
-						options = 'text=' + encodeURIComponent($('#title').text()) +
-								'&url=' + encodeURIComponent(response.responseJSON.data.url) +
-								'&related=' + this.config.SHARING_RELATED +
-								'&hashtags=' + this.config.SHARING_HASHTAG;
-						window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
-					});
-			window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
-		},
-
-		requestBitly:function () {
-			var url = this.setSharingUrl();
-			var bitlyUrls = [
-				"http://api.bitly.com/v3/shorten?callback=?",
-				"https://api-ssl.bitly.com/v3/shorten?callback=?"
-			];
-			var bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1];
-
-			var urlParams = esri.urlToObject(url).query || {};
-			var targetUrl = url;
-
-			$.getJSON(
-					bitlyUrl,
-					{
-						"format":"json",
-						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
-						"login":"esristorymaps",
-						"longUrl":targetUrl
-					},
-					function (response) {
-						if (!response || !response || !response.data.url)
-							return;
-						$("#bitlyLoad").fadeOut();
-						$("#bitlyInput").fadeIn();
-						$("#bitlyInput").val(response.data.url);
-						$("#bitlyInput").select();
-					}
-			);
-			$(".popover").show();
 		}
 	});
-})
-;
+});

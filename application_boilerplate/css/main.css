@@ -71,6 +71,14 @@ body {
 	/*background: #000 url(img/blue_black.jpg) 178px 0px no-repeat;*/
 }
 
+.header-logo {
+	height: 60px;
+	float: right;
+	padding-right: 8px;
+	padding-top: 8px;
+	padding-left: 8px;
+}
+
 .header-title {
 	padding-top: 10px;
 	padding-left: 10px;
@@ -236,4 +244,9 @@ body {
 /* Applied to selected maps in the dGrid that are outside the LOD */
 .outside-lod {
 	opacity: 0.3;
-}}
+}
+
+.bitlyInputContainer {
+	width:150px;
+	height:30px;
+}
