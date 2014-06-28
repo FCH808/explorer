@@ -4,9 +4,6 @@
 
 <a href="https://github.com/ChrisMahlke/explorer/raw/gh-pages/explorer_documentation.pdf" target="_blank">Configuration options</a>
 
-##### Header
-<img src="https://raw.githubusercontent.com/ChrisMahlke/explorer/master/header.png" width="100%">
-
 #### Demo
 
 <a href="http://chrismahlke.github.io/explorer_dev/" target="_blank">Demo</a>
