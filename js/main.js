@@ -118,8 +118,6 @@ define([
 		mapUtils: {},
 		timelineUtils: {},
 
-		sharingUrl: "",
-
 		minimumId: "",
 
 		config: {},
@@ -325,70 +323,6 @@ define([
 		_getUrlParameters:function () {
 			var urlObject = urlUtils.urlToObject(window.location.href);
 			return urlObject.query;
-		},
-
-		_setSharingUrl:function () {
-			var mapClickX,
-					mapClickY,
-					timelineDateRange = "",
-					minDate = "",
-					maxDate = "",
-					objectIDs = "",
-					downloadIDs = "",
-					filters = "";
-			if (!this.currentMapClickPoint) {
-				// User is sharing the app but never even clicked on the map
-				// Leave these params empty
-				mapClickX = "";
-				mapClickY = "";
-			} else {
-				mapClickX = this.currentMapClickPoint.x;
-				mapClickY = this.currentMapClickPoint.y;
-			}
-
-			var lat = this.map.extent.getCenter().getLatitude();
-			var lng = this.map.extent.getCenter().getLongitude();
-			var zoomLevel = this.map.getLevel();
-
-			if (this.timeline) {
-				timelineDateRange = this.timeline.getVisibleChartRange();
-				minDate = new Date(timelineDateRange.start).getFullYear();
-				maxDate = new Date(timelineDateRange.end).getFullYear();
-			}
-
-			query(".dgrid-row", this.grid.domNode).forEach(lang.hitch(this, function (node) {
-				var row = this.grid.row(node);
-				objectIDs += row.data.objID + "|";
-				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
-			}));
-			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
-			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
-
-			array.forEach(this.filterSelection, function (filter) {
-				filters += filter + "|";
-			});
-			filters = filters.substr(0, filters.length - 1);
-
-			var protocol = window.location.protocol;
-			var host = window.location.host;
-			var pathName = window.location.pathname;
-			var fileName = "";
-			var pathArray = window.location.pathname.split("/");
-			if (pathArray[pathArray.length - 1] !== "index.html") {
-				fileName = "index.html";
-			} else {
-				fileName = "";
-			}
-
-			this.sharingUrl = protocol + "//" + host + pathName + fileName +
-					"?lat=" + lat + "&lng=" + lng + "&zl=" + zoomLevel +
-					"&minDate=" + minDate + "&maxDate=" + maxDate +
-					"&oids=" + objectIDs +
-					"&dlids=" + downloadIDs +
-					"&f=" + filters +
-					"&clickLat=" + mapClickX +
-					"&clickLng=" + mapClickY;
-			return this.sharingUrl;
 		},
 
 		_watchSplitters:function (bc) {
@@ -820,9 +754,9 @@ define([
 						var dateCurrent = new Date(feature.attributes[this.config.ATTRIBUTE_DATE]);
 						if (dateCurrent === null)
 							dateCurrent = this.config.MSG_UNKNOWN;
-						var day = this._formatDay(dateCurrent);
-						var month = this._formatMonth(dateCurrent);
-						var year = this._formatYear(dateCurrent);
+						var day = this.timelineUtils.formatDay(dateCurrent);
+						var month = this.timelineUtils.formatMonth(dateCurrent);
+						var year = this.timelineUtils.formatYear(dateCurrent);
 						var formattedDate = month + "/" + day + "/" + year;
 
 						var startDate = new Date(dateCurrent, month, day);
@@ -856,54 +790,6 @@ define([
 				} // END QUERY
 				this._drawTimeline(this.timelineData);
 			})); // END Deferred
-		},
-
-		_formatDay:function (date) {
-			if (date instanceof Date)
-				return date.getDate();
-			else
-				return "";
-		},
-
-		_formatMonth:function (date) {
-			if (date instanceof Date) {
-				var month = date.getMonth();
-				if (month === 0) {
-					return "01";
-				} else if (month === 1) {
-					return "02";
-				} else if (month === 2) {
-					return "03";
-				} else if (month === 3) {
-					return "04";
-				} else if (month === 4) {
-					return "05";
-				} else if (month === 5) {
-					return "06";
-				} else if (month === 6) {
-					return "07";
-				} else if (month === 7) {
-					return "08";
-				} else if (month === 8) {
-					return "09";
-				} else if (month === 9) {
-					return "10";
-				} else if (month === 10) {
-					return "11";
-				} else if (month === 11) {
-					return "12";
-				}
-			} else {
-				return "";
-			}
-		},
-
-		_formatYear:function (date) {
-			if (date instanceof Date) {
-				return date.getFullYear();
-			} else {
-				return "";
-			}
 		},
 
 		_addNoResultsMask:function () {
