@@ -14,9 +14,13 @@
  | limitations under the License.
  */
 define([
+	"dojo/_base/array",
 	"dojo/_base/declare",
+	"dojo/aspect",
 	"dojo/dom",
 	"dojo/dom-attr",
+	"dojo/dom-construct",
+	"dojo/dom-geometry",
 	"dojo/dom-style",
 	"dojo/query",
 	"esri/graphic",
@@ -24,7 +28,7 @@ define([
 	"esri/symbols/SimpleLineSymbol",
 	"esri/symbols/SimpleMarkerSymbol",
 	"esri/Color"
-], function (declare, dom, domAttr, domStyle, query, Graphic, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color) {
+], function (array, declare, aspect, dom, domAttr, domConstruct, domGeom, domStyle, query, Graphic, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color) {
 	return declare(null, {
 
 		config: {},
@@ -115,6 +119,36 @@ define([
 			}
 			this._crosshairGraphic = new Graphic(mp, this._crosshairSymbol);
 			this._main.map.graphics.add(this._crosshairGraphic);
+		},
+
+		addNoResultsMask: function () {
+			domConstruct.create("div", {
+				"class": "timeline-mask",
+				"innerHTML": "<p style='text-align: center; margin-top: 20px'>" + this.config.MSG_NO_MAPS + "</p>"
+			}, "timeline", "first");
+		},
+
+		createMouseOverGraphic: function (borderColor, fillColor) {
+			var sfs = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+					new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, borderColor, this.config.IMAGE_BORDER_WIDTH), fillColor);
+			return sfs;
+		},
+
+		watchSplitters: function (bc) {
+			array.forEach(["bottom"], function (region) {
+				var spl = bc.getSplitter(region);
+				aspect.after(spl, "_startDrag", function () {
+					domStyle.set(spl.child.domNode, "opacity", "0.4");
+				});
+				aspect.after(spl, "_stopDrag", function () {
+					domStyle.set(spl.child.domNode, "opacity", "1.0");
+					// TODO Timeline height needs to be resized accordingly
+					var node = dom.byId("timeline-container");
+					this.timelineContainerNodeGeom = domStyle.getComputedStyle(this.timelineContainerNode);
+					this.timelineContainerGeometry = domGeom.getContentBox(node, this.timelineContainerNodeGeom);
+					this.timelineUtils.drawTimeline(this.timelineData);
+				});
+			});
 		}
 	});
 });

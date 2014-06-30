@@ -126,7 +126,7 @@ define([
 						this.filterSelection.splice(i, 1);
 					}
 				}
-				this._drawTimeline(this.timelineData);
+				this.timelineUtils.drawTimeline(this.timelineData);
 			}));
 			domConstruct.place(node, query(".topo-legend")[0]);
 		}

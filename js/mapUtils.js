@@ -41,7 +41,7 @@ define([
 			this.currentMapClickPoint = evt.mapPoint;
 			this.currentLOD = this.map.getLevel();
 			this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
-			this.runQuery(this.currentMapExtent, this.currentMapClickPoint, this.currentLOD);
+			this.timelineUtils.runQuery(this.currentMapExtent, this.currentMapClickPoint, this.currentLOD);
 		},
 
 		/**

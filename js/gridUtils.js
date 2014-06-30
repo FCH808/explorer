@@ -24,9 +24,11 @@ define([
 	return declare(null, {
 
 		config: {},
+		_main: {},
 
-		constructor: function (templateConfig) {
+		constructor: function (obj, templateConfig) {
 			this.config = templateConfig;
+			this._main = obj;
 		},
 
 		/**
@@ -70,7 +72,7 @@ define([
 			}
 			var row = this.grid.row(evt),
 				extent = row.data.extent,
-				sfs = this._createMouseOverGraphic(
+				sfs = this.userInterfaceUtils.createMouseOverGraphic(
 					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_BORDER),
 					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_FILL)
 				);
