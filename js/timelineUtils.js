@@ -73,7 +73,7 @@ define([
 
 		runQuery: function (mapExtent, mp, lod) {
 			var queryTask = new QueryTask(this.config.QUERY_TASK_URL),
-					q = new Query();
+				q = new Query();
 			q.returnGeometry = true;
 			q.outFields = this.config.QUERY_TASK_OUTFIELDS;
 			q.spatialRelationship = Query.SPATIAL_REL_INTERSECTS;
@@ -98,14 +98,14 @@ define([
 					if (this.timelineContainerGeometry.h === 0) {
 						var n = registry.byId("timeline-container").domNode;
 						fx.animateProperty({
-							node:n,
-							duration:1000,
-							properties:{
-								height:{
-									end:parseInt(this.config.TIMELINE_HEIGHT) + 20
+							node: n,
+							duration: 1000,
+							properties: {
+								height: {
+									end: parseInt(this.config.TIMELINE_HEIGHT) + 20
 								}
 							},
-							onEnd:function () {
+							onEnd: function () {
 								registry.byId("main-window").layout();
 							}
 						}).play();
@@ -135,7 +135,7 @@ define([
 						var citation = feature.attributes[this.config.ATTRIBUTE_CITATION];
 
 						var className = this._main.timelineLegendUtils.setClassname(scale, this._main.TOPO_MAP_SCALES);
-						var lodThreshold = this._main.timelineLegendUtils.setLodThreshold(scale, this._main.TOPO_MAP_SCALES, this.nScales, this.minScaleValue, this.maxScaleValue);
+						var lodThreshold = this._main.timelineLegendUtils.setLodThreshold(scale, this._main.TOPO_MAP_SCALES, this._main.nScales, this._main.minScaleValue, this._main.maxScaleValue);
 
 						var tooltipContent = "<img class='tooltipThumbnail' src='" + this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + "'>" +
 								"<div class='tooltipContainer'>" +
@@ -272,16 +272,15 @@ define([
 				if (sel[0].row !== undefined) {
 					var row = sel[0].row;
 					var objID = _timelineData[row].objID;
-
 					var downloadLink = _timelineData[row].downloadLink;
 					var lodThreshhold = _timelineData[row].lodThreshold;
 					var whereClause = this.config.IMAGE_SERVER_WHERE + objID;
-					var queryTask = new QueryTask(this.IMAGE_SERVICE_URL);
+					var queryTask = new QueryTask(this._main.IMAGE_SERVICE_URL);
 					var q = new Query();
 					q.returnGeometry = false;
 					q.outFields = this.OUTFIELDS;
 					q.where = whereClause;
-					var imageServiceLayer
+					var imageServiceLayer;
 					queryTask.execute(q, lang.hitch(this, function (rs) {
 						var extent = rs.features[0].geometry.getExtent();
 						var mapName = rs.features[0].attributes.Map_Name;
@@ -307,11 +306,11 @@ define([
 							imageServiceParameters:params,
 							opacity:1.0
 						});
-						this.map.addLayer(imageServiceLayer);
+						this._main.map.addLayer(imageServiceLayer);
 
 						var _firstRow;
-						if (query(".dgrid-row", this.grid.domNode)[0]) {
-							var rowId = query(".dgrid-row", this.grid.domNode)[0].id;
+						if (query(".dgrid-row", this._main.grid.domNode)[0]) {
+							var rowId = query(".dgrid-row", this._main.grid.domNode)[0].id;
 							_firstRow = rowId.split("-")[2];
 						}
 
@@ -334,10 +333,10 @@ define([
 							before:firstRowObj[0]
 						};
 					})).then(lang.hitch(this, function (evt) {
-						this.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
-						this.userInterfaceUtils.showStep(".stepThree", ".step-three-message");
-						this.userInterfaceUtils.showGrid();
-						this.grid.refresh();
+						this._main.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
+						this._main.userInterfaceUtils.showStep(".stepThree", ".step-three-message");
+						this._main.userInterfaceUtils.showGrid();
+						this._main.grid.refresh();
 					}));
 				}
 			}
