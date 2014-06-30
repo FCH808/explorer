@@ -86,7 +86,7 @@ define([
 		gridLeaveCellHandler: function (evt) {
 			this.map.graphics.remove(this.mouseOverGraphic);
 			this.map.graphics.clear();
-			this._addCrosshair(this.currentMapClickPoint);
+			this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
 		},
 
 		thumbnailRenderCell: function (object, data, td, options) {
@@ -116,7 +116,7 @@ define([
 							// no remaining items in the grid/store
 							this.map.graphics.remove(this.mouseOverGraphic);
 							this.map.graphics.clear();
-							this._addCrosshair(this.currentMapClickPoint);
+							this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
 							this.hideLoadingIndicator();
 							this.userInterfaceUtils.hideStep(".stepThree", ".step-three-message");
 							this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");

@@ -18,15 +18,24 @@ define([
 	"dojo/dom",
 	"dojo/dom-attr",
 	"dojo/dom-style",
-	"dojo/query"
-], function (declare, dom, domAttr, domStyle, query) {
+	"dojo/query",
+	"esri/graphic",
+	"esri/symbols/SimpleFillSymbol",
+	"esri/symbols/SimpleLineSymbol",
+	"esri/symbols/SimpleMarkerSymbol",
+	"esri/Color"
+], function (declare, dom, domAttr, domStyle, query, Graphic, SimpleFillSymbol, SimpleLineSymbol, SimpleMarkerSymbol, Color) {
 	return declare(null, {
 
 		config: {},
+		_main: {},
+		_crosshairGraphic: "",
+		_crosshairSymbol: "",
 
-		constructor: function (templateConfig) {
-			//console.debug("uiUtils", templateConfig);
+		constructor: function (obj, templateConfig) {
+			this._main = obj;
 			this.config = templateConfig;
+			this._crosshairSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CROSS, this.config.CROSSHAIR_SIZE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color(this.config.CROSSHAIR_FILL_COLOR), this.config.CROSSHAIR_OPACITY));
 		},
 
 		/**
@@ -98,6 +107,14 @@ define([
 		showGrid: function () {
 			query(".gridContainer").style("display", "block");
 			this.hideStep(".stepTwo", ".step-two-message");
+		},
+
+		addCrosshair: function (mp) {
+			if (this._crosshairGraphic) {
+				this._main.map.graphics.remove(this._crosshairGraphic);
+			}
+			this._crosshairGraphic = new Graphic(mp, this._crosshairSymbol);
+			this._main.map.graphics.add(this._crosshairGraphic);
 		}
 	});
 });

@@ -94,9 +94,6 @@ define([
 		currentMapClickPoint: "",
 		currentMapExtent: "",
 
-		crosshairGraphic: "",
-		crosshairSymbol: "",
-
 		data: "",
 		grid: "",
 		store: "",
@@ -136,7 +133,7 @@ define([
 				// document ready
 				ready(lang.hitch(this, function () {
 
-					this.userInterfaceUtils = new UserInterfaceUtils(this.config);
+					this.userInterfaceUtils = new UserInterfaceUtils(this, this.config);
 					this.gridUtils = new GridUtils(this.config);
 					this.timelineLegendUtils = new TimelineLegendUtils(this.config);
 					this.timelineUtils = new TimelineUtils(this.config);
@@ -155,8 +152,6 @@ define([
 					for (var i = 0; i < this.TOPO_MAP_SCALES.length; i++) {
 						this.mapScaleValues.push(this.TOPO_MAP_SCALES[i].value);
 					}
-
-					this.crosshairSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CROSS, this.config.CROSSHAIR_SIZE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color(this.config.CROSSHAIR_FILL_COLOR), this.config.CROSSHAIR_OPACITY));
 
 					this.nScales = this.timelineLegendUtils.getNumberOfScales(this.TOPO_MAP_SCALES);
 					this.maxScaleValue = this.timelineLegendUtils.getMaxScaleValue(this.TOPO_MAP_SCALES);
@@ -310,7 +305,7 @@ define([
 			if (this.urlQueryObject !== null) {
 				var _mp = new Point([this.urlQueryObject.clickLat, this.urlQueryObject.clickLng], new SpatialReference({ wkid:102100 }));
 				// add crosshair
-				this._addCrosshair(_mp);
+				this.userInterfaceUtils.addCrosshair(_mp);
 			}
 
 			//// external logic ////
@@ -430,14 +425,6 @@ define([
 				}
 			}, srcRef);
 			geocoder.startup();
-		},
-
-		_addCrosshair:function (mp) {
-			if (this.crosshairGraphic) {
-				this.map.graphics.remove(this.crosshairGraphic);
-			}
-			this.crosshairGraphic = new Graphic(mp, this.crosshairSymbol);
-			this.map.graphics.add(this.crosshairGraphic);
 		},
 
 		// dojo src
@@ -691,7 +678,7 @@ define([
 			query(".timeline-event").on(mouse.leave, lang.hitch(this, function (evt) {
 				this.map.graphics.remove(this.mouseOverGraphic);
 				this.map.graphics.clear();
-				this._addCrosshair(this.currentMapClickPoint);
+				this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
 			}));
 		},
 

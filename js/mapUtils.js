@@ -40,11 +40,7 @@ define([
 		mapClickHandler: function (evt) {
 			this.currentMapClickPoint = evt.mapPoint;
 			this.currentLOD = this.map.getLevel();
-			if (this.crosshairGraphic) {
-				this.map.graphics.remove(this.crosshairGraphic);
-			}
-			this.crosshairGraphic = new Graphic(this.currentMapClickPoint, this.crosshairSymbol);
-			this.map.graphics.add(this.crosshairGraphic);
+			this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
 			this.runQuery(this.currentMapExtent, this.currentMapClickPoint, this.currentLOD);
 		},
 
