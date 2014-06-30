@@ -162,7 +162,7 @@ define([
 			})); // END Deferred
 		},
 
-		drawTimeline:function (data) {
+		drawTimeline: function (data) {
 			this._main.filteredData = this._main._filterData(data, this._main.filter);
 			topic.subscribe("/dnd/drop", lang.hitch(this, function (source, nodes, copy, target) {
 				var layers = [];
@@ -261,7 +261,7 @@ define([
 			query(".timeline-event").on(mouse.leave, lang.hitch(this, function (evt) {
 				this._main.map.graphics.remove(this._main.mouseOverGraphic);
 				this._main.map.graphics.clear();
-				this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
+				this._main.userInterfaceUtils.addCrosshair(this._main.currentMapClickPoint);
 			}));
 		},
 
