@@ -21,19 +21,12 @@ define([
 	"dojo/_base/lang",
 	"dojo/Deferred",
 	"dojo/dom",
-	"dojo/dom-attr",
 	"dojo/dom-class",
-	"dojo/dom-construct",
-	"dojo/dom-geometry",
-	"dojo/dom-style",
-	"dojo/io-query",
 	"dojo/json",
 	"dojo/number",
 	"dojo/on",
 	"dojo/parser",
-	"dojo/promise/all",
 	"dojo/query",
-	"dojo/topic",
 	"dojo/store/Observable",
 	"dojo/store/Memory",
 	"dgrid/extensions/DnD",
@@ -42,7 +35,6 @@ define([
 	"dgrid/Selection",
 	"dgrid/Keyboard",
 	"dgrid/util/mouse",
-	"dijit/form/Button",
 	"dijit/form/HorizontalSlider",
 	"dijit/layout/BorderContainer",
 	"dijit/layout/ContentPane",
@@ -52,8 +44,6 @@ define([
 	"esri/geometry/Point",
 	"esri/SpatialReference",
 	"esri/map",
-	"esri/tasks/query",
-	"esri/tasks/QueryTask",
 	"esri/urlUtils",
 	"application/uiUtils",
 	"application/gridUtils",
@@ -61,12 +51,9 @@ define([
 	"application/sharingUtils",
 	"application/mapUtils",
 	"application/timelineUtils"
-], function (ready, array, declare, fx, lang, Deferred, dom, domAttr, domClass, domConstruct, domGeom, domStyle, ioQuery, json, number, on, parser, all, query, topic, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, Button, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, SpatialReference, Map, Query, QueryTask, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils, MappingUtils, TimelineUtils) {
+], function (ready, array, declare, fx, lang, Deferred, dom, domClass, json, number, on, parser, query, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, SpatialReference, Map, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils, MappingUtils, TimelineUtils) {
 	return declare(null, {
 
-		OUTFIELDS: "",
-		IMAGE_SERVICE_URL: "",
-		imageServiceLayer: "",
 		DOWNLOAD_PATH: "",
 		TOPO_MAP_SCALES: "",
 		mapScaleValues: [],
@@ -98,8 +85,6 @@ define([
 		mapUtils: {},
 		timelineUtils: {},
 
-		minimumId: "",
-
 		config: {},
 
 		startup: function (config) {
@@ -122,8 +107,6 @@ define([
 					var itemInfo = this.config.itemInfo || this.config.webmap;
 					this._createWebMap(itemInfo);
 
-					this.OUTFIELDS = this.config.OUTFIELDS;
-					this.IMAGE_SERVICE_URL = this.config.IMAGE_SERVER;
 					this.TOPO_MAP_SCALES = this.config.TIMELINE_LEGEND_VALUES;
 					this.DOWNLOAD_PATH = this.config.DOWNLOAD_PATH;
 

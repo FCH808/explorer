@@ -43,6 +43,7 @@ define([
 
 		config: {},
 		_main: {},
+		IMAGE_SERVICE_URL: "",
 		timeline: "",
 		timelineOptions: {},
 		timelineContainerNodeGeom: "",
@@ -278,7 +279,7 @@ define([
 					var downloadLink = _timelineData[row].downloadLink;
 					var lodThreshhold = _timelineData[row].lodThreshold;
 					var whereClause = this.config.IMAGE_SERVER_WHERE + objID;
-					var queryTask = new QueryTask(this._main.IMAGE_SERVICE_URL);
+					var queryTask = new QueryTask(this.config.IMAGE_SERVER);
 					var q = new Query();
 					q.returnGeometry = false;
 					q.outFields = this.config.OUTFIELDS;
@@ -305,7 +306,7 @@ define([
 						var params = new ImageServiceParameters();
 						params.noData = 0;
 						params.mosaicRule = mosaicRule;
-						imageServiceLayer = new ArcGISImageServiceLayer(this._main.IMAGE_SERVICE_URL, {
+						imageServiceLayer = new ArcGISImageServiceLayer(this.config.IMAGE_SERVER, {
 							imageServiceParameters: params,
 							opacity:1.0
 						});
