@@ -146,13 +146,13 @@ define([
 								'<span class="thumbnailLabel">' + mapName + '</span>';
 
 						this.timelineData.push({
-							"start":startDate,
-							"content":timelineItemContent,
-							"objID":objID,
-							"downloadLink":downloadLink,
-							"scale":scale,
-							"lodThreshold":lodThreshold,
-							"className":className
+							"start": startDate,
+							"content": timelineItemContent,
+							"objID": objID,
+							"downloadLink": downloadLink,
+							"scale": scale,
+							"lodThreshold": lodThreshold,
+							"className": className
 						});
 					})); // END forEach
 				} else {
@@ -278,7 +278,7 @@ define([
 					var queryTask = new QueryTask(this._main.IMAGE_SERVICE_URL);
 					var q = new Query();
 					q.returnGeometry = false;
-					q.outFields = this.OUTFIELDS;
+					q.outFields = this.config.OUTFIELDS;
 					q.where = whereClause;
 					var imageServiceLayer;
 					queryTask.execute(q, lang.hitch(this, function (rs) {
@@ -299,11 +299,11 @@ define([
 							"operation":MosaicRule.OPERATION_FIRST,
 							"where":whereClause
 						});
-						params = new ImageServiceParameters();
+						var params = new ImageServiceParameters();
 						params.noData = 0;
 						params.mosaicRule = mosaicRule;
-						imageServiceLayer = new ArcGISImageServiceLayer(this.IMAGE_SERVICE_URL, {
-							imageServiceParameters:params,
+						imageServiceLayer = new ArcGISImageServiceLayer(this._main.IMAGE_SERVICE_URL, {
+							imageServiceParameters: params,
 							opacity:1.0
 						});
 						this._main.map.addLayer(imageServiceLayer);
@@ -314,11 +314,11 @@ define([
 							_firstRow = rowId.split("-")[2];
 						}
 
-						var firstRowObj = this.store.query({
+						var firstRowObj = this._main.store.query({
 							objID:_firstRow
 						});
 
-						this.store.put({
+						this._main.store.put({
 							id:1,
 							objID:objID,
 							layer:imageServiceLayer,
