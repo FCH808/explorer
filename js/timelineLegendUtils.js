@@ -106,27 +106,30 @@ define([
 
 			on(node, "click", lang.hitch(this, function (evt) {
 				var selectedScale = evt.target.getAttribute("data-scale"),
-					selectedScaleIndex = this.filter.indexOf(selectedScale);
+					selectedScaleIndex = this.timelineUtils.filter.indexOf(selectedScale);
+
+				console.log("selectedScale: " + selectedScale);
+				console.log("selectedScaleIndex: " + selectedScaleIndex);
 
 				domClass.toggle(node, "sel");
 
 				if (domClass.contains(node, "sel")) {
 					if (selectedScaleIndex === -1) {
-						this.filter.push(selectedScale);
+						this.timelineUtils.filter.push(selectedScale);
 					}
 					domStyle.set(node, "opacity", "0.3");
-					this.filterSelection.push(selectedScale);
+					this.timelineUtils.filterSelection.push(selectedScale);
 				} else {
 					if (selectedScaleIndex !== -1) {
-						this.filter.splice(selectedScaleIndex, 1);
+						this.timelineUtils.filter.splice(selectedScaleIndex, 1);
 					}
 					domStyle.set(node, "opacity", "1.0");
-					var i = this.filterSelection.indexOf(selectedScale);
+					var i = this.timelineUtils.filterSelection.indexOf(selectedScale);
 					if (i !== -1) {
-						this.filterSelection.splice(i, 1);
+						this.timelineUtils.filterSelection.splice(i, 1);
 					}
 				}
-				this.timelineUtils.drawTimeline(this.timelineData);
+				this.timelineUtils.drawTimeline(this.timelineUtils.timelineData);
 			}));
 			domConstruct.place(node, query(".topo-legend")[0]);
 		}

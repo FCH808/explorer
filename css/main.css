@@ -252,6 +252,14 @@ body {
 }
 
 /* Messages */
+.step-one {
+
+}
+
+.step-one-message {
+
+}
+
 .step-two {
 	position: absolute;
 	bottom: 235px;
@@ -263,4 +271,12 @@ body {
 	bottom: 245px;
 	margin-left: 40px;
 	display: none;
+}
+
+.step-three {
+
+}
+
+.step-three-message {
+
 }

@@ -90,9 +90,6 @@ define([
 		timelineContainerNode: "",
 
 		mouseOverGraphic: "",
-		filterSelection: [],
-		filter: [],
-		filteredData: "",
 
 		userInterfaceUtils: {},
 		gridUtils: {},
@@ -405,73 +402,6 @@ define([
 					}
 				});
 				return afterOrder + 1;
-			}
-		},
-
-		_filterData:function (dataToFilter, filter) {
-			var _filteredData = [];
-			var exclude = false;
-			var nFilters = filter.length;
-
-			if (nFilters > 0) {
-				array.forEach(dataToFilter, lang.hitch(this, function (item) {
-					// loop through each filter
-					for (var i = 0; i < nFilters; i++) {
-						var _filterScale = number.parse(filter[i]);
-						var _mapScale = item.scale;
-						var _pos = array.indexOf(this.mapScaleValues, _filterScale);
-						var _lowerBoundScale;
-						var _upperBoundScale;
-						var current;
-
-						if (_pos !== -1) {
-							if (this.TOPO_MAP_SCALES[_pos + 1] !== undefined) {
-								_lowerBoundScale = this.TOPO_MAP_SCALES[(_pos + 1)].value;
-							} else {
-								_lowerBoundScale = "";
-							}
-
-							if (this.TOPO_MAP_SCALES[_pos].value) {
-								current = this.TOPO_MAP_SCALES[_pos].value;
-							}
-
-							if (this.TOPO_MAP_SCALES[(_pos - 1)] !== undefined) {
-								_upperBoundScale = this.TOPO_MAP_SCALES[(_pos)].value;
-							} else {
-								_upperBoundScale = "";
-							}
-						}
-
-						if (_lowerBoundScale === "") {
-							if (_mapScale <= _filterScale) {
-								exclude = true;
-								break;
-							}
-						}
-
-						if (_upperBoundScale === "") {
-							if (_mapScale >= _filterScale) {
-								exclude = true;
-								break;
-							}
-						}
-
-						if (_lowerBoundScale !== "" && _upperBoundScale !== "") {
-							if (_mapScale > _lowerBoundScale && _mapScale <= _upperBoundScale) {
-								exclude = true;
-								break;
-							}
-						}
-					}
-
-					if (!exclude) {
-						_filteredData.push(item);
-					}
-					exclude = false;
-				}));
-				return _filteredData;
-			} else {
-				return dataToFilter;
 			}
 		}
 	});

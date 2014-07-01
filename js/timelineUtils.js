@@ -48,6 +48,9 @@ define([
 		timelineContainerNodeGeom: "",
 		timelineContainerGeometry: "",
 		timelineData: [],
+		filterSelection: [],
+		filter: [],
+		filteredData: "",
 
 		constructor: function (obj, templateConfig) {
 			// config file
@@ -163,7 +166,7 @@ define([
 		},
 
 		drawTimeline: function (data) {
-			this._main.filteredData = this._main._filterData(data, this._main.filter);
+			this.filteredData = this._filterData(data, this.filter);
 			topic.subscribe("/dnd/drop", lang.hitch(this, function (source, nodes, copy, target) {
 				var layers = [];
 				//query(".grid-map").forEach(domConstruct.destroy);
@@ -204,7 +207,7 @@ define([
 					this.timelineOptions.end = new Date(this._main.urlQueryObject.maxDate, 0, 0);
 				}
 				this.timeline = new links.Timeline(dom.byId("timeline"));
-				this.timeline.draw(this._main.filteredData, this.timelineOptions);
+				this.timeline.draw(this.filteredData, this.timelineOptions);
 				links.events.addListener(this.timeline, "ready", this._onTimelineReady);
 				links.events.addListener(this.timeline, "select", lang.hitch(this, "_onSelect"));
 				//links.events.addListener(timeline, "rangechanged", timelineRangeChanged);
@@ -214,7 +217,7 @@ define([
 				var height = this.timelineContainerGeometry ? this.timelineContainerGeometry.h : this.config.TIMELINE_HEIGHT;
 				//this.timelineOptions.height = height + "px";
 				//this.timeline.draw(this.filteredData, this.timelineOptions);
-				this.timeline.setData(this._main.filteredData);
+				this.timeline.setData(this.filteredData);
 				this.timeline.redraw();
 			}
 
@@ -346,6 +349,73 @@ define([
 			// if the grid is visible, step 3 is visible, so hide step 2
 			if (domStyle.get(query(".gridContainer")[0], "display") === "block") {
 				this._main.userInterfaceUtils.hideStep(".step-two", ".step-two-message");
+			}
+		},
+
+		_filterData:function (dataToFilter, f) {
+			var _filteredData = [];
+			var exclude = false;
+			var nFilters = f.length;
+
+			if (nFilters > 0) {
+				array.forEach(dataToFilter, lang.hitch(this, function (item) {
+					// loop through each filter
+					for (var i = 0; i < nFilters; i++) {
+						var _filterScale = number.parse(f[i]);
+						var _mapScale = item.scale;
+						var _pos = array.indexOf(this._main.mapScaleValues, _filterScale);
+						var _lowerBoundScale;
+						var _upperBoundScale;
+						var current;
+
+						if (_pos !== -1) {
+							if (this._main.TOPO_MAP_SCALES[_pos + 1] !== undefined) {
+								_lowerBoundScale = this._main.TOPO_MAP_SCALES[(_pos + 1)].value;
+							} else {
+								_lowerBoundScale = "";
+							}
+
+							if (this._main.TOPO_MAP_SCALES[_pos].value) {
+								current = this._main.TOPO_MAP_SCALES[_pos].value;
+							}
+
+							if (this._main.TOPO_MAP_SCALES[(_pos - 1)] !== undefined) {
+								_upperBoundScale = this._main.TOPO_MAP_SCALES[(_pos)].value;
+							} else {
+								_upperBoundScale = "";
+							}
+						}
+
+						if (_lowerBoundScale === "") {
+							if (_mapScale <= _filterScale) {
+								exclude = true;
+								break;
+							}
+						}
+
+						if (_upperBoundScale === "") {
+							if (_mapScale >= _filterScale) {
+								exclude = true;
+								break;
+							}
+						}
+
+						if (_lowerBoundScale !== "" && _upperBoundScale !== "") {
+							if (_mapScale > _lowerBoundScale && _mapScale <= _upperBoundScale) {
+								exclude = true;
+								break;
+							}
+						}
+					}
+
+					if (!exclude) {
+						_filteredData.push(item);
+					}
+					exclude = false;
+				}));
+				return _filteredData;
+			} else {
+				return dataToFilter;
 			}
 		},
 
