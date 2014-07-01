@@ -208,8 +208,8 @@ define([
 				links.events.addListener(this.timeline, "ready", this._onTimelineReady);
 				links.events.addListener(this.timeline, "select", lang.hitch(this, "_onSelect"));
 				//links.events.addListener(timeline, "rangechanged", timelineRangeChanged);
-				this._main.userInterfaceUtils.hideStep(".stepOne", "");
-				this._main.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
+				this._main.userInterfaceUtils.hideStep(".step-one", "");
+				this._main.userInterfaceUtils.showStep(".step-two", ".step-two-message");
 			} else {
 				var height = this.timelineContainerGeometry ? this.timelineContainerGeometry.h : this.config.TIMELINE_HEIGHT;
 				//this.timelineOptions.height = height + "px";
@@ -333,8 +333,8 @@ define([
 							before:firstRowObj[0]
 						};
 					})).then(lang.hitch(this, function (evt) {
-						this._main.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
-						this._main.userInterfaceUtils.showStep(".stepThree", ".step-three-message");
+						this._main.userInterfaceUtils.hideStep(".step-two", ".step-two-message");
+						this._main.userInterfaceUtils.showStep(".step-three", ".step-three-message");
 						this._main.userInterfaceUtils.showGrid();
 						this._main.grid.refresh();
 					}));
@@ -345,7 +345,7 @@ define([
 		_onTimelineReady:function () {
 			// if the grid is visible, step 3 is visible, so hide step 2
 			if (domStyle.get(query(".gridContainer")[0], "display") === "block") {
-				this._main.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
+				this._main.userInterfaceUtils.hideStep(".step-two", ".step-two-message");
 			}
 		},
 

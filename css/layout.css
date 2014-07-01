@@ -193,15 +193,16 @@ body {
 }
 
 /* */
+
+.step-two {
+	position: absolute;
+	bottom: 235px;
+	display: none;
+}
+
 .step-two-message {
 	position: absolute;
 	bottom: 245px;
 	margin-left: 40px;
-	display: none;
-}
-
-.stepTwo {
-	position: absolute;
-	bottom: 235px;
 	display: none;
 }

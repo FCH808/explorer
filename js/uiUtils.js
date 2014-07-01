@@ -110,7 +110,7 @@ define([
 
 		showGrid: function () {
 			query(".gridContainer").style("display", "block");
-			this.hideStep(".stepTwo", ".step-two-message");
+			this.hideStep(".step-two", ".step-two-message");
 		},
 
 		addCrosshair: function (mp) {

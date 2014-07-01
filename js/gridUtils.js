@@ -119,9 +119,9 @@ define([
 							this.map.graphics.remove(this.mouseOverGraphic);
 							this.map.graphics.clear();
 							this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
-							this.hideLoadingIndicator();
-							this.userInterfaceUtils.hideStep(".stepThree", ".step-three-message");
-							this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
+							//this.hideLoadingIndicator();
+							this.userInterfaceUtils.showStep(".step-two", ".step-two-message");
+							this.userInterfaceUtils.hideStep(".step-three", ".step-three-message");
 						}
 					})
 				});
