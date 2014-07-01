@@ -6,8 +6,8 @@
 	float: right;
 	color: #a8a8a8;
 	font-size: 0.9em;
-	margin-top: -30px;
-	margin-right: 10px;
+	margin-top: -20px;
+	/*margin-right: 100px;*/
 }
 
 @font-face {
@@ -97,6 +97,15 @@
 	display: none;
 }
 
+.bitlyInputContainer {
+	width: 150px;
+	height: 30px;
+}
+
+#bitlyInput {
+	width: 150px;
+}
+
 #bitlyInput::-ms-clear {
 	display: none;
 }
@@ -105,7 +114,8 @@
 	top: 2px;
 	right: 35px;
 	max-width: 180px;
-	left:auto;
+	left: auto;
+	display: none;
 }
 
 .arrow {

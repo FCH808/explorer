@@ -14,20 +14,102 @@
  | limitations under the License.
  */
 define([
+	"dojo/_base/array",
 	"dojo/_base/declare",
-	"dojo/query"
-], function (declare, query) {
+	"dojo/_base/lang",
+	"dojo/query",
+	"esri/urlUtils"
+], function (array, declare, lang, query, urlUtils) {
 	return declare(null, {
 
 		config: {},
-		map: {},
+		sharingUrl: "",
 
-		constructor: function (templateConfig, map) {
+		constructor:function (templateConfig) {
 			this.config = templateConfig;
-			this.map = map;
 		},
 
-		_setSharingUrl:function () {
+		documentClickHandler: function (evt) {
+			if (!$("#bitlyIcon").is(evt.target) && !$("#bitlyInput").is(evt.target) && !$(".popover-content").is(evt.target)) {
+				$(".popover").hide();
+			}
+		},
+
+		requestBitly: function () {
+			var url = this.sharingUtils._setSharingUrl(this),
+				bitlyUrls = [
+					"http://api.bitly.com/v3/shorten?callback=?",
+					"https://api-ssl.bitly.com/v3/shorten?callback=?"
+				],
+				bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1],
+				urlParams = urlUtils.urlToObject(url).query || {},
+				targetUrl = url;
+
+			$.getJSON(
+					bitlyUrl,
+					{
+						"format":"json",
+						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
+						"login":"esristorymaps",
+						"longUrl":targetUrl
+					},
+					function (response) {
+						if (!response || !response || !response.data.url)
+							return;
+						$("#bitlyLoad").fadeOut();
+						$("#bitlyInput").fadeIn();
+						$("#bitlyInput").val(response.data.url);
+						$("#bitlyInput").select();
+					}
+			);
+			$(".popover").show();
+		},
+
+		shareFacebook: function () {
+			var url = this.sharingUtils._setSharingUrl(this),
+				options = '&p[title]=' + encodeURIComponent($('#title').text())
+					+ '&p[summary]=' + encodeURIComponent($('#subtitle').text())
+					+ '&p[url]=' + encodeURIComponent(url)
+					+ '&p[images][0]=' + encodeURIComponent($("meta[property='og:image']").attr("content"));
+
+			window.open('http://www.facebook.com/sharer.php?s=100' + options, 'Facebook sharing', 'toolbar=0,status=0,width=626,height=436');
+		},
+
+		shareTwitter: function () {
+			var url = this.sharingUtils._setSharingUrl(this),
+				bitlyUrls = [
+					"http://api.bitly.com/v3/shorten?callback=?",
+					"https://api-ssl.bitly.com/v3/shorten?callback=?"
+				],
+				bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1],
+				urlParams = urlUtils.urlToObject(url).query || {},
+				targetUrl = url,
+				options;
+
+			$.getJSON(
+					bitlyUrl,
+					{
+						"format":"json",
+						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
+						"login":"esristorymaps",
+						"longUrl":targetUrl
+					},
+					function (response) {
+						if (!response || !response || !response.data.url) {
+							return;
+						}
+					}
+			).complete(function (response) {
+				options = 'text=' + encodeURIComponent($('#title').text()) +
+						'&url=' + encodeURIComponent(response.responseJSON.data.url) +
+						'&related=' + this.config.SHARING_RELATED +
+						'&hashtags=' + this.config.SHARING_HASHTAG;
+				window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
+			});
+			//window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
+		},
+
+		_setSharingUrl: function (_self) {
 			var mapClickX,
 				mapClickY,
 				timelineDateRange = "",
@@ -36,35 +118,35 @@ define([
 				objectIDs = "",
 				downloadIDs = "",
 				filters = "";
-			if (!this.currentMapClickPoint) {
+			if (!_self.currentMapClickPoint) {
 				// User is sharing the app but never even clicked on the map
 				// Leave these params empty
 				mapClickX = "";
 				mapClickY = "";
 			} else {
-				mapClickX = this.currentMapClickPoint.x;
-				mapClickY = this.currentMapClickPoint.y;
+				mapClickX = _self.currentMapClickPoint.x;
+				mapClickY = _self.currentMapClickPoint.y;
 			}
 
-			var lat = this.map.extent.getCenter().getLatitude();
-			var lng = this.map.extent.getCenter().getLongitude();
-			var zoomLevel = this.map.getLevel();
+			var lat = _self.map.extent.getCenter().getLatitude();
+			var lng = _self.map.extent.getCenter().getLongitude();
+			var zoomLevel = _self.map.getLevel();
 
-			if (this.timeline) {
-				timelineDateRange = this.timeline.getVisibleChartRange();
+			if (_self.timeline) {
+				timelineDateRange = _self.timeline.getVisibleChartRange();
 				minDate = new Date(timelineDateRange.start).getFullYear();
 				maxDate = new Date(timelineDateRange.end).getFullYear();
 			}
 
-			query(".dgrid-row", grid.domNode).forEach(function (node) {
-				var row = this.grid.row(node);
+			query(".dgrid-row", _self.grid.domNode).forEach(lang.hitch(_self, function (node) {
+				var row = _self.grid.row(node);
 				objectIDs += row.data.objID + "|";
 				downloadIDs += row.data.downloadLink.split("=")[1] + "|";
-			});
+			}));
 			objectIDs = objectIDs.substr(0, objectIDs.length - 1);
 			downloadIDs = downloadIDs.substr(0, downloadIDs.length - 1);
 
-			array.forEach(this.filterSelection, function (filter) {
+			array.forEach(_self.filterSelection, function (filter) {
 				filters += filter + "|";
 			});
 			filters = filters.substr(0, filters.length - 1);
@@ -89,82 +171,6 @@ define([
 					"&clickLat=" + mapClickX +
 					"&clickLng=" + mapClickY;
 			return this.sharingUrl;
-		},
-
-		requestBitly: function () {
-			var url = this._setSharingUrl(),
-				bitlyUrls = [
-					"http://api.bitly.com/v3/shorten?callback=?",
-					"https://api-ssl.bitly.com/v3/shorten?callback=?"
-				],
-				bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1];
-
-			var urlParams = esri.urlToObject(url).query || {};
-			var targetUrl = url;
-
-			$.getJSON(
-					bitlyUrl,
-					{
-						"format":"json",
-						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
-						"login":"esristorymaps",
-						"longUrl":targetUrl
-					},
-					function (response) {
-						if (!response || !response || !response.data.url)
-							return;
-						$("#bitlyLoad").fadeOut();
-						$("#bitlyInput").fadeIn();
-						$("#bitlyInput").val(response.data.url);
-						$("#bitlyInput").select();
-					}
-			);
-			$(".popover").show();
-		},
-
-		shareTwitter:function () {
-			var url = this.setSharingUrl();
-
-			var bitlyUrls = [
-				"http://api.bitly.com/v3/shorten?callback=?",
-				"https://api-ssl.bitly.com/v3/shorten?callback=?"
-			];
-			var bitlyUrl = location.protocol === 'http:' ? bitlyUrls[0] : bitlyUrls[1];
-
-			var urlParams = esri.urlToObject(url).query || {};
-			var targetUrl = url;
-
-			$.getJSON(
-					bitlyUrl,
-					{
-						"format":"json",
-						"apiKey":"R_14fc9f92e48f7c78c21db32bd01f7014",
-						"login":"esristorymaps",
-						"longUrl":targetUrl
-					},
-					function (response) {
-						if (!response || !response || !response.data.url)
-							return;
-					}
-			).complete(function (response) {
-						options = 'text=' + encodeURIComponent($('#title').text()) +
-								'&url=' + encodeURIComponent(response.responseJSON.data.url) +
-								'&related=' + this.config.SHARING_RELATED +
-								'&hashtags=' + this.config.SHARING_HASHTAG;
-						window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
-					});
-			window.open('https://twitter.com/intent/tweet?' + options, 'Tweet', 'toolbar=0,status=0,width=626,height=436');
-		},
-
-		shareFacebook:function () {
-			var url = this.setSharingUrl();
-			var options = '&p[title]=' + encodeURIComponent($('#title').text())
-					+ '&p[summary]=' + encodeURIComponent($('#subtitle').text())
-					+ '&p[url]=' + encodeURIComponent(url)
-					+ '&p[images][0]=' + encodeURIComponent($("meta[property='og:image']").attr("content"));
-
-			window.open('http://www.facebook.com/sharer.php?s=100' + options, 'Facebook sharing', 'toolbar=0,status=0,width=626,height=436'
-			);
 		}
 	});
 });
