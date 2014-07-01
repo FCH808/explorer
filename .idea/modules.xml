@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/explorer.iml" filepath="$PROJECT_DIR$/.idea/explorer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../explorer-gh-pages/.idea/explorer-gh-pages.iml" filepath="$PROJECT_DIR$/../explorer-gh-pages/.idea/explorer-gh-pages.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../explorer_dev/.idea/explorer_dev.iml" filepath="$PROJECT_DIR$/../explorer_dev/.idea/explorer_dev.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../explorer_landsat/.idea/explorer_landsat.iml" filepath="$PROJECT_DIR$/../explorer_landsat/.idea/explorer_landsat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ui_v3/.idea/ui.iml" filepath="$PROJECT_DIR$/../ui_v3/.idea/ui.iml" />
+    </modules>
+  </component>
+</project>
+

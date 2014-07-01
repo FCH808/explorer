@@ -19,6 +19,7 @@ define([
 	"dojo/aspect",
 	"dojo/dom",
 	"dojo/dom-attr",
+<<<<<<< HEAD
 	"dojo/dom-construct",
 	"dojo/dom-geometry",
 	"dojo/dom-style",
@@ -38,6 +39,17 @@ define([
 
 		constructor: function (obj, templateConfig) {
 			this._main = obj;
+=======
+	"dojo/dom-style",
+	"dojo/query"
+], function (declare, dom, domAttr, domStyle, query) {
+	return declare(null, {
+
+		config: {},
+
+		constructor: function (templateConfig) {
+			//console.debug("uiUtils", templateConfig);
+>>>>>>> 81555525942cc5a727b248069e3388f83911aad9
 			this.config = templateConfig;
 			this._crosshairSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CROSS, this.config.CROSSHAIR_SIZE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color(this.config.CROSSHAIR_FILL_COLOR), this.config.CROSSHAIR_OPACITY));
 		},
@@ -111,6 +123,7 @@ define([
 		showGrid: function () {
 			query(".gridContainer").style("display", "block");
 			this.hideStep(".stepTwo", ".step-two-message");
+<<<<<<< HEAD
 		},
 
 		addCrosshair: function (mp) {
@@ -149,6 +162,8 @@ define([
 					this.timelineUtils.drawTimeline(this.timelineData);
 				});
 			});
+=======
+>>>>>>> 81555525942cc5a727b248069e3388f83911aad9
 		}
 	});
 });

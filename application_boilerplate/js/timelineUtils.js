@@ -14,6 +14,7 @@
  | limitations under the License.
  */
 define([
+<<<<<<< HEAD
 	"dijit/registry",
 	"dojo/_base/array",
 	"dojo/_base/declare",
@@ -347,6 +348,16 @@ define([
 			if (domStyle.get(query(".gridContainer")[0], "display") === "block") {
 				this._main.userInterfaceUtils.hideStep(".stepTwo", ".step-two-message");
 			}
+=======
+	"dojo/_base/declare"
+], function (declare) {
+	return declare(null, {
+
+		config: {},
+
+		constructor: function (templateConfig) {
+			this.config = templateConfig;
+>>>>>>> 81555525942cc5a727b248069e3388f83911aad9
 		},
 
 		formatDay:function (date) {

@@ -24,11 +24,17 @@ define([
 	return declare(null, {
 
 		config: {},
+<<<<<<< HEAD
 		_main: {},
 
 		constructor: function (obj, templateConfig) {
 			this.config = templateConfig;
 			this._main = obj;
+=======
+
+		constructor: function (templateConfig) {
+			this.config = templateConfig;
+>>>>>>> 81555525942cc5a727b248069e3388f83911aad9
 		},
 
 		/**
@@ -72,7 +78,11 @@ define([
 			}
 			var row = this.grid.row(evt),
 				extent = row.data.extent,
+<<<<<<< HEAD
 				sfs = this.userInterfaceUtils.createMouseOverGraphic(
+=======
+				sfs = this._createMouseOverGraphic(
+>>>>>>> 81555525942cc5a727b248069e3388f83911aad9
 					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_BORDER),
 					new Color(this.config.SIDEBAR_MAP_MOUSEOVER_GR_FILL)
 				);
@@ -88,7 +98,11 @@ define([
 		gridLeaveCellHandler: function (evt) {
 			this.map.graphics.remove(this.mouseOverGraphic);
 			this.map.graphics.clear();
+<<<<<<< HEAD
 			this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
+=======
+			this._addCrosshair(this.currentMapClickPoint);
+>>>>>>> 81555525942cc5a727b248069e3388f83911aad9
 		},
 
 		thumbnailRenderCell: function (object, data, td, options) {
@@ -118,7 +132,11 @@ define([
 							// no remaining items in the grid/store
 							this.map.graphics.remove(this.mouseOverGraphic);
 							this.map.graphics.clear();
+<<<<<<< HEAD
 							this.userInterfaceUtils.addCrosshair(this.currentMapClickPoint);
+=======
+							this._addCrosshair(this.currentMapClickPoint);
+>>>>>>> 81555525942cc5a727b248069e3388f83911aad9
 							this.hideLoadingIndicator();
 							this.userInterfaceUtils.hideStep(".stepThree", ".step-three-message");
 							this.userInterfaceUtils.showStep(".stepTwo", ".step-two-message");
