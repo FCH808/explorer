@@ -54,22 +54,26 @@ define([
 ], function (ready, array, declare, fx, lang, Deferred, dom, domClass, json, number, on, parser, query, Observable, Memory, DnD, OnDemandGrid, editor, Selection, Keyboard, mouseUtil, HorizontalSlider, BorderContainer, ContentPane, registry, arcgisUtils, Geocoder, Point, SpatialReference, Map, urlUtils, UserInterfaceUtils, GridUtils, TimelineLegendUtils, SharingUtils, MappingUtils, TimelineUtils) {
 	return declare(null, {
 
-		DOWNLOAD_PATH: "",
+		/* Loading indicator */
+		_loading: "",
+
+		/* download link (if hard-coded */
+		_DOWNLOAD_PATH: "",
+		/* scales */
 		TOPO_MAP_SCALES: "",
+		/* scale values */
 		mapScaleValues: [],
 
 		nScales: "",
 		maxScaleValue: "",
 		minScaleValue: "",
 
-		_loading: "",
 		urlQueryObject: "",
 
 		currentLOD: "",
 		currentMapClickPoint: "",
 		currentMapExtent: "",
 
-		data: "",
 		grid: "",
 		store: "",
 		storeData: [],
@@ -108,7 +112,7 @@ define([
 					this._createWebMap(itemInfo);
 
 					this.TOPO_MAP_SCALES = this.config.TIMELINE_LEGEND_VALUES;
-					this.DOWNLOAD_PATH = this.config.DOWNLOAD_PATH;
+					this._DOWNLOAD_PATH = this.config.DOWNLOAD_PATH;
 
 					for (var i = 0; i < this.TOPO_MAP_SCALES.length; i++) {
 						this.mapScaleValues.push(this.TOPO_MAP_SCALES[i].value);
