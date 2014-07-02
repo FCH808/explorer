@@ -138,8 +138,8 @@ define([
 						var downloadLink = feature.attributes[this.config.ATTRIBUTE_DOWNLOAD_LINK];
 						var citation = feature.attributes[this.config.ATTRIBUTE_CITATION];
 
-						var className = this._main.timelineLegendUtils.setClassname(scale, this._main.TOPO_MAP_SCALES);
-						var lodThreshold = this._main.timelineLegendUtils.setLodThreshold(scale, this._main.TOPO_MAP_SCALES, this._main.nScales, this._main.minScaleValue, this._main.maxScaleValue);
+						var className = this._main.timelineLegendUtils.setClassname(scale, this.config.TIMELINE_LEGEND_VALUES);
+						var lodThreshold = this._main.timelineLegendUtils.setLodThreshold(scale, this.config.TIMELINE_LEGEND_VALUES, this._main.nScales, this._main.minScaleValue, this._main.maxScaleValue);
 
 						var tooltipContent = "<img class='tooltipThumbnail' src='" + this.config.IMAGE_SERVER + "/" + objID + this.config.INFO_THUMBNAIL + "'>" +
 								"<div class='tooltipContainer'>" +
@@ -370,18 +370,18 @@ define([
 						var current;
 
 						if (_pos !== -1) {
-							if (this._main.TOPO_MAP_SCALES[_pos + 1] !== undefined) {
-								_lowerBoundScale = this._main.TOPO_MAP_SCALES[(_pos + 1)].value;
+							if (this.config.TIMELINE_LEGEND_VALUES[_pos + 1] !== undefined) {
+								_lowerBoundScale = this.config.TIMELINE_LEGEND_VALUES[(_pos + 1)].value;
 							} else {
 								_lowerBoundScale = "";
 							}
 
-							if (this._main.TOPO_MAP_SCALES[_pos].value) {
-								current = this._main.TOPO_MAP_SCALES[_pos].value;
+							if (this.config.TIMELINE_LEGEND_VALUES[_pos].value) {
+								current = this.config.TIMELINE_LEGEND_VALUES[_pos].value;
 							}
 
-							if (this._main.TOPO_MAP_SCALES[(_pos - 1)] !== undefined) {
-								_upperBoundScale = this._main.TOPO_MAP_SCALES[(_pos)].value;
+							if (this.config.TIMELINE_LEGEND_VALUES[(_pos - 1)] !== undefined) {
+								_upperBoundScale = this.config.TIMELINE_LEGEND_VALUES[(_pos)].value;
 							} else {
 								_upperBoundScale = "";
 							}

@@ -59,8 +59,6 @@ define([
 
 		/* download link (if hard-coded */
 		_DOWNLOAD_PATH: "",
-		/* scales */
-		TOPO_MAP_SCALES: "",
 		/* scale values */
 		mapScaleValues: [],
 
@@ -111,16 +109,15 @@ define([
 					var itemInfo = this.config.itemInfo || this.config.webmap;
 					this._createWebMap(itemInfo);
 
-					this.TOPO_MAP_SCALES = this.config.TIMELINE_LEGEND_VALUES;
 					this._DOWNLOAD_PATH = this.config.DOWNLOAD_PATH;
 
-					for (var i = 0; i < this.TOPO_MAP_SCALES.length; i++) {
-						this.mapScaleValues.push(this.TOPO_MAP_SCALES[i].value);
+					for (var i = 0; i < this.config.TIMELINE_LEGEND_VALUES.length; i++) {
+						this.mapScaleValues.push(this.config.TIMELINE_LEGEND_VALUES[i].value);
 					}
 
-					this.nScales = this.timelineLegendUtils.getNumberOfScales(this.TOPO_MAP_SCALES);
-					this.maxScaleValue = this.timelineLegendUtils.getMaxScaleValue(this.TOPO_MAP_SCALES);
-					this.minScaleValue = this.timelineLegendUtils.getMinScaleValue(this.TOPO_MAP_SCALES);
+					this.nScales = this.timelineLegendUtils.getNumberOfScales(this.config.TIMELINE_LEGEND_VALUES);
+					this.maxScaleValue = this.timelineLegendUtils.getMaxScaleValue(this.config.TIMELINE_LEGEND_VALUES);
+					this.minScaleValue = this.timelineLegendUtils.getMinScaleValue(this.config.TIMELINE_LEGEND_VALUES);
 
 					this.userInterfaceUtils.loadAppStyles();
 
