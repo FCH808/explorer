@@ -52,7 +52,7 @@ define([
 		},
 
 		/**
-		 * Editor module when an editor field loses focus after being changed (handle the HSlider)
+		 * Editor module when an editor field loses focus after being changed (handle HSlider changes)
 		 *
 		 * @param evt
 		 */
@@ -82,6 +82,7 @@ define([
 
 		/**
 		 * Fires when the mouse moves out of a cell within the body of a grid.
+		 * Remove any mouseover/out graphics and redraw the crosshair
 		 *
 		 * @param evt
 		 */
@@ -104,7 +105,7 @@ define([
 						"<div class='thumbnailMapName'>" + mapName + "</div>" +
 						"<div class='thumbnailMapImprintYear'>" + imprintYear + "</div>" +
 						"<div class='downloadLink'><a href='" + downloadLink + "' target='_parent'>download map</a></div>",
-					onclick: lang.hitch(this, function (evt) {
+					"onclick": lang.hitch(this, function (evt) {
 						var objID = evt.target.getAttribute("data-objectid"),
 							storeObj = this.store.query({
 								objID: objID

@@ -37,8 +37,8 @@ define([
 		_crosshairSymbol: "",
 
 		constructor: function (obj, templateConfig) {
-			this._main = obj;
 			this.config = templateConfig;
+			this._main = obj;
 			this._crosshairSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CROSS, this.config.CROSSHAIR_SIZE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color(this.config.CROSSHAIR_FILL_COLOR), this.config.CROSSHAIR_OPACITY));
 		},
 
