@@ -1,5 +1,7 @@
 ### USGS Historical Topographic Map Explorer template
 
+<a href="http://www.esri.com/esri-news/releases/14-3qtr/new-york-to-la-history-of-americas-maps-in-one-app" target="_blank">Press Release</a>
+
 #### Instructions
 
 <a href="https://github.com/ChrisMahlke/explorer/raw/gh-pages/explorer_documentation.pdf" target="_blank">Configuration options</a>
